@@ -884,7 +884,7 @@
         <div class="point-progress-card">
           <div class="progress-header">
             <strong style="font-size: 14px; color: var(--text-main);">🎯 주간 누적 포인트 보상</strong>
-            <span id="weekly-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 100 P</span>
+            <span id="weekly-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 4,000 P</span>
           </div>
           <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="weekly-progress-fill"></div>
@@ -995,7 +995,6 @@
     }
 
     /* ===== 미션 데이터 및 계산 로직 ===== */
-    // 요청된 신규 일일 미션 목록 (7종)
     const dailyMissionData = [
       { id: 'd1', name: '로그인 1회', dia: 10000, pts: 500 },
       { id: 'd2', name: '게임플레이 타임 (600초)', dia: 3000, pts: 500 },
@@ -1006,7 +1005,6 @@
       { id: 'd7', name: '요리 먹기 (3회)', dia: 3000, pts: 500 }
     ];
 
-    // 요청된 신규 일일 마일스톤 데이터 (700P ~ 3500P)
     const dailyMilestonesData = [
       { pts: 700, keyType: 'gold', name: '골드던전 열쇠', count: 1, color: 'var(--key-gold)' },
       { pts: 1400, keyType: 'equip', name: '장비던전 열쇠', count: 1, color: 'var(--key-equip)' },
@@ -1015,20 +1013,32 @@
       { pts: 3500, keyType: 'material', name: '재료던전 열쇠', count: 1, color: 'var(--key-material)' }
     ];
 
+    // 요청된 신규 주간 미션 목록 (8종)
     const weeklyMissionData = [
-      { id: 'w1', name: '주간 출석 5회 달성', dia: 10000, pts: 20 },
-      { id: 'w2', name: '스테이지 1,000회 클리어', dia: 15000, pts: 20 },
-      { id: 'w3', name: '소환 100회 진행', dia: 15000, pts: 20 },
-      { id: 'w4', name: '던전 15회 입장', dia: 15000, pts: 20 },
-      { id: 'w5', name: '길드 출석 및 기부 5회', dia: 10000, pts: 20 }
+      { id: 'w1', name: '로그인 1회', dia: 10000, pts: 500 },
+      { id: 'w2', name: '게임플레이 타임 (1800초)', dia: 10000, pts: 500 },
+      { id: 'w3', name: '몬스터 처치 (15000마리)', dia: 10000, pts: 500 },
+      { id: 'w4', name: '장비 뽑기 (1000회)', dia: 10000, pts: 500 },
+      { id: 'w5', name: '컨텐츠 플레이 (30회)', dia: 10000, pts: 500 },
+      { id: 'w6', name: '광고시청 (1회)', dia: 10000, pts: 500 },
+      { id: 'w7', name: '요리 제작 (30회)', dia: 10000, pts: 500 },
+      { id: 'w8', name: '요리 먹기 (30회)', dia: 10000, pts: 500 }
+    ];
+
+    // 요청된 신규 주간 마일스톤 데이터 (800P ~ 4000P 각 지점당 열쇠 4종 1개씩)
+    const weeklyKeysStandard = [
+      { keyType: 'gold', name: '골드던전 열쇠', count: 1, color: 'var(--key-gold)' },
+      { keyType: 'equip', name: '장비던전 열쇠', count: 1, color: 'var(--key-equip)' },
+      { keyType: 'skill', name: '스킬던전 열쇠', count: 1, color: 'var(--key-skill)' },
+      { keyType: 'heart', name: '하트던전 열쇠', count: 1, color: 'var(--key-heart)' }
     ];
 
     const weeklyMilestonesData = [
-      { pts: 20, items: [{ keyType: 'gold', name: '골드던전 열쇠', count: 5, color: 'var(--key-gold)' }] },
-      { pts: 40, items: [{ keyType: 'equip', name: '장비던전 열쇠', count: 5, color: 'var(--key-equip)' }] },
-      { pts: 60, items: [{ keyType: 'skill', name: '스킬던전 열쇠', count: 5, color: 'var(--key-skill)' }] },
-      { pts: 80, items: [{ keyType: 'heart', name: '하트던전 열쇠', count: 5, color: 'var(--key-heart)' }] },
-      { pts: 100, items: [{ keyType: 'material', name: '재료던전 열쇠', count: 5, color: 'var(--key-material)' }] }
+      { pts: 800, items: weeklyKeysStandard },
+      { pts: 1600, items: weeklyKeysStandard },
+      { pts: 2400, items: weeklyKeysStandard },
+      { pts: 3200, items: weeklyKeysStandard },
+      { pts: 4000, items: weeklyKeysStandard }
     ];
 
     const repeatMissionData = [
@@ -1083,7 +1093,7 @@
       const weeklyMilestoneContainer = document.getElementById('weekly-milestones');
       weeklyMilestoneContainer.innerHTML = weeklyMilestonesData.map(ms => `
         <div class="milestone-box" id="ms-weekly-${ms.pts}">
-          <div class="milestone-pts">${ms.pts} P 달성</div>
+          <div class="milestone-pts">${toCommaStr(ms.pts)} P 달성</div>
           <div class="item-badge-list">
             ${ms.items.map(it => `<span class="item-badge">${getKeySvg(it.color)} ${it.name} x${it.count}</span>`).join('')}
           </div>
@@ -1209,10 +1219,10 @@
 
       const weeklyDailyAvgDia = Math.floor(weeklyTotalDia / 7);
 
-      document.getElementById('weekly-pts-text').innerText = `${weeklyPts} / 100 P`;
-      document.getElementById('weekly-progress-fill').style.width = `${Math.min(100, weeklyPts)}%`;
+      document.getElementById('weekly-pts-text').innerText = `${toCommaStr(weeklyPts)} / 4,000 P`;
+      document.getElementById('weekly-progress-fill').style.width = `${Math.min(100, (weeklyPts / 4000) * 100)}%`;
 
-      document.getElementById('sum-weekly-pts').innerText = `${weeklyPts} P`;
+      document.getElementById('sum-weekly-pts').innerText = `${toCommaStr(weeklyPts)} P`;
       document.getElementById('sum-weekly-total-dia').innerText = `${toCommaStr(weeklyTotalDia)} 💎`;
       document.getElementById('sum-weekly-daily-avg-dia').innerText = `${toCommaStr(weeklyDailyAvgDia)} 💎/일`;
 
