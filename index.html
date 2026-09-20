@@ -16,7 +16,11 @@
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color); }
 
     /* 헤더 */
-    header { background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 16px 24px; font-size: 20px; font-weight: bold; color: #0f172a; }
+    <!-- <header> 부분 변경 -->
+<header style="display: flex; align-items: center; gap: 10px;">
+  <img src="logo.png" alt="캐릭터 로고" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+  <span>배용키 환산기</span>
+</header>
 
     /* 메인 레이아웃 (좌측 메뉴 + 우측 콘텐츠) */
     .app-container { display: flex; min-height: calc(100vh - 61px); }
