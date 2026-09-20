@@ -18,6 +18,13 @@
       --color-def: #3b82f6;
       --color-crit: #f59e0b;
       --color-ult: #8b5cf6;
+
+      /* 던전 열쇠 색상 */
+      --key-gold: #eab308;
+      --key-equip: #64748b;
+      --key-skill: #22c55e;
+      --key-heart: #ef4444;
+      --key-material: #0f172a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -273,8 +280,12 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
 
-    .item-icon {
-      font-size: 14px;
+    /* 열쇠 SVG 아이콘 인라인 스타일 */
+    .key-icon-svg {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      vertical-align: middle;
     }
 
     /* 요약 카드 결과창 */
@@ -759,6 +770,50 @@
 
     <!-- 3. 미션 계산기 탭 -->
     <div id="tab-mission" class="tab-content">
+      <!-- 최상단: 일수 선택 기반 수급 합계 자동계산 카드 -->
+      <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none;">
+        <div class="invest-title" style="color: #38bdf8;">
+          📅 미션 보상 총 수급합계 계산기 (일일 + 반복 미션)
+        </div>
+        
+        <div class="invest-input-row" style="margin-bottom: 14px; align-items: center;">
+          <div class="input-field" style="flex: 1; max-width: 200px;">
+            <label style="color: #94a3b8;">계산 기준 일수 (일)</label>
+            <div class="input-box" style="background: #334155; border-color: #475569;">
+              <input type="text" id="mission-days" value="1" style="color: white; font-size: 14px;" oninput="formatLevelWithComma(this); updateAllMissionCalculations(); handleInput();">
+              <span class="unit" style="color: #cbd5e1;">일간</span>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 16px;">
+            * 아래 체크한 일일 미션 및 입력된 반복 미션을 <span id="days-label-text" style="color: #38bdf8; font-weight: 700;">1일</span> 동안 수행했을 때의 총합입니다.
+          </div>
+        </div>
+
+        <div class="category-summary-grid" style="margin-bottom: 12px;">
+          <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
+            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 다이아</div>
+            <div class="cat-summary-cost" id="top-total-period-dia" style="color: #38bdf8; font-size: 18px;">0 💎</div>
+          </div>
+          <div class="cat-summary-card" style="background: #1e293b; border-color: #334155; grid-column: span 2;">
+            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 던전 열쇠</div>
+            <div class="item-badge-list" id="top-total-period-keys" style="justify-content: center; margin-top: 4px;"></div>
+          </div>
+        </div>
+
+        <!-- 하단: 주 1회 추가 획득 가능 항목 -->
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #475569;">
+          <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 6px;">
+            🎁 [주 1회 추가 획득 가능 항목] 주간 미션 완료 보상
+          </div>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 13px;">
+            <div>다이아: <strong style="color: #38bdf8;" id="top-weekly-extra-dia">0 💎</strong></div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              열쇠: <div class="item-badge-list" id="top-weekly-extra-keys" style="margin-top: 0;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="mission-sub-nav">
         <button class="mission-tab-btn active" onclick="switchMissionPanel('panel-daily', this)">☀️ 일일 미션</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-weekly', this)">📅 주간 미션</button>
@@ -781,7 +836,7 @@
         <div class="point-progress-card">
           <div class="progress-header">
             <strong style="font-size: 14px; color: var(--text-main);">🎯 일일 누적 포인트 보상</strong>
-            <span id="daily-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 100 P</span>
+            <span id="daily-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 3,500 P</span>
           </div>
           <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="daily-progress-fill"></div>
@@ -792,7 +847,7 @@
 
         <!-- 일일 결과 요약 -->
         <div class="mission-summary-card">
-          <div class="mission-summary-title">📊 일일 미션 보상 계산 결과</div>
+          <div class="mission-summary-title">📊 일일 미션 보상 계산 결과 (1일)</div>
           <div class="summary-grid-3">
             <div class="summary-item">
               <div class="summary-item-label">달성 누적 포인트</div>
@@ -803,13 +858,9 @@
               <div class="summary-item-val" id="sum-daily-mission-dia">0 💎</div>
             </div>
             <div class="summary-item">
-              <div class="summary-item-label">포인트 보상 다이아</div>
-              <div class="summary-item-val" id="sum-daily-point-dia">0 💎</div>
+              <div class="summary-item-label">총 일일 다이아</div>
+              <div class="summary-item-val" id="sum-daily-total-dia" style="color: #38bdf8;">0 💎</div>
             </div>
-          </div>
-          <div style="background: #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="font-size: 11px; color: #94a3b8;">총 일일 획득 다이아</div>
-            <div style="font-size: 20px; font-weight: 800; color: #38bdf8;" id="sum-daily-total-dia">0 💎</div>
           </div>
           <div>
             <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">🎁 획득 아이템 목록 (누적 포인트):</div>
@@ -868,16 +919,16 @@
       <!-- 3-3. 반복 미션 패널 -->
       <div id="panel-repeat" class="mission-panel">
         <div style="margin-bottom: 12px;">
-          <strong style="font-size: 15px;">🔄 반복 미션 (횟수 제한 없음)</strong>
+          <strong style="font-size: 15px;">🔄 반복 미션 (1일 기준 수행 횟수)</strong>
           <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 반복 미션은 수행 횟수에 따라 다이아가 계속 지급되며, 별도의 누적 포인트 및 아이템 보상이 존재하지 않습니다.</p>
         </div>
 
         <div class="mission-grid" id="repeat-mission-grid"></div>
 
         <div class="mission-summary-card">
-          <div class="mission-summary-title">📊 반복 미션 총 다이아 획득 결과</div>
+          <div class="mission-summary-title">📊 반복 미션 1일 다이아 획득 결과</div>
           <div style="background: #1e293b; padding: 14px; border-radius: 8px;">
-            <div style="font-size: 12px; color: #94a3b8;">반복 미션 총 다이아 수급량</div>
+            <div style="font-size: 12px; color: #94a3b8;">1일 기준 반복 미션 다이아 수급량</div>
             <div style="font-size: 22px; font-weight: 800; color: #38bdf8;" id="sum-repeat-total-dia">0 💎</div>
           </div>
         </div>
@@ -936,39 +987,48 @@
       document.getElementById(panelId)?.classList.add('active');
     }
 
+    /* ===== 던전 열쇠 SVG 아이콘 생성 함수 ===== */
+    function getKeySvg(colorHex) {
+      return `<svg class="key-icon-svg" viewBox="0 0 24 24" fill="none" stroke="${colorHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 2l-2 2m-3 1l-4 4m2 2l-3 3m0 0l-3-3m3 3l2 2m-7 1a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+      </svg>`;
+    }
+
     /* ===== 미션 데이터 및 계산 로직 ===== */
+    // 요청된 신규 일일 미션 목록 (7종)
     const dailyMissionData = [
-      { id: 'd1', name: '일일 출석 체크', dia: 500, pts: 20 },
-      { id: 'd2', name: '스테이지 100회 클리어', dia: 1000, pts: 20 },
-      { id: 'd3', name: '장비 또는 스킬 소환 10회', dia: 1000, pts: 20 },
-      { id: 'd4', name: '던전 3회 입장', dia: 1000, pts: 20 },
-      { id: 'd5', name: '요리 1회 섭취', dia: 500, pts: 20 }
+      { id: 'd1', name: '로그인 1회', dia: 10000, pts: 500 },
+      { id: 'd2', name: '게임플레이 타임 (600초)', dia: 3000, pts: 500 },
+      { id: 'd3', name: '몬스터 처치 (500마리)', dia: 3000, pts: 500 },
+      { id: 'd4', name: '장비뽑기 (10회)', dia: 3000, pts: 500 },
+      { id: 'd5', name: '컨텐츠 플레이 (3회)', dia: 3000, pts: 500 },
+      { id: 'd6', name: '요리 제작 (3회)', dia: 3000, pts: 500 },
+      { id: 'd7', name: '요리 먹기 (3회)', dia: 3000, pts: 500 }
     ];
 
-    // 요청하신 6개 품목에 맞춰 업데이트된 일일 마일스톤 데이터
+    // 요청된 신규 일일 마일스톤 데이터 (700P ~ 3500P)
     const dailyMilestonesData = [
-      { pts: 20, dia: 1000, items: [{ icon: '🔑🟡', name: '골드던전 열쇠', count: 1 }] },
-      { pts: 40, dia: 1500, items: [{ icon: '🔑🩶', name: '장비던전 열쇠', count: 1 }] },
-      { pts: 60, dia: 2000, items: [{ icon: '🔑🟢', name: '스킬던전 열쇠', count: 1 }] },
-      { pts: 80, dia: 2500, items: [{ icon: '🔑🔴', name: '하트던전 열쇠', count: 1 }] },
-      { pts: 100, dia: 3000, items: [{ icon: '🔑🖤', name: '재료던전 열쇠', count: 1 }] }
+      { pts: 700, keyType: 'gold', name: '골드던전 열쇠', count: 1, color: 'var(--key-gold)' },
+      { pts: 1400, keyType: 'equip', name: '장비던전 열쇠', count: 1, color: 'var(--key-equip)' },
+      { pts: 2100, keyType: 'skill', name: '스킬던전 열쇠', count: 1, color: 'var(--key-skill)' },
+      { pts: 2800, keyType: 'heart', name: '하트던전 열쇠', count: 1, color: 'var(--key-heart)' },
+      { pts: 3500, keyType: 'material', name: '재료던전 열쇠', count: 1, color: 'var(--key-material)' }
     ];
 
     const weeklyMissionData = [
-      { id: 'w1', name: '주간 출석 5회 달성', dia: 3000, pts: 20 },
-      { id: 'w2', name: '스테이지 1,000회 클리어', dia: 5000, pts: 20 },
-      { id: 'w3', name: '소환 100회 진행', dia: 5000, pts: 20 },
-      { id: 'w4', name: '던전 15회 입장', dia: 5000, pts: 20 },
-      { id: 'w5', name: '길드 출석 및 기부 5회', dia: 2000, pts: 20 }
+      { id: 'w1', name: '주간 출석 5회 달성', dia: 10000, pts: 20 },
+      { id: 'w2', name: '스테이지 1,000회 클리어', dia: 15000, pts: 20 },
+      { id: 'w3', name: '소환 100회 진행', dia: 15000, pts: 20 },
+      { id: 'w4', name: '던전 15회 입장', dia: 15000, pts: 20 },
+      { id: 'w5', name: '길드 출석 및 기부 5회', dia: 10000, pts: 20 }
     ];
 
-    // 요청하신 6개 품목에 맞춰 업데이트된 주간 마일스톤 데이터
     const weeklyMilestonesData = [
-      { pts: 20, dia: 3000, items: [{ icon: '🔑🟡', name: '골드던전 열쇠', count: 5 }, { icon: '🔑🩶', name: '장비던전 열쇠', count: 5 }] },
-      { pts: 40, dia: 5000, items: [{ icon: '🔑🟢', name: '스킬던전 열쇠', count: 5 }, { icon: '🔑🔴', name: '하트던전 열쇠', count: 5 }] },
-      { pts: 60, dia: 7000, items: [{ icon: '🔑🖤', name: '재료던전 열쇠', count: 5 }] },
-      { pts: 80, dia: 10000, items: [{ icon: '🔑🟡', name: '골드던전 열쇠', count: 10 }, { icon: '🔑🟢', name: '스킬던전 열쇠', count: 10 }] },
-      { pts: 100, dia: 15000, items: [{ icon: '🔑🔴', name: '하트던전 열쇠', count: 10 }, { icon: '🔑🖤', name: '재료던전 열쇠', count: 10 }] }
+      { pts: 20, items: [{ keyType: 'gold', name: '골드던전 열쇠', count: 5, color: 'var(--key-gold)' }] },
+      { pts: 40, items: [{ keyType: 'equip', name: '장비던전 열쇠', count: 5, color: 'var(--key-equip)' }] },
+      { pts: 60, items: [{ keyType: 'skill', name: '스킬던전 열쇠', count: 5, color: 'var(--key-skill)' }] },
+      { pts: 80, items: [{ keyType: 'heart', name: '하트던전 열쇠', count: 5, color: 'var(--key-heart)' }] },
+      { pts: 100, items: [{ keyType: 'material', name: '재료던전 열쇠', count: 5, color: 'var(--key-material)' }] }
     ];
 
     const repeatMissionData = [
@@ -988,7 +1048,7 @@
               보상: <span>💎 ${toCommaStr(m.dia)}</span> | 포인트: <span>+${m.pts}P</span>
             </div>
           </div>
-          <input type="checkbox" id="chk-daily-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="calcDailyMissions(); handleInput();">
+          <input type="checkbox" id="chk-daily-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllMissionCalculations(); handleInput();">
         </div>
       `).join('');
 
@@ -996,10 +1056,11 @@
       const dailyMilestoneContainer = document.getElementById('daily-milestones');
       dailyMilestoneContainer.innerHTML = dailyMilestonesData.map(ms => `
         <div class="milestone-box" id="ms-daily-${ms.pts}">
-          <div class="milestone-pts">${ms.pts} P 달성</div>
-          <div style="font-size: 11px; font-weight: 700; color: var(--primary);">💎 ${toCommaStr(ms.dia)}</div>
+          <div class="milestone-pts">${toCommaStr(ms.pts)} P 달성</div>
           <div class="item-badge-list">
-            ${ms.items.map(it => `<span class="item-badge"><span class="item-icon">${it.icon}</span> ${it.name} x${it.count}</span>`).join('')}
+            <span class="item-badge">
+              ${getKeySvg(ms.color)} ${ms.name} x${ms.count}
+            </span>
           </div>
         </div>
       `).join('');
@@ -1014,7 +1075,7 @@
               보상: <span>💎 ${toCommaStr(m.dia)}</span> | 포인트: <span>+${m.pts}P</span>
             </div>
           </div>
-          <input type="checkbox" id="chk-weekly-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="calcWeeklyMissions(); handleInput();">
+          <input type="checkbox" id="chk-weekly-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllMissionCalculations(); handleInput();">
         </div>
       `).join('');
 
@@ -1023,9 +1084,8 @@
       weeklyMilestoneContainer.innerHTML = weeklyMilestonesData.map(ms => `
         <div class="milestone-box" id="ms-weekly-${ms.pts}">
           <div class="milestone-pts">${ms.pts} P 달성</div>
-          <div style="font-size: 11px; font-weight: 700; color: var(--primary);">💎 ${toCommaStr(ms.dia)}</div>
           <div class="item-badge-list">
-            ${ms.items.map(it => `<span class="item-badge"><span class="item-icon">${it.icon}</span> ${it.name} x${it.count}</span>`).join('')}
+            ${ms.items.map(it => `<span class="item-badge">${getKeySvg(it.color)} ${it.name} x${it.count}</span>`).join('')}
           </div>
         </div>
       `).join('');
@@ -1041,7 +1101,7 @@
             </div>
           </div>
           <div class="input-box" style="width: 100px; background: white;">
-            <input type="text" id="input-repeat-${m.id}" value="0" placeholder="횟수" oninput="formatLevelWithComma(this); calcRepeatMissions(); handleInput();">
+            <input type="text" id="input-repeat-${m.id}" value="0" placeholder="횟수" oninput="formatLevelWithComma(this); updateAllMissionCalculations(); handleInput();">
             <span class="unit">회</span>
           </div>
         </div>
@@ -1053,7 +1113,7 @@
         const chk = document.getElementById(`chk-daily-${m.id}`);
         if (chk) chk.checked = check;
       });
-      calcDailyMissions();
+      updateAllMissionCalculations();
       handleInput();
     }
 
@@ -1062,124 +1122,153 @@
         const chk = document.getElementById(`chk-weekly-${m.id}`);
         if (chk) chk.checked = check;
       });
-      calcWeeklyMissions();
+      updateAllMissionCalculations();
       handleInput();
     }
 
-    function calcDailyMissions() {
-      let earnedPts = 0;
-      let missionDia = 0;
+    // 종합 미션 보상 통합 계산 로직
+    function updateAllMissionCalculations() {
+      const days = Math.max(1, parseNumber(document.getElementById('mission-days')?.value) || 1);
+      document.getElementById('days-label-text').innerText = `${toCommaStr(days)}일`;
+
+      // 1. 일일 미션 계산
+      let dailyPts = 0;
+      let dailyMissionDia = 0;
 
       dailyMissionData.forEach(m => {
         const chk = document.getElementById(`chk-daily-${m.id}`);
         const card = document.getElementById(`card-daily-${m.id}`);
         if (chk && chk.checked) {
-          earnedPts += m.pts;
-          missionDia += m.dia;
+          dailyPts += m.pts;
+          dailyMissionDia += m.dia;
           if (card) card.classList.add('checked');
         } else {
           if (card) card.classList.remove('checked');
         }
       });
 
-      let pointDia = 0;
-      let acquiredItems = [];
-
+      let dailyAcquiredKeys = {};
       dailyMilestonesData.forEach(ms => {
         const box = document.getElementById(`ms-daily-${ms.pts}`);
-        if (earnedPts >= ms.pts) {
-          pointDia += ms.dia;
-          acquiredItems.push(...ms.items);
+        if (dailyPts >= ms.pts) {
+          dailyAcquiredKeys[ms.keyType] = (dailyAcquiredKeys[ms.keyType] || 0) + ms.count;
           if (box) box.classList.add('achieved');
         } else {
           if (box) box.classList.remove('achieved');
         }
       });
 
-      const totalDailyDia = missionDia + pointDia;
+      document.getElementById('daily-pts-text').innerText = `${toCommaStr(dailyPts)} / 3,500 P`;
+      document.getElementById('daily-progress-fill').style.width = `${Math.min(100, (dailyPts / 3500) * 100)}%`;
 
-      document.getElementById('daily-pts-text').innerText = `${earnedPts} / 100 P`;
-      document.getElementById('daily-progress-fill').style.width = `${Math.min(100, earnedPts)}%`;
+      document.getElementById('sum-daily-pts').innerText = `${toCommaStr(dailyPts)} P`;
+      document.getElementById('sum-daily-mission-dia').innerText = `${toCommaStr(dailyMissionDia)} 💎`;
+      document.getElementById('sum-daily-total-dia').innerText = `${toCommaStr(dailyMissionDia)} 💎`;
 
-      document.getElementById('sum-daily-pts').innerText = `${earnedPts} P`;
-      document.getElementById('sum-daily-mission-dia').innerText = `${toCommaStr(missionDia)} 💎`;
-      document.getElementById('sum-daily-point-dia').innerText = `${toCommaStr(pointDia)} 💎`;
-      document.getElementById('sum-daily-total-dia').innerText = `${toCommaStr(totalDailyDia)} 💎`;
-
-      const itemSummaryContainer = document.getElementById('sum-daily-items');
-      if (acquiredItems.length === 0) {
-        itemSummaryContainer.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
+      const dailyItemSummaryEl = document.getElementById('sum-daily-items');
+      const dailyKeysList = Object.keys(dailyAcquiredKeys);
+      if (dailyKeysList.length === 0) {
+        dailyItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
       } else {
-        itemSummaryContainer.innerHTML = acquiredItems.map(it => `
-          <span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-            <span class="item-icon">${it.icon}</span> ${it.name} x${it.count}
-          </span>
-        `).join('');
+        dailyItemSummaryEl.innerHTML = dailyKeysList.map(kt => {
+          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${getKeySvg(cfg.color)} ${cfg.name} x${dailyAcquiredKeys[kt]}
+          </span>`;
+        }).join('');
       }
-    }
 
-    function calcWeeklyMissions() {
-      let earnedPts = 0;
-      let missionDia = 0;
+      // 2. 주간 미션 계산
+      let weeklyPts = 0;
+      let weeklyTotalDia = 0;
 
       weeklyMissionData.forEach(m => {
         const chk = document.getElementById(`chk-weekly-${m.id}`);
         const card = document.getElementById(`card-weekly-${m.id}`);
         if (chk && chk.checked) {
-          earnedPts += m.pts;
-          missionDia += m.dia;
+          weeklyPts += m.pts;
+          weeklyTotalDia += m.dia;
           if (card) card.classList.add('checked');
         } else {
           if (card) card.classList.remove('checked');
         }
       });
 
-      let pointDia = 0;
-      let acquiredItems = [];
-
+      let weeklyAcquiredKeys = {};
       weeklyMilestonesData.forEach(ms => {
         const box = document.getElementById(`ms-weekly-${ms.pts}`);
-        if (earnedPts >= ms.pts) {
-          pointDia += ms.dia;
-          acquiredItems.push(...ms.items);
+        if (weeklyPts >= ms.pts) {
+          ms.items.forEach(it => {
+            weeklyAcquiredKeys[it.keyType] = (weeklyAcquiredKeys[it.keyType] || 0) + it.count;
+          });
           if (box) box.classList.add('achieved');
         } else {
           if (box) box.classList.remove('achieved');
         }
       });
 
-      const totalWeeklyDia = missionDia + pointDia;
-      const dailyAvgDia = Math.floor(totalWeeklyDia / 7);
+      const weeklyDailyAvgDia = Math.floor(weeklyTotalDia / 7);
 
-      document.getElementById('weekly-pts-text').innerText = `${earnedPts} / 100 P`;
-      document.getElementById('weekly-progress-fill').style.width = `${Math.min(100, earnedPts)}%`;
+      document.getElementById('weekly-pts-text').innerText = `${weeklyPts} / 100 P`;
+      document.getElementById('weekly-progress-fill').style.width = `${Math.min(100, weeklyPts)}%`;
 
-      document.getElementById('sum-weekly-pts').innerText = `${earnedPts} P`;
-      document.getElementById('sum-weekly-total-dia').innerText = `${toCommaStr(totalWeeklyDia)} 💎`;
-      document.getElementById('sum-weekly-daily-avg-dia').innerText = `${toCommaStr(dailyAvgDia)} 💎/일`;
+      document.getElementById('sum-weekly-pts').innerText = `${weeklyPts} P`;
+      document.getElementById('sum-weekly-total-dia').innerText = `${toCommaStr(weeklyTotalDia)} 💎`;
+      document.getElementById('sum-weekly-daily-avg-dia').innerText = `${toCommaStr(weeklyDailyAvgDia)} 💎/일`;
 
-      const itemSummaryContainer = document.getElementById('sum-weekly-items');
-      if (acquiredItems.length === 0) {
-        itemSummaryContainer.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
+      const weeklyItemSummaryEl = document.getElementById('sum-weekly-items');
+      const weeklyKeysList = Object.keys(weeklyAcquiredKeys);
+      if (weeklyKeysList.length === 0) {
+        weeklyItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
       } else {
-        itemSummaryContainer.innerHTML = acquiredItems.map(it => `
-          <span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-            <span class="item-icon">${it.icon}</span> ${it.name} x${it.count}
-          </span>
-        `).join('');
+        weeklyItemSummaryEl.innerHTML = weeklyKeysList.map(kt => {
+          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${getKeySvg(cfg.color)} ${cfg.name} x${weeklyAcquiredKeys[kt]}
+          </span>`;
+        }).join('');
       }
-    }
 
-    function calcRepeatMissions() {
-      let totalRepeatDia = 0;
-
+      // 3. 반복 미션 계산 (1일 기준)
+      let repeat1DayDia = 0;
       repeatMissionData.forEach(m => {
         const inputEl = document.getElementById(`input-repeat-${m.id}`);
         const count = parseNumber(inputEl?.value) || 0;
-        totalRepeatDia += count * m.diaPerCount;
+        repeat1DayDia += count * m.diaPerCount;
       });
 
-      document.getElementById('sum-repeat-total-dia').innerText = `${toCommaStr(totalRepeatDia)} 💎`;
+      document.getElementById('sum-repeat-total-dia').innerText = `${toCommaStr(repeat1DayDia)} 💎`;
+
+      // 4. 최상단 '일수 기준 수급 합계' 업데이트
+      const periodTotalDia = (dailyMissionDia + repeat1DayDia) * days;
+      document.getElementById('top-total-period-dia').innerText = `${toCommaStr(periodTotalDia)} 💎`;
+
+      const topPeriodKeysEl = document.getElementById('top-total-period-keys');
+      if (dailyKeysList.length === 0) {
+        topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 열쇠 없음</span>`;
+      } else {
+        topPeriodKeysEl.innerHTML = dailyKeysList.map(kt => {
+          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+          const totalKeyCount = dailyAcquiredKeys[kt] * days;
+          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
+            ${getKeySvg(cfg.color)} ${cfg.name} x${toCommaStr(totalKeyCount)}
+          </span>`;
+        }).join('');
+      }
+
+      // 최상단 '주 1회 추가 획득 가능 항목' 표기
+      document.getElementById('top-weekly-extra-dia').innerText = `${toCommaStr(weeklyTotalDia)} 💎`;
+      const topWeeklyKeysEl = document.getElementById('top-weekly-extra-keys');
+      if (weeklyKeysList.length === 0) {
+        topWeeklyKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">주간 열쇠 보상 없음</span>`;
+      } else {
+        topWeeklyKeysEl.innerHTML = weeklyKeysList.map(kt => {
+          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
+            ${getKeySvg(cfg.color)} ${cfg.name} x${weeklyAcquiredKeys[kt]}
+          </span>`;
+        }).join('');
+      }
     }
 
     /* ===== 기존 스탯 계산 로직 유지 ===== */
@@ -1832,6 +1921,7 @@
         saveData[`input-repeat-${m.id}`] = document.getElementById(`input-repeat-${m.id}`)?.value;
       });
 
+      saveData['mission-days'] = document.getElementById('mission-days')?.value;
       saveData['char-level'] = document.getElementById('char-level')?.value;
       saveData['invest-amount1'] = document.getElementById('invest-amount1')?.value;
       saveData['invest-unit1'] = document.getElementById('invest-unit1')?.value;
@@ -1877,9 +1967,7 @@
       validateInvestUnits();
       runInvestmentCalc();
 
-      calcDailyMissions();
-      calcWeeklyMissions();
-      calcRepeatMissions();
+      updateAllMissionCalculations();
     }
 
     window.onload = function() {
