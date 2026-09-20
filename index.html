@@ -658,19 +658,35 @@
     function validateInvestUnits() {
       const unit1El = document.getElementById('invest-unit1');
       const unit2El = document.getElementById('invest-unit2');
+      const amt1El = document.getElementById('invest-amount1');
       const amt2El = document.getElementById('invest-amount2');
 
       if (!unit1El || !unit2El) return;
 
       const u1 = Number(unit1El.value) || 1000000000000;
 
-      // 1. 골드 2 단위 드롭다운에서 골드 1 이상 단위 비활성화
+      // 1. 보유 투자 골드 1 입력값 최대 입력 자동 제한 (상위 단위 범위인 9,999를 초과하지 않도록 함)
+      if (amt1El) {
+        const u1Index = unit1El.selectedIndex;
+        const u1NextOpt = unit1El.options[u1Index + 1];
+        let maxAllowedAmt1 = 9999;
+        if (u1NextOpt) {
+          const u1Next = Number(u1NextOpt.value);
+          maxAllowedAmt1 = Math.floor(u1Next / u1) - 1;
+        }
+        const curAmt1 = parseNumber(amt1El.value);
+        if (curAmt1 > maxAllowedAmt1) {
+          amt1El.value = toCommaStr(maxAllowedAmt1);
+        }
+      }
+
+      // 2. 골드 2 단위 드롭다운에서 골드 1 이상 단위 비활성화
       Array.from(unit2El.options).forEach(opt => {
         const val = Number(opt.value);
         opt.disabled = (val >= u1);
       });
 
-      // 2. 현재 골드 2 단위가 골드 1 이상일 경우 골드 1 바로 아래 단위로 자동 변경
+      // 3. 현재 골드 2 단위가 골드 1 이상일 경우 골드 1 바로 아래 단위로 자동 변경
       let u2 = Number(unit2El.value);
       if (u2 >= u1) {
         const validOpts = Array.from(unit2El.options).filter(opt => !opt.disabled);
@@ -680,7 +696,7 @@
         }
       }
 
-      // 3. 골드 2에 입력할 수 있는 최대 수치 제어 (예: 조-억 관계 시 9,999억 까지만 허용)
+      // 4. 골드 2에 입력할 수 있는 최대 수치 제어 (예: 조-억 관계 시 9,999억 까지만 허용)
       if (amt2El && u1 > u2) {
         const maxAllowedAmt2 = Math.floor(u1 / u2) - 1;
         const curAmt2 = parseNumber(amt2El.value);
