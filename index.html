@@ -252,7 +252,7 @@
       <div class="result-box">
         <h3 style="font-size: 16px; margin-bottom: 12px;">💰 보유 예산 입력</h3>
         <div class="input-box" style="background: white;">
-          <input type="text" id="budget" placeholder="예산 입력" style="text-align: left;" oninput="cleanNumberInput(this)">
+          <input type="text" id="budget" placeholder="예산 입력" style="text-align: left;" oninput="formatLevelWithComma(this)">
           <span class="unit">조 골드</span>
         </div>
         <button class="btn-calc" onclick="calculateEfficiency()">최적 배분 계산하기</button>
@@ -272,17 +272,31 @@
       { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) }
     ];
 
-    // 입력값에서 콤마 및 기타 문자를 완전히 제거
+    function toCommaStr(val) {
+      if (val === null || val === undefined || isNaN(val)) return '0';
+      const parts = val.toString().split('.');
+      parts[0] = Number(parts[0]).toLocaleString();
+      return parts.join('.');
+    }
+
     function parseNumber(str) {
       if (!str) return 0;
       return Number(str.toString().replace(/[^0-9.]/g, '')) || 0;
     }
 
-    function cleanNumberInput(inputEl) {
-      inputEl.value = inputEl.value.replace(/[^0-9.]/g, '');
+    // 레벨 입력용 천 단위 콤마 포맷팅
+    function formatLevelWithComma(inputEl) {
+      const cursorPosition = inputEl.selectionStart;
+      const originalLen = inputEl.value.length;
+      
+      const num = parseNumber(inputEl.value);
+      inputEl.value = inputEl.value ? toCommaStr(num) : '';
+      
+      const newLen = inputEl.value.length;
+      inputEl.setSelectionRange(cursorPosition + (newLen - originalLen), cursorPosition + (newLen - originalLen));
     }
 
-    // 숫자를 직관적인 한글 단위로 변환 (천 단위 콤마 제거)
+    // 스탯 수치/골드용 한글 단위 변환
     function toKoreanText(num, isPercent = false) {
       if (num <= 0 || isNaN(num)) return '0';
       if (isPercent) return `${num.toFixed(2)}%`;
@@ -314,17 +328,17 @@
           </div>
           
           <div class="input-grid">
-            <!-- 1. 현재 레벨 -->
+            <!-- 1. 현재 레벨 (콤마 표기) -->
             <div class="input-field">
               <label>현재 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-lv" value="${s.defaultLv}" oninput="cleanNumberInput(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
               <div class="korean-hint" id="gold-${s.id}-lv-hint"></div>
             </div>
 
-            <!-- 2. 현재 수치 -->
+            <!-- 2. 현재 수치 (한글 표기) -->
             <div class="input-field">
               <label>현재 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -333,17 +347,17 @@
               </div>
             </div>
 
-            <!-- 3. 목표 레벨 -->
+            <!-- 3. 목표 레벨 (콤마 표기) -->
             <div class="input-field">
               <label>목표 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-target-lv" value="${s.defaultTarget}" oninput="cleanNumberInput(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
               <div class="korean-hint" id="gold-${s.id}-target-lv-hint"></div>
             </div>
 
-            <!-- 4. 목표 수치 -->
+            <!-- 4. 목표 수치 (한글 표기) -->
             <div class="input-field">
               <label>목표 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -352,7 +366,7 @@
               </div>
             </div>
 
-            <!-- 5. 목표까지 필요 금액 -->
+            <!-- 5. 목표까지 필요 금액 (한글 표기) -->
             <div class="input-field full-width">
               <label>목표 레벨까지 필요 금액 (자동 계산)</label>
               <div class="input-box readonly">
@@ -388,11 +402,10 @@
       const targetLv = parseNumber(document.getElementById(`gold-${id}-target-lv`)?.value);
       const isPercent = statConfig.unit === '%';
 
-      // 수치 계산
+      // 수치 연산
       const curVal = isPercent ? (curLv * statConfig.perLv) : Math.floor(curLv * statConfig.perLv);
       const targetVal = isPercent ? (targetLv * statConfig.perLv) : Math.floor(targetLv * statConfig.perLv);
 
-      // 한글 단위로 화면 출력
       const curValEl = document.getElementById(`gold-${id}-val`);
       const targetValEl = document.getElementById(`gold-${id}-target-val`);
       const dispEl = document.getElementById(`gold-${id}-val-disp`);
@@ -401,11 +414,11 @@
       if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
       if (dispEl) dispEl.innerText = toKoreanText(curVal, isPercent);
 
-      // 레벨 한글 힌트 업데이트
-      document.getElementById(`gold-${id}-lv-hint`).innerText = `= ${toKoreanText(curLv)} Lv`;
-      document.getElementById(`gold-${id}-target-lv-hint`).innerText = `= ${toKoreanText(targetLv)} Lv`;
+      // 레벨 한글 힌트에도 콤마 표기 적용 (예: = 146,400 Lv)
+      document.getElementById(`gold-${id}-lv-hint`).innerText = `= ${toCommaStr(curLv)} Lv`;
+      document.getElementById(`gold-${id}-target-lv-hint`).innerText = `= ${toCommaStr(targetLv)} Lv`;
 
-      // 필요 금액 계산 및 한글 표기
+      // 필요 금액 연산 및 한글 표기
       const totalCost = calculateTotalRequiredGold(statConfig, curLv, targetLv);
       const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
       if (totalCostEl) {
@@ -431,11 +444,11 @@
           if (el) saveData[key] = el.value;
         });
       });
-      localStorage.setItem('hungryDragonGoldV6Data', JSON.stringify(saveData));
+      localStorage.setItem('hungryDragonGoldV7Data', JSON.stringify(saveData));
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('hungryDragonGoldV6Data');
+      const saved = localStorage.getItem('hungryDragonGoldV7Data');
       if (saved) {
         const data = JSON.parse(saved);
         Object.keys(data).forEach(k => {
