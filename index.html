@@ -35,14 +35,6 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
 
-    .header-logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary-light);
-    }
-
     .container {
       max-width: 1080px;
       margin: 0 auto;
@@ -100,10 +92,12 @@
     .stat-card.crit { border-left: 4px solid var(--color-crit); }
     .stat-card.ult { border-left: 4px solid var(--color-ult); }
 
+    /* 레이아웃 깨짐 및 폰트 넘어감 방지 헤더 */
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
       margin-bottom: 12px;
       padding-bottom: 8px;
       border-bottom: 1px dashed var(--border);
@@ -115,15 +109,22 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
 
+    /* 상단 우측 뱃지 정렬 */
     .stat-current-val {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       background: #f1f5f9;
       color: var(--primary);
-      padding: 3px 8px;
+      padding: 4px 8px;
       border-radius: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 60%;
+      text-align: right;
     }
 
     .input-grid {
@@ -218,13 +219,13 @@
     @media (max-width: 640px) {
       .stat-grid { grid-template-columns: 1fr; }
       .container { padding: 12px; }
+      .stat-current-val { max-width: 50%; font-size: 10px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <img src="logo.png" alt="로고" class="header-logo" onerror="this.src='https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f409.png'">
     <span>배용키 환산기</span>
   </header>
 
@@ -235,19 +236,16 @@
       <button class="nav-btn" onclick="switchTab('tab-calc')">3. 예산 및 계산 결과</button>
     </nav>
 
-    <!-- 1. 골드 스탯 탭 -->
     <div id="tab-gold" class="tab-content active">
       <div class="stat-grid" id="gold-stat-container"></div>
     </div>
 
-    <!-- 2. 레벨 스탯 탭 -->
     <div id="tab-level" class="tab-content">
       <div style="padding: 20px; text-align: center; color: var(--text-sub);">
         2. 레벨 스탯 탭 내용
       </div>
     </div>
 
-    <!-- 3. 예산 및 계산 결과 탭 -->
     <div id="tab-calc" class="tab-content">
       <div class="result-box">
         <h3 style="font-size: 16px; margin-bottom: 12px;">💰 보유 예산 입력</h3>
@@ -261,15 +259,16 @@
   </div>
 
   <script>
+    // 인게임 스크린샷 데이터 기반으로 보정된 스탯 설정 테이블
     const goldStats = [
-      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', perLv: 132000000 / 146400, defaultLv: 146400, defaultTarget: 150000, maxLv: 200000, baseCostLv: 311151790000 / Math.pow(146400, 1.5) },
-      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', perLv: 2957200 / 100000, defaultLv: 100000, defaultTarget: 110000, maxLv: 150000, baseCostLv: 30517290000 / Math.pow(100000, 1.5) },
-      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '', perLv: 10738910000 / 50200, defaultLv: 50200, defaultTarget: 60000, maxLv: 100000, baseCostLv: 839010000 / Math.pow(50200, 1.5) },
-      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '', perLv: 1000, defaultLv: 25000, defaultTarget: 30000, maxLv: 50000, baseCostLv: 1000000 / Math.pow(25000, 1.2) },
-      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%', perLv: 0.01, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 50000 / Math.pow(1000, 1.2) },
-      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 50000 / Math.pow(1000, 1.2) },
-      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%', perLv: 0.01, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) },
-      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) }
+      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', perLv: 132000000 / 146400, defaultLv: 146400, defaultTarget: 150000, maxLv: 300000, baseCostLv: 311151790000 / Math.pow(146400, 1.5) },
+      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', perLv: 2957200 / 100000, defaultLv: 100000, defaultTarget: 110000, maxLv: 300000, baseCostLv: 30517290000 / Math.pow(100000, 1.5) },
+      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '', perLv: 10738910000 / 50200, defaultLv: 50200, defaultTarget: 60000, maxLv: 300000, baseCostLv: 839010000 / Math.pow(50200, 1.5) },
+      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '', perLv: 624100 / 25000, defaultLv: 25000, defaultTarget: 30000, maxLv: 300000, baseCostLv: 8330000 / Math.pow(25000, 1.2) },
+      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%', perLv: 100 / 1000, defaultLv: 1000, defaultTarget: 1000, maxLv: 1000, baseCostLv: 0 },
+      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%', perLv: 5200 / 19000, defaultLv: 19000, defaultTarget: 20000, maxLv: 40000, baseCostLv: 34275300000000 / Math.pow(19000, 1.5) },
+      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%', perLv: 40 / 400, defaultLv: 400, defaultTarget: 500, maxLv: 1000, baseCostLv: 510237100000000 / Math.pow(400, 1.5) },
+      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 300 / 2000, defaultLv: 2000, defaultTarget: 3000, maxLv: 10000, baseCostLv: 4298700000000 / Math.pow(2000, 1.5) }
     ];
 
     function toCommaStr(val) {
@@ -295,9 +294,12 @@
       inputEl.setSelectionRange(cursorPosition + (newLen - originalLen), cursorPosition + (newLen - originalLen));
     }
 
+    // 한글 단위 변환 (중복 % 제거 조치)
     function toKoreanText(num, isPercent = false) {
       if (num <= 0 || isNaN(num)) return '0';
-      if (isPercent) return `${num.toFixed(2)}%`;
+      if (isPercent) {
+        return `${num.toFixed(2)}`;
+      }
 
       const units = ['', '만', '억', '조', '경'];
       let result = [];
@@ -322,14 +324,12 @@
         <div class="stat-card ${s.type}">
           <div class="card-header">
             <span class="stat-title">${s.icon} ${s.name}</span>
-            <span class="stat-current-val">
-              <span>Max레벨: ${toCommaStr(s.maxLv)}</span> | 
-              현재: <span id="gold-${s.id}-val-disp">0</span>${s.unit}
+            <span class="stat-current-val" title="Max레벨: ${toCommaStr(s.maxLv)} | 현재: ${s.unit}">
+              Max: ${toCommaStr(s.maxLv)} | <span id="gold-${s.id}-val-disp">0</span>${s.unit}
             </span>
           </div>
           
           <div class="input-grid">
-            <!-- 1. 현재 레벨 -->
             <div class="input-field">
               <label>현재 레벨</label>
               <div class="input-box">
@@ -339,7 +339,6 @@
               <div class="korean-hint" id="gold-${s.id}-lv-hint"></div>
             </div>
 
-            <!-- 2. 현재 수치 -->
             <div class="input-field">
               <label>현재 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -348,7 +347,6 @@
               </div>
             </div>
 
-            <!-- 3. 목표 레벨 (Max 초과 제한 검증 포함) -->
             <div class="input-field">
               <label>목표 레벨</label>
               <div class="input-box">
@@ -358,7 +356,6 @@
               <div class="korean-hint" id="gold-${s.id}-target-lv-hint"></div>
             </div>
 
-            <!-- 4. 목표 수치 -->
             <div class="input-field">
               <label>목표 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -367,7 +364,6 @@
               </div>
             </div>
 
-            <!-- 5. 목표까지 필요 금액 -->
             <div class="input-field full-width">
               <label>목표 레벨까지 필요 금액 (자동 계산)</label>
               <div class="input-box readonly">
@@ -380,7 +376,6 @@
       `).join('');
     }
 
-    // 목표 레벨이 Max 레벨을 초과하지 못하도록 검증하는 함수
     function validateMaxLevel(id) {
       const statConfig = goldStats.find(s => s.id === id);
       if (!statConfig) return;
@@ -396,7 +391,7 @@
     }
 
     function calculateTotalRequiredGold(statConfig, curLv, targetLv) {
-      if (targetLv <= curLv) return 0;
+      if (targetLv <= curLv || statConfig.baseCostLv === 0) return 0;
       
       let totalCost = 0;
       const step = Math.max(1, Math.floor((targetLv - curLv) / 100)); 
