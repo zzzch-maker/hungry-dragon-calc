@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>효율 계산기</title>
+  <title>배용키 환산기</title>
   <style>
     :root {
       --primary: #0284c7;
@@ -14,17 +14,15 @@
       --text-main: #0f172a;
       --text-sub: #64748b;
       
-      /* 스탯별 포인트 컬러 */
-      --color-atk: #ef4444;      /* 공격계열 - Red */
-      --color-def: #3b82f6;      /* 방어/생존계열 - Blue */
-      --color-crit: #f59e0b;     /* 유틸/속도계열 - Orange */
-      --color-ult: #8b5cf6;      /* 궁극/특수계열 - Purple */
+      --color-atk: #ef4444;
+      --color-def: #3b82f6;
+      --color-crit: #f59e0b;
+      --color-ult: #8b5cf6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text-main); }
 
-    /* 헤더 */
     header {
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
@@ -45,14 +43,12 @@
       border: 2px solid var(--primary-light);
     }
 
-    /* 메인 컨테이너 */
     .container {
-      max-width: 1000px;
+      max-width: 1080px;
       margin: 0 auto;
       padding: 20px;
     }
 
-    /* 네비게이션 탭 */
     .nav-tabs {
       display: flex;
       gap: 8px;
@@ -85,34 +81,10 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* 레벨 스탯 요약 상자 */
-    .summary-card {
-      background: linear-gradient(135deg, #0284c7, #0369a1);
-      color: white;
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);
-    }
-
-    .summary-title {
-      font-size: 15px;
-      font-weight: 600;
-      opacity: 0.9;
-    }
-
-    .summary-value {
-      font-size: 22px;
-      font-weight: 800;
-    }
-
-    /* 스탯 카드 그리드 레이아웃 */
+    /* 스탯 카드 그리드 */
     .stat-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
       gap: 16px;
     }
 
@@ -122,15 +94,8 @@
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-      transition: transform 0.15s, box-shadow 0.15s;
     }
 
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-
-    /* 컬러 포인트 */
     .stat-card.atk { border-left: 4px solid var(--color-atk); }
     .stat-card.def { border-left: 4px solid var(--color-def); }
     .stat-card.crit { border-left: 4px solid var(--color-crit); }
@@ -162,7 +127,6 @@
       border-radius: 6px;
     }
 
-    /* 입력 폼 그리드 */
     .input-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -173,10 +137,6 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
-    }
-
-    .input-field.full {
-      grid-column: span 2;
     }
 
     .input-field label {
@@ -194,6 +154,10 @@
       padding: 4px 8px;
     }
 
+    .input-box.readonly {
+      background: #f1f5f9;
+    }
+
     .input-box input {
       width: 100%;
       border: none;
@@ -206,6 +170,11 @@
       color: var(--text-main);
     }
 
+    .input-box input[readonly] {
+      color: var(--primary);
+      cursor: default;
+    }
+
     .input-box .unit {
       font-size: 11px;
       color: var(--text-sub);
@@ -213,7 +182,6 @@
       white-space: nowrap;
     }
 
-    /* 결과 카드 */
     .result-box {
       background: var(--card-bg);
       border: 1px solid var(--border);
@@ -238,38 +206,33 @@
     @media (max-width: 640px) {
       .stat-grid { grid-template-columns: 1fr; }
       .container { padding: 12px; }
-      .summary-card { flex-direction: column; align-items: flex-start; gap: 6px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <span>효율 계산기</span>
+    <img src="logo.png" alt="로고" class="header-logo" onerror="this.src='https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f409.png'">
+    <span>배용키 환산기</span>
   </header>
 
   <div class="container">
-    <!-- 상단 메뉴 -->
     <nav class="nav-tabs">
       <button class="nav-btn active" onclick="switchTab('tab-gold')">1. 골드 스탯</button>
       <button class="nav-btn" onclick="switchTab('tab-level')">2. 레벨 스탯</button>
       <button class="nav-btn" onclick="switchTab('tab-calc')">3. 예산 및 계산 결과</button>
     </nav>
 
-    <!-- 1. 골드 스탯 탭 -->
+    <!-- 1. 골드 스탯 탭 (자동 계산 및 목표 레벨 추가 적용) -->
     <div id="tab-gold" class="tab-content active">
       <div class="stat-grid" id="gold-stat-container"></div>
     </div>
 
-    <!-- 2. 레벨 스탯 탭 (수정된 9종 항목 및 목표 레벨 합산 기능) -->
+    <!-- 2. 레벨 스탯 탭 -->
     <div id="tab-level" class="tab-content">
-      <!-- 최상단 총 필요 레벨 요약 -->
-      <div class="summary-card">
-        <span class="summary-title">🎯 모든 항목 목표 레벨까지의 총 필요 레벨</span>
-        <span class="summary-value"><span id="total-target-req-lv">0</span> Lv</span>
+      <div style="padding: 20px; text-align: center; color: var(--text-sub);">
+        2. 레벨 스탯 탭 내용
       </div>
-
-      <div class="stat-grid" id="level-stat-container"></div>
     </div>
 
     <!-- 3. 예산 및 계산 결과 탭 -->
@@ -282,44 +245,23 @@
         </div>
         <button class="btn-calc" onclick="calculateEfficiency()">최적 배분 계산하기</button>
       </div>
-
-      <div class="result-box" style="margin-top: 16px; border-left: 4px solid var(--primary);">
-        <h4 style="color: var(--primary); margin-bottom: 8px;">📊 스탯 효율 추천</h4>
-        <p id="result-desc" style="font-size: 14px; color: var(--text-sub);">
-          스탯 정보를 입력한 후 '최적 배분 계산하기' 버튼을 누르면 추천 업그레이드 경로가 표시됩니다.
-        </p>
-      </div>
     </div>
-
   </div>
 
   <script>
-    // [1. 골드 스탯 8종 정의]
+    // 스크린샷 수치 기반 1Lv당 스탯 증가량 기본값
     const goldStats = [
-      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '' },
-      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '' },
-      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '' },
-      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '' },
-      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%' },
-      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%' },
-      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%' },
-      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%' }
+      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', perLv: 10000, baseCost: 3111000 },
+      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', perLv: 71, baseCost: 305000 },
+      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '', perLv: 2110000, baseCost: 8390 },
+      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '', perLv: 100, baseCost: 1000 },
+      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%', perLv: 0.01, baseCost: 5000 },
+      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%', perLv: 0.1, baseCost: 5000 },
+      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%', perLv: 0.01, baseCost: 10000 },
+      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 0.1, baseCost: 10000 }
     ];
 
-    // [2. 레벨 스탯 9종 신규 정의]
-    const levelStats = [
-      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '' },
-      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '' },
-      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '' },
-      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '' },
-      { id: 'moveSpeed', name: '이동속도 증가', icon: '👟', type: 'crit', unit: '%' },
-      { id: 'atkSpeed', name: '공격속도 증가', icon: '⚡', type: 'crit', unit: '%' },
-      { id: 'hpKillRec', name: '처치 시 체력 회복', icon: '🧪', type: 'ult', unit: '' },
-      { id: 'hpMaxRec', name: '최대 생명력 비례 회복', icon: '💖', type: 'ult', unit: '%' },
-      { id: 'evasion', name: '회피율', icon: '🌀', type: 'def', unit: '%' }
-    ];
-
-    // 1. 골드 스탯 렌더링
+    // 골드 스탯 카드 8종 동적 생성
     function renderGoldStats() {
       const container = document.getElementById('gold-stat-container');
       container.innerHTML = goldStats.map(s => `
@@ -330,34 +272,56 @@
           </div>
           
           <div class="input-grid">
+            <!-- 1. 현재 레벨 (사용자 입력) -->
             <div class="input-field">
-              <label>현재 수치</label>
+              <label>현재 레벨</label>
               <div class="input-box">
-                <input type="number" id="gold-${s.id}-val" value="0" oninput="updateDisp('gold', '${s.id}'); handleInput();">
+                <input type="number" id="gold-${s.id}-lv" value="1000" oninput="calcGoldStat('${s.id}'); handleInput();">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+
+            <!-- 2. 현재 수치 (자동 계산 / ReadOnly) -->
+            <div class="input-field">
+              <label>현재 수치 (자동계산)</label>
+              <div class="input-box readonly">
+                <input type="number" id="gold-${s.id}-val" value="0" readonly>
                 <span class="unit">${s.unit}</span>
               </div>
             </div>
 
+            <!-- 3. 목표 레벨 (사용자 입력) -->
             <div class="input-field">
-              <label>현재 레벨</label>
+              <label>목표 레벨</label>
               <div class="input-box">
-                <input type="number" id="gold-${s.id}-lv" value="0" oninput="handleInput()">
+                <input type="number" id="gold-${s.id}-target-lv" value="2000" oninput="calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
 
+            <!-- 4. 목표 수치 (자동 계산 / ReadOnly) -->
             <div class="input-field">
-              <label>Max 레벨</label>
-              <div class="input-box">
-                <input type="number" id="gold-${s.id}-max" value="10000" oninput="handleInput()">
-                <span class="unit">Lv</span>
+              <label>목표 수치 (자동계산)</label>
+              <div class="input-box readonly">
+                <input type="number" id="gold-${s.id}-target-val" value="0" readonly>
+                <span class="unit">${s.unit}</span>
               </div>
             </div>
 
+            <!-- 5. 1Lv당 필요 골드 (입력) -->
             <div class="input-field">
-              <label>+Lv당 필요 금액</label>
+              <label>+1Lv 당 필요 골드</label>
               <div class="input-box">
-                <input type="number" id="gold-${s.id}-cost" value="0" oninput="handleInput()">
+                <input type="number" id="gold-${s.id}-unit-cost" value="${s.baseCost}" oninput="calcGoldStat('${s.id}'); handleInput();">
+                <span class="unit">골드</span>
+              </div>
+            </div>
+
+            <!-- 6. 목표레벨까지 필요 금액 (자동 계산 / ReadOnly) -->
+            <div class="input-field">
+              <label>목표까지 필요 금액</label>
+              <div class="input-box readonly">
+                <input type="text" id="gold-${s.id}-total-cost" value="0" readonly style="font-size: 11px;">
                 <span class="unit">골드</span>
               </div>
             </div>
@@ -366,106 +330,48 @@
       `).join('');
     }
 
-    // 2. 레벨 스탯 렌더링 (목표 레벨 & Max 필요 레벨 구조)
-    function renderLevelStats() {
-      const container = document.getElementById('level-stat-container');
-      container.innerHTML = levelStats.map(s => `
-        <div class="stat-card ${s.type}">
-          <div class="card-header">
-            <span class="stat-title">${s.icon} ${s.name}</span>
-            <span class="stat-current-val">현재: <span id="level-${s.id}-val-disp">0</span>${s.unit}</span>
-          </div>
-          
-          <div class="input-grid">
-            <div class="input-field">
-              <label>현재 수치</label>
-              <div class="input-box">
-                <input type="number" id="level-${s.id}-val" value="0" oninput="updateDisp('level', '${s.id}'); handleInput();">
-                <span class="unit">${s.unit}</span>
-              </div>
-            </div>
+    // 골드 스탯 실시간 연산 (현재/목표 수치 및 필요 금액)
+    function calcGoldStat(id) {
+      const statConfig = goldStats.find(s => s.id === id);
+      if (!statConfig) return;
 
-            <div class="input-field">
-              <label>현재 레벨</label>
-              <div class="input-box">
-                <input type="number" id="level-${s.id}-lv" value="0" oninput="calcLevelCalculations('${s.id}'); handleInput();">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
+      const curLv = Number(document.getElementById(`gold-${id}-lv`)?.value) || 0;
+      const targetLv = Number(document.getElementById(`gold-${id}-target-lv`)?.value) || 0;
+      const unitCost = Number(document.getElementById(`gold-${id}-unit-cost`)?.value) || 0;
 
-            <div class="input-field">
-              <label>목표 레벨</label>
-              <div class="input-box">
-                <input type="number" id="level-${s.id}-target" value="1000" oninput="calcLevelCalculations('${s.id}'); handleInput();">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
+      // 1. 현재 수치 & 목표 수치 자동 계산
+      const curVal = curLv * statConfig.perLv;
+      const targetVal = targetLv * statConfig.perLv;
 
-            <div class="input-field">
-              <label>목표까지 필요 레벨</label>
-              <div class="input-box" style="background: #e0f2fe;">
-                <input type="number" id="level-${s.id}-target-req" value="1000" readonly style="color: var(--primary);">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
+      const curValEl = document.getElementById(`gold-${id}-val`);
+      const targetValEl = document.getElementById(`gold-${id}-target-val`);
+      const dispEl = document.getElementById(`gold-${id}-val-disp`);
 
-            <div class="input-field">
-              <label>Max 레벨</label>
-              <div class="input-box">
-                <input type="number" id="level-${s.id}-max" value="10000" oninput="calcLevelCalculations('${s.id}'); handleInput();">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
+      if (curValEl) curValEl.value = curVal;
+      if (targetValEl) targetValEl.value = targetVal;
+      if (dispEl) dispEl.innerText = curVal.toLocaleString();
 
-            <div class="input-field">
-              <label>Max까지 필요 레벨</label>
-              <div class="input-box" style="background: #f1f5f9;">
-                <input type="number" id="level-${s.id}-max-req" value="10000" readonly style="color: var(--text-sub);">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
+      // 2. 목표 레벨까지 필요 금액 계산
+      const reqLv = Math.max(0, targetLv - curLv);
+      const totalCost = reqLv * unitCost;
 
-    // 레벨 연산 (Max 필요 레벨, 목표 필요 레벨 & 총 목표 필요 레벨 합산)
-    function calcLevelCalculations(id) {
-      const curLv = Number(document.getElementById(`level-${id}-lv`)?.value) || 0;
-      const targetLv = Number(document.getElementById(`level-${id}-target`)?.value) || 0;
-      const maxLv = Number(document.getElementById(`level-${id}-max`)?.value) || 0;
-
-      // 항목별 필요 레벨 계산
-      const targetReqEl = document.getElementById(`level-${id}-target-req`);
-      const maxReqEl = document.getElementById(`level-${id}-max-req`);
-
-      if (targetReqEl) targetReqEl.value = Math.max(0, targetLv - curLv);
-      if (maxReqEl) maxReqEl.value = Math.max(0, maxLv - curLv);
-
-      // 전체 항목의 목표 필요 레벨 총합 구하기
-      updateTotalTargetReqLevel();
-    }
-
-    // 최상단 총 필요 레벨 합산 기능
-    function updateTotalTargetReqLevel() {
-      let total = 0;
-      levelStats.forEach(s => {
-        const curLv = Number(document.getElementById(`level-${s.id}-lv`)?.value) || 0;
-        const targetLv = Number(document.getElementById(`level-${s.id}-target`)?.value) || 0;
-        total += Math.max(0, targetLv - curLv);
-      });
-
-      const totalDisp = document.getElementById('total-target-req-lv');
-      if (totalDisp) {
-        totalDisp.innerText = total.toLocaleString();
+      const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
+      if (totalCostEl) {
+        totalCostEl.value = formatGoldText(totalCost);
       }
     }
 
-    // 카드 상단 수치 실시간 업데이트
-    function updateDisp(prefix, id) {
-      const val = document.getElementById(`${prefix}-${id}-val`)?.value || 0;
-      const dispEl = document.getElementById(`${prefix}-${id}-val-disp`);
-      if (dispEl) dispEl.innerText = Number(val).toLocaleString();
+    // 골드 단위 가독성 표기 (조/억/만)
+    function formatGoldText(num) {
+      if (num <= 0) return '0';
+      if (num >= 1000000000000) {
+        return (num / 1000000000000).toFixed(1) + '조';
+      } else if (num >= 100000000) {
+        return (num / 100000000).toFixed(1) + '억';
+      } else if (num >= 10000) {
+        return (num / 10000).toFixed(0) + '만';
+      }
+      return num.toLocaleString();
     }
 
     // 탭 전환
@@ -481,60 +387,31 @@
     // 데이터 저장
     function handleInput() {
       const saveData = {};
-      
-      // 골드 스탯 저장
       goldStats.forEach(s => {
-        ['val', 'lv', 'max', 'cost'].forEach(field => {
+        ['lv', 'target-lv', 'unit-cost'].forEach(field => {
           const key = `gold-${s.id}-${field}`;
           const el = document.getElementById(key);
           if (el) saveData[key] = el.value;
         });
       });
-
-      // 레벨 스탯 저장
-      levelStats.forEach(s => {
-        ['val', 'lv', 'target', 'target-req', 'max', 'max-req'].forEach(field => {
-          const key = `level-${s.id}-${field}`;
-          const el = document.getElementById(key);
-          if (el) saveData[key] = el.value;
-        });
-      });
-
-      localStorage.setItem('hungryDragonTabV3Data', JSON.stringify(saveData));
+      localStorage.setItem('hungryDragonGoldV1Data', JSON.stringify(saveData));
     }
 
-    // 저장 데이터 불러오기
+    // 저장 데이터 로드
     function loadSavedData() {
-      const saved = localStorage.getItem('hungryDragonTabV3Data');
+      const saved = localStorage.getItem('hungryDragonGoldV1Data');
       if (saved) {
         const data = JSON.parse(saved);
         Object.keys(data).forEach(k => {
           const el = document.getElementById(k);
           if (el) el.value = data[k];
         });
-        
-        goldStats.forEach(s => updateDisp('gold', s.id));
-        levelStats.forEach(s => {
-          updateDisp('level', s.id);
-          calcLevelCalculations(s.id);
-        });
-      } else {
-        // 초기 합산 갱신
-        levelStats.forEach(s => calcLevelCalculations(s.id));
       }
-    }
-
-    // 계산 실행 예시
-    function calculateEfficiency() {
-      const atkGoldLv = document.getElementById('gold-atk-lv')?.value || 0;
-      const atkLevelLv = document.getElementById('level-atk-lv')?.value || 0;
-      document.getElementById('result-desc').innerText = 
-        `골드 공격력 Lv.${atkGoldLv}, 레벨 공격력 Lv.${atkLevelLv} 및 목표 레벨 합산 수치를 바탕으로 최적 배분 경로를 계산했습니다.`;
+      goldStats.forEach(s => calcGoldStat(s.id));
     }
 
     window.onload = function() {
       renderGoldStats();
-      renderLevelStats();
       loadSavedData();
     };
   </script>
