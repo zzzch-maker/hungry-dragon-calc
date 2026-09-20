@@ -682,8 +682,8 @@
 
       <!-- 5. 미션&소환 소분류 -->
       <div id="main-summon" class="sub-tab-group">
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-mission', this)">미션&보상</button>
-        <button class="sub-nav-btn active" onclick="switchSubTab('tab-summon', this)">소환</button>
+        <button class="sub-nav-btn active" onclick="switchSubTab('tab-mission', this)">미션&보상</button>
+        <button class="sub-nav-btn" onclick="switchSubTab('tab-summon', this)">소환</button>
       </div>
     </div>
 
@@ -806,35 +806,7 @@
       <div class="stat-grid" id="level-stat-container"></div>
     </div>
 
-    <!-- 3. 소환 계산기 탭 -->
-    <div id="tab-summon" class="tab-content active">
-      <!-- 최상단: 소환 항목별 총 필요 다이아 종합 카드 -->
-      <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none;">
-        <div class="invest-title" style="color: #38bdf8;">
-          🔮 항목별 소환 목표 달성 총 필요 다이아 종합
-        </div>
-        
-        <div class="category-summary-grid" style="margin-bottom: 12px;" id="summon-top-summary-grid">
-          <!-- 동적 생성됨 -->
-        </div>
-
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #475569; display: flex; justify-content: space-between; align-items: center;">
-          <div style="font-size: 13px; font-weight: 700; color: #f59e0b;">
-            ✨ 모든 소환 항목 목표 달성 총 필요 다이아 합계
-          </div>
-          <div style="font-size: 20px; font-weight: 800; color: #38bdf8;" id="summon-grand-total-dia">
-            0 💎
-          </div>
-        </div>
-      </div>
-
-      <!-- 소환 항목별 상세 카드 그리드 -->
-      <div class="stat-grid" id="summon-card-container">
-        <!-- 동적 생성됨 -->
-      </div>
-    </div>
-
-    <!-- 4. 미션&보상 계산기 탭 -->
+    <!-- 3. 미션&보상 계산기 탭 -->
     <div id="tab-mission" class="tab-content">
       <!-- 최상단: 일수 선택 기반 수급 합계 자동계산 카드 -->
       <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none;">
@@ -857,11 +829,11 @@
 
         <div class="category-summary-grid" style="margin-bottom: 12px;">
           <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
-            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 다이아</div>
+            <div class="cat-summary-title" style="color: #94a3b8;">일일 총 획득 다이아</div>
             <div class="cat-summary-cost" id="top-total-period-dia" style="color: #38bdf8; font-size: 18px;">0 💎</div>
           </div>
           <div class="cat-summary-card" style="background: #1e293b; border-color: #334155; grid-column: span 2;">
-            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 던전 열쇠 및 아이템</div>
+            <div class="cat-summary-title" style="color: #94a3b8;">일일 총 획득 던전 열쇠 및 아이템</div>
             <div class="item-badge-list" id="top-total-period-keys" style="justify-content: center; margin-top: 4px;"></div>
           </div>
         </div>
@@ -1006,7 +978,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
             <strong style="font-size: 15px;">💎 주간 상점 무료 다이아 수령 항목 (주 1회)</strong>
-            <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 주간 상점에서 무료로 수령 가능한 다이아 항목입니다. (최상단 주 1회 추가 항목에 합산)</p>
+            <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 주간 상점에서 무료로 수령 가능한 다이아 항목입니다. </p>
           </div>
           <div>
             <button onclick="toggleAllFreeDia(true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
@@ -1054,6 +1026,30 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 4. 소환 계산기 탭 (수정 완료) -->
+    <div id="tab-summon" class="tab-content">
+      <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; margin-bottom: 20px;">
+        <div class="invest-title" style="color: #38bdf8; margin-bottom: 8px;">
+          🎁 모든 소환 항목 목표 달성 총 필요 다이아 합계
+        </div>
+        <div style="font-size: 24px; font-weight: 800; color: #f59e0b; margin-bottom: 12px;" id="total-all-summon-dia">
+          0 💎
+        </div>
+        <div style="border-top: 1px solid #334155; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #94a3b8;">1) 장비 목표 등급 다이아 기댓값:</span>
+            <strong style="color: #38bdf8;" id="summary-equip-dia">0 💎</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #94a3b8;">2) 스킬 목표 등급 다이아 기댓값:</span>
+            <strong style="color: #38bdf8;" id="summary-skill-dia">0 💎</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="summon-stat-container"></div>
     </div>
 
     <!-- 기타 서브탭 준비중 플레이스홀더들 -->
@@ -1117,187 +1113,6 @@
       return `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="${colorHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
       </svg>`;
-    }
-
-    /* ===== 소환 데이터 정보 (제공해주신 표 기준) ===== */
-    // 장비류 (무기, 갑옷, 투구, 반지): 레벨별 { req: 필요소환량, cost: 1회당 다이아, reward: 달성보상 }
-    const equipSummonLevels = [
-      { lv: 1, req: 300, cost: 100, reward: 30 },
-      { lv: 2, req: 3000, cost: 100, reward: 300 },
-      { lv: 3, req: 6000, cost: 100, reward: 600 },
-      { lv: 4, req: 9000, cost: 100, reward: 900 },
-      { lv: 5, req: 12000, cost: 100, reward: 1200 },
-      { lv: 6, req: 15000, cost: 100, reward: 1500 },
-      { lv: 7, req: 18000, cost: 100, reward: 1800 },
-      { lv: 8, req: 21000, cost: 100, reward: 2100 },
-      { lv: 9, req: 24000, cost: 100, reward: 2400 },
-      { lv: 10, req: 27000, cost: 100, reward: 2700 },
-      { lv: 11, req: 30000, cost: 100, reward: 3000 },
-      { lv: 12, req: 33000, cost: 100, reward: 3300 },
-      { lv: 13, req: 36000, cost: 100, reward: 3600 },
-      { lv: 14, req: 39000, cost: 100, reward: 3900 },
-      { lv: 15, req: 42000, cost: 100, reward: 4200 },
-      { lv: 16, req: 45000, cost: 100, reward: 4500 },
-      { lv: 17, req: 48000, cost: 100, reward: 4800 },
-      { lv: 18, req: 51000, cost: 100, reward: 5100 },
-      { lv: 19, req: 54000, cost: 100, reward: 5400 },
-      { lv: 20, req: 57000, cost: 100, reward: 5700 }
-    ];
-
-    // 스킬류: 1~10레벨
-    const skillSummonLevels = [
-      { lv: 1, req: 1000, cost: 500, reward: 100 },
-      { lv: 2, req: 1500, cost: 500, reward: 150 },
-      { lv: 3, req: 2000, cost: 500, reward: 200 },
-      { lv: 4, req: 2500, cost: 500, reward: 250 },
-      { lv: 5, req: 3000, cost: 500, reward: 300 },
-      { lv: 6, req: 3500, cost: 500, reward: 350 },
-      { lv: 7, req: 4000, cost: 500, reward: 400 },
-      { lv: 8, req: 4500, cost: 500, reward: 450 },
-      { lv: 9, req: 5000, cost: 500, reward: 500 },
-      { lv: 10, req: 5500, cost: 500, reward: 550 }
-    ];
-
-    const summonCategories = [
-      { id: 'weapon', name: '무기 소환', icon: '⚔️', type: 'equip', maxLv: 20, defaultLv: 1, defaultTarget: 10 },
-      { id: 'armor', name: '갑옷 소환', icon: '🛡️', type: 'equip', maxLv: 20, defaultLv: 1, defaultTarget: 10 },
-      { id: 'helmet', name: '투구 소환', icon: '🪖', type: 'equip', maxLv: 20, defaultLv: 1, defaultTarget: 10 },
-      { id: 'ring', name: '반지 소환', icon: '💍', type: 'equip', maxLv: 20, defaultLv: 1, defaultTarget: 10 },
-      { id: 'skill', name: '스킬 소환', icon: '✨', type: 'skill', maxLv: 10, defaultLv: 1, defaultTarget: 5 }
-    ];
-
-    function renderSummonUI() {
-      // 1. 최상단 요약 카드 그리드
-      const topSummaryGrid = document.getElementById('summon-top-summary-grid');
-      topSummaryGrid.innerHTML = summonCategories.map(cat => `
-        <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;" id="top-sum-card-${cat.id}">
-          <div class="cat-summary-title" style="color: #94a3b8;">${cat.icon} ${cat.name} 필요 다이아</div>
-          <div class="cat-summary-cost" id="top-cost-${cat.id}" style="color: #38bdf8; font-size: 15px;">0 💎</div>
-        </div>
-      `).join('');
-
-      // 2. 상세 카드 그리드
-      const cardContainer = document.getElementById('summon-card-container');
-      cardContainer.innerHTML = summonCategories.map(cat => `
-        <div class="stat-card atk" id="summon-card-${cat.id}">
-          <div class="card-header">
-            <span class="stat-title">${cat.icon} ${cat.name}</span>
-            <span class="stat-current-val" id="summon-range-${cat.id}">Lv.1 ~ Lv.${cat.maxLv}</span>
-          </div>
-          
-          <div class="input-grid">
-            <div class="input-field">
-              <label>현재 소환 레벨</label>
-              <div class="input-box">
-                <input type="text" id="summon-${cat.id}-lv" value="${cat.defaultLv}" oninput="formatLevelWithComma(this); validateSummonLevel('${cat.id}'); calcSummonCost('${cat.id}'); handleInput();">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
-
-            <div class="input-field">
-              <label>현재 누적 소환 횟수</label>
-              <div class="input-box">
-                <input type="text" id="summon-${cat.id}-cnt" value="0" placeholder="현재 횟수 입력" oninput="formatLevelWithComma(this); calcSummonCost('${cat.id}'); handleInput();">
-                <span class="unit">회</span>
-              </div>
-            </div>
-
-            <div class="input-field">
-              <label>목표 소환 레벨</label>
-              <div class="input-box">
-                <input type="text" id="summon-${cat.id}-target-lv" value="${cat.defaultTarget}" oninput="formatLevelWithComma(this); validateSummonLevel('${cat.id}'); calcSummonCost('${cat.id}'); handleInput();">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
-
-            <div class="input-field">
-              <label>목표 등급 선택</label>
-              <div class="input-box" style="background: #f8fafc;">
-                <select id="summon-${cat.id}-grade" class="unit-select" style="border:none; background:transparent;" onchange="handleInput();">
-                  <option value="normal">일반 ~ 고급</option>
-                  <option value="rare">희귀</option>
-                  <option value="epic">영웅</option>
-                  <option value="unique">전설</option>
-                  <option value="legend">신화 이상</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="input-field full-width">
-              <label>목표 레벨까지 필요 총 다이아 (자동 계산)</label>
-              <div class="input-box readonly">
-                <input type="text" id="summon-${cat.id}-total-dia" value="0" readonly style="font-size: 13px; font-weight: 800; color: #0284c7;">
-                <span class="unit">💎</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function validateSummonLevel(catId) {
-      const cat = summonCategories.find(x => x.id === catId);
-      if (!cat) return;
-
-      ['lv', 'target-lv'].forEach(field => {
-        const inputEl = document.getElementById(`summon-${catId}-${field}`);
-        if (!inputEl) return;
-        let val = parseNumber(inputEl.value);
-        if (val > cat.maxLv) inputEl.value = cat.maxLv;
-        if (val < 1) inputEl.value = 1;
-      });
-    }
-
-    // 소환 레벨별 필요 다이아 산정 로직 (현재 누적 소환횟수 반영)
-    function calcSummonCost(catId) {
-      const cat = summonCategories.find(x => x.id === catId);
-      if (!cat) return;
-
-      const curLv = parseNumber(document.getElementById(`summon-${catId}-lv`)?.value) || 1;
-      const curCnt = parseNumber(document.getElementById(`summon-${catId}-cnt`)?.value) || 0;
-      const targetLv = parseNumber(document.getElementById(`summon-${catId}-target-lv`)?.value) || 1;
-
-      const levelsTable = cat.type === 'equip' ? equipSummonLevels : skillSummonLevels;
-
-      if (targetLv <= curLv) {
-        document.getElementById(`summon-${catId}-total-dia`).value = '0';
-        updateSummonGrandTotal();
-        return;
-      }
-
-      let totalDiaNeeded = 0;
-
-      for (let l = curLv; l <= targetLv; l++) {
-        const levelData = levelsTable.find(x => x.lv === l);
-        if (!levelData) continue;
-
-        let neededPulls = levelData.req;
-        if (l === curLv) {
-          // 현재 레벨인 경우 남은 소환 횟수만 계산
-          neededPulls = Math.max(0, levelData.req - curCnt);
-        }
-
-        const diaForThisLevel = neededPulls * levelData.cost;
-        totalDiaNeeded += diaForThisLevel;
-      }
-
-      document.getElementById(`summon-${catId}-total-dia`).value = toCommaStr(totalDiaNeeded);
-      updateSummonGrandTotal();
-    }
-
-    function updateSummonGrandTotal() {
-      let grandTotal = 0;
-      summonCategories.forEach(cat => {
-        const valStr = document.getElementById(`summon-${cat.id}-total-dia`)?.value || '0';
-        const val = parseNumber(valStr);
-        grandTotal += val;
-
-        const topCostEl = document.getElementById(`top-cost-${cat.id}`);
-        if (topCostEl) topCostEl.innerText = `${toCommaStr(val)} 💎`;
-      });
-
-      const grandEl = document.getElementById('summon-grand-total-dia');
-      if (grandEl) grandEl.innerText = `${toCommaStr(grandTotal)} 💎`;
     }
 
     /* ===== 미션 및 보상 데이터 정의 ===== */
@@ -1380,6 +1195,14 @@
       }
     ];
 
+    /* ===== 소환 항목 데이터 정의 ===== */
+    const summonStats = [
+      { id: 'weapon', name: '무기 소환', icon: '🗡️', type: 'atk', defaultLv: 1, defaultTarget: 10, maxLv: 20 },
+      { id: 'armor', name: '방어구 소환', icon: '🛡️', type: 'def', defaultLv: 1, defaultTarget: 10, maxLv: 20 },
+      { id: 'helmet', name: '투구 소환', icon: '🪖', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20 },
+      { id: 'skill', name: '스킬 소환', icon: '✨', type: 'ult', defaultLv: 1, defaultTarget: 10, maxLv: 20 }
+    ];
+
     function renderMissions() {
       const dailyGrid = document.getElementById('daily-mission-grid');
       dailyGrid.innerHTML = dailyMissionData.map(m => `
@@ -1435,7 +1258,7 @@
         if (m.hasTimeCalc) {
           extraInputHtml = `
             <div class="smart-calc-box">
-              <label>⏱️ 플레이 타임 시간/분 입력 (시간: 0~24, 분: 0~59)</label>
+              <label>⏱️ 플레이 타임 시간/분 입력</label>
               <div class="smart-row">
                 <div class="input-box" style="background: white; flex: 1;">
                   <input type="text" id="calc-time-hours" value="0" placeholder="시간 (0~24)" oninput="formatLevelWithComma(this); validateTimeInput('hours', 24); calcTimeFromHoursMinutes();">
@@ -1539,6 +1362,52 @@
               </div>
             </div>
           ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderSummonStats() {
+      const container = document.getElementById('summon-stat-container');
+      container.innerHTML = summonStats.map(s => `
+        <div class="stat-card ${s.type}">
+          <div class="card-header">
+            <span class="stat-title">${s.icon} ${s.name}</span>
+            <span class="stat-current-val">Max ${s.maxLv}렙</span>
+          </div>
+          
+          <div class="input-grid">
+            <div class="input-field">
+              <label>현재 소환 레벨</label>
+              <div class="input-box">
+                <input type="text" id="summon-${s.id}-lv" value="${s.defaultLv}" oninput="formatLevelWithComma(this); validateSummonLevel('${s.id}'); calcSummonStat('${s.id}'); handleInput();">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>목표 소환 레벨</label>
+              <div class="input-box">
+                <input type="text" id="summon-${s.id}-target-lv" value="${s.defaultTarget}" oninput="formatLevelWithComma(this); validateSummonLevel('${s.id}'); calcSummonStat('${s.id}'); handleInput();">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>목표 추가 소환 횟수</label>
+              <div class="input-box readonly">
+                <input type="text" id="summon-${s.id}-needed-cnt" value="0" readonly>
+                <span class="unit">회</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>필요 다이아 기댓값 (1회=100)</label>
+              <div class="input-box readonly">
+                <input type="text" id="summon-${s.id}-dia" value="0" readonly style="color: #0284c7; font-weight: 800;">
+                <span class="unit">💎</span>
+              </div>
+            </div>
+          </div>
         </div>
       `).join('');
     }
@@ -1838,6 +1707,71 @@
         }).join('');
         topWeeklyKeysEl.innerHTML = badgeHtml;
       }
+    }
+
+    /* ===== 소환 계산 로직 ===== */
+    function validateSummonLevel(id) {
+      const s = summonStats.find(x => x.id === id);
+      const lvEl = document.getElementById(`summon-${id}-lv`);
+      const targetLvEl = document.getElementById(`summon-${id}-target-lv`);
+
+      let curLv = parseNumber(lvEl.value);
+      if (lvEl.value !== '' && curLv < 1) curLv = 1;
+      if (curLv > s.maxLv) curLv = s.maxLv;
+
+      let targetLv = parseNumber(targetLvEl.value);
+      if (targetLvEl.value !== '' && targetLv < curLv) targetLv = curLv;
+      if (targetLv > s.maxLv) targetLv = s.maxLv;
+
+      if (lvEl.value !== '') lvEl.value = toCommaStr(curLv);
+      if (targetLvEl.value !== '') targetLvEl.value = toCommaStr(targetLv);
+    }
+
+    // 예시 환산 함수 (레벨 구간별 누적 소환 횟수 및 다이아 기댓값 산출 함수)
+    function getSummonCostAndCount(curLv, targetLv) {
+      if (targetLv <= curLv) return { count: 0, dia: 0 };
+      let totalCount = 0;
+      for (let lv = curLv; lv < targetLv; lv++) {
+        // 임의의 레벨별 필요 소환 횟수 공식 (레벨이 올라갈수록 필요 횟수 증가)
+        totalCount += Math.round(50 * Math.pow(1.3, lv - 1));
+      }
+      return { count: totalCount, dia: totalCount * 100 };
+    }
+
+    function calcSummonStat(id) {
+      const lvEl = document.getElementById(`summon-${id}-lv`);
+      const targetLvEl = document.getElementById(`summon-${id}-target-lv`);
+      const neededCntEl = document.getElementById(`summon-${id}-needed-cnt`);
+      const diaEl = document.getElementById(`summon-${id}-dia`);
+
+      const curLv = lvEl.value === '' ? 1 : parseNumber(lvEl.value);
+      const targetLv = targetLvEl.value === '' ? curLv : parseNumber(targetLvEl.value);
+
+      const res = getSummonCostAndCount(curLv, targetLv);
+      neededCntEl.value = toCommaStr(res.count);
+      diaEl.value = toCommaStr(res.dia);
+
+      calcTotalSummonSummary();
+    }
+
+    function calcTotalSummonSummary() {
+      let totalAllDia = 0;
+      let equipDia = 0;
+      let skillDia = 0;
+
+      summonStats.forEach(s => {
+        const diaVal = parseNumber(document.getElementById(`summon-${s.id}-dia`)?.value) || 0;
+        totalAllDia += diaVal;
+        if (s.id === 'weapon' || s.id === 'armor' || s.id === 'helmet') {
+          equipDia += diaVal;
+        } else if (s.id === 'skill') {
+          skillDia += diaVal;
+        }
+      });
+
+      document.getElementById('total-all-summon-dia').innerText = `${toCommaStr(totalAllDia)} 💎`;
+      document.getElementById('summary-equip-dia').innerText = `${toCommaStr(equipDia)} 💎`;
+      document.getElementById('summary-skill-dia').innerText = `${toCommaStr(skillDia)} 💎`;
     }
 
     /* ===== 기존 스탯 계산 로직 유지 ===== */
@@ -2480,11 +2414,12 @@
         });
       });
 
-      summonCategories.forEach(cat => {
-        saveData[`summon-${cat.id}-lv`] = document.getElementById(`summon-${cat.id}-lv`)?.value;
-        saveData[`summon-${cat.id}-cnt`] = document.getElementById(`summon-${cat.id}-cnt`)?.value;
-        saveData[`summon-${cat.id}-target-lv`] = document.getElementById(`summon-${cat.id}-target-lv`)?.value;
-        saveData[`summon-${cat.id}-grade`] = document.getElementById(`summon-${cat.id}-grade`)?.value;
+      summonStats.forEach(s => {
+        ['lv', 'target-lv'].forEach(field => {
+          const key = `summon-${s.id}-${field}`;
+          const el = document.getElementById(key);
+          if (el) saveData[key] = el.value;
+        });
       });
 
       dailyMissionData.forEach(m => {
@@ -2549,8 +2484,9 @@
         calcLevelStat(s.id);
       });
 
-      summonCategories.forEach(cat => {
-        calcSummonCost(cat.id);
+      summonStats.forEach(s => {
+        validateSummonLevel(s.id);
+        calcSummonStat(s.id);
       });
 
       repeatMissionData.forEach(m => {
@@ -2561,15 +2497,15 @@
       calcTotalLevelNeeded();
       validateInvestUnits();
       runInvestmentCalc();
-
       updateAllMissionCalculations();
+      calcTotalSummonSummary();
     }
 
     window.onload = function() {
       renderGoldStats();
       renderLevelStats();
-      renderSummonUI();
       renderMissions();
+      renderSummonStats();
       loadSavedData();
     };
   </script>
