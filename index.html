@@ -197,6 +197,27 @@
       color: var(--primary);
     }
 
+    /* 반복 미션 스마트 계산 패널 카드 */
+    .smart-calc-box {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+    .smart-calc-box label {
+      font-weight: 700;
+      color: var(--text-main);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .smart-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     /* 누적 포인트 보상 진행도 박스 */
     .point-progress-card {
       background: var(--card-bg);
@@ -690,7 +711,7 @@
               <select id="invest-unit2" class="unit-select" onchange="validateInvestUnits(); runInvestmentCalc(); handleInput();">
                 <option value="1">원</option>
                 <option value="10000">만</option>
-                <option value="100000000" selected>억</option>
+                <option value="100000000">억</option>
                 <option value="1000000000000">조</option>
                 <option value="10000000000000000">경</option>
                 <option value="100000000000000000000">해</option>
@@ -1013,7 +1034,6 @@
       { pts: 3500, keyType: 'material', name: '재료던전 열쇠', count: 1, color: 'var(--key-material)' }
     ];
 
-    // 요청된 신규 주간 미션 목록 (8종)
     const weeklyMissionData = [
       { id: 'w1', name: '로그인 1회', dia: 10000, pts: 500 },
       { id: 'w2', name: '게임플레이 타임 (1800초)', dia: 10000, pts: 500 },
@@ -1025,7 +1045,6 @@
       { id: 'w8', name: '요리 먹기 (30회)', dia: 10000, pts: 500 }
     ];
 
-    // 요청된 신규 주간 마일스톤 데이터 (800P ~ 4000P 각 지점당 열쇠 4종 1개씩)
     const weeklyKeysStandard = [
       { keyType: 'gold', name: '골드던전 열쇠', count: 1, color: 'var(--key-gold)' },
       { keyType: 'equip', name: '장비던전 열쇠', count: 1, color: 'var(--key-equip)' },
@@ -1041,10 +1060,15 @@
       { pts: 4000, items: weeklyKeysStandard }
     ];
 
+    // 요청된 신규 반복 미션 목록 및 보상
     const repeatMissionData = [
-      { id: 'r1', name: '몬스터 1,000마리 처치', diaPerCount: 500 },
-      { id: 'r2', name: '장비 / 스킬 소환 50회', diaPerCount: 1000 },
-      { id: 'r3', name: '스테이지 BOSS 10회 처치', diaPerCount: 800 }
+      { id: 'r1', name: '몬스터 처치 (500마리)', diaPerCount: 100, hasMonsterCalc: true },
+      { id: 'r2', name: '게임플레이 타임 (300초)', diaPerCount: 150, hasTimeCalc: true },
+      { id: 'r3', name: '장비 뽑기 (100회)', diaPerCount: 100 },
+      { id: 'r4', name: '컨텐츠 플레이 (5회)', diaPerCount: 200 },
+      { id: 'r5', name: '광고 시청 (1회)', diaPerCount: 100 },
+      { id: 'r6', name: '요리 제작 (10회)', diaPerCount: 100 },
+      { id: 'r7', name: '요리 먹기 (10회)', diaPerCount: 100 }
     ];
 
     function renderMissions() {
@@ -1100,22 +1124,86 @@
         </div>
       `).join('');
 
-      // 3. 반복 미션 렌더링
+      // 3. 반복 미션 렌더링 (스마트 자동 계산 입력 포함)
       const repeatGrid = document.getElementById('repeat-mission-grid');
-      repeatGrid.innerHTML = repeatMissionData.map(m => `
-        <div class="mission-card" style="align-items: center;">
-          <div class="mission-info">
-            <span class="mission-name">${m.name}</span>
-            <div class="mission-rewards">
-              1회 완료 시: <span>💎 ${toCommaStr(m.diaPerCount)}</span>
+      repeatGrid.innerHTML = repeatMissionData.map(m => {
+        let smartCalcHtml = '';
+        if (m.hasTimeCalc) {
+          smartCalcHtml = `
+            <div class="smart-calc-box">
+              <label>⏱️ 플레이 타임 자동 계산</label>
+              <div class="smart-row">
+                <div class="input-box" style="background: white; flex: 1;">
+                  <input type="text" id="calc-time-hours" value="0" placeholder="시간" oninput="formatLevelWithComma(this); calcTimeFromHoursMinutes();">
+                  <span class="unit">시간</span>
+                </div>
+                <div class="input-box" style="background: white; flex: 1;">
+                  <input type="text" id="calc-time-mins" value="0" placeholder="분" oninput="formatLevelWithComma(this); calcTimeFromHoursMinutes();">
+                  <span class="unit">분</span>
+                </div>
+              </div>
+            </div>`;
+        }
+        if (m.hasMonsterCalc) {
+          smartCalcHtml = `
+            <div class="smart-calc-box">
+              <label>🗡️ 몬스터 처치 자동 계산 (24시간 기준)</label>
+              <div class="smart-row">
+                <div class="input-box" style="background: white; flex: 1;">
+                  <input type="text" id="calc-monster-per-min" value="0" placeholder="분당 처치 수" oninput="formatLevelWithComma(this); calcMonsterFromPerMinute();">
+                  <span class="unit">마리/분</span>
+                </div>
+              </div>
+            </div>`;
+        }
+
+        return `
+          <div style="display: flex; flex-direction: column; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px;">
+            ${smartCalcHtml}
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div class="mission-info">
+                <span class="mission-name">${m.name}</span>
+                <div class="mission-rewards">
+                  1회 완료 시: <span>💎 ${toCommaStr(m.diaPerCount)}</span>
+                </div>
+              </div>
+              <div class="input-box" style="width: 110px; background: white;">
+                <input type="text" id="input-repeat-${m.id}" value="0" placeholder="횟수" oninput="formatLevelWithComma(this); updateAllMissionCalculations(); handleInput();">
+                <span class="unit">회</span>
+              </div>
             </div>
           </div>
-          <div class="input-box" style="width: 100px; background: white;">
-            <input type="text" id="input-repeat-${m.id}" value="0" placeholder="횟수" oninput="formatLevelWithComma(this); updateAllMissionCalculations(); handleInput();">
-            <span class="unit">회</span>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+    }
+
+    // 시간/분 입력 시 초 계산 후 반복 횟수(300초 기준) 자동 산출
+    function calcTimeFromHoursMinutes() {
+      const hours = parseNumber(document.getElementById('calc-time-hours')?.value) || 0;
+      const mins = parseNumber(document.getElementById('calc-time-mins')?.value) || 0;
+      const totalSeconds = (hours * 3600) + (mins * 60);
+      const count = Math.floor(totalSeconds / 300);
+
+      const repeatInput = document.getElementById('input-repeat-r2');
+      if (repeatInput) {
+        repeatInput.value = toCommaStr(count);
+        updateAllMissionCalculations();
+        handleInput();
+      }
+    }
+
+    // 분당 처치 마리수 입력 시 24시간 기준 횟수(500마리 기준) 자동 산출
+    function calcMonsterFromPerMinute() {
+      const perMin = parseNumber(document.getElementById('calc-monster-per-min')?.value) || 0;
+      const totalDailyMonsters = perMin * 60 * 24;
+      const count = Math.floor(totalDailyMonsters / 500);
+
+      const repeatInput = document.getElementById('input-repeat-r1');
+      if (repeatInput) {
+        repeatInput.value = toCommaStr(count);
+        updateAllMissionCalculations();
+        handleInput();
+      }
     }
 
     function toggleAllDailyMissions(check) {
@@ -1930,6 +2018,10 @@
       repeatMissionData.forEach(m => {
         saveData[`input-repeat-${m.id}`] = document.getElementById(`input-repeat-${m.id}`)?.value;
       });
+
+      saveData['calc-time-hours'] = document.getElementById('calc-time-hours')?.value;
+      saveData['calc-time-mins'] = document.getElementById('calc-time-mins')?.value;
+      saveData['calc-monster-per-min'] = document.getElementById('calc-monster-per-min')?.value;
 
       saveData['mission-days'] = document.getElementById('mission-days')?.value;
       saveData['char-level'] = document.getElementById('char-level')?.value;
