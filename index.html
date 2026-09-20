@@ -7,7 +7,7 @@
   <style>
     :root {
       --primary: #0284c7;
-      --primary-light: #e0f2fe;
+      --primary-light: #f0f9ff;
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --border: #e2e8f0;
@@ -73,51 +73,69 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* 최상단 투자 골드 & 효율 계산 카드 */
+    /* Option A 형태의 최상단 투자 골드 & 효율 분석 카드 */
     .investment-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
+      border-radius: 14px;
+      padding: 20px;
       margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    }
+
+    .inv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
     }
 
     .inv-title {
       font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 14px;
+      font-weight: 800;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       color: var(--text-main);
     }
 
     .inv-input-row {
       display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+
+    .inv-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-sub);
+      white-space: nowrap;
+    }
+
+    .inv-inputs-container {
+      display: flex;
+      flex: 1;
       gap: 10px;
       align-items: center;
-      margin-bottom: 16px;
     }
 
     .inv-input-group {
       display: flex;
       flex: 1;
-      gap: 6px;
+      gap: 4px;
       align-items: center;
-    }
-
-    .inv-input-box {
-      display: flex;
-      flex: 1;
-      align-items: center;
-      background: var(--bg);
+      background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 6px 12px;
+      padding: 4px 8px;
     }
 
-    .inv-input-box input {
+    .inv-input-group input {
       flex: 1;
       border: none;
       background: transparent;
@@ -130,10 +148,10 @@
     }
 
     .unit-select {
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      border-radius: 8px;
-      padding: 8px 10px;
+      border: none;
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 6px 8px;
       font-weight: 700;
       font-size: 13px;
       color: var(--primary);
@@ -143,51 +161,60 @@
 
     .eff-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 16px;
     }
 
     .eff-card {
-      background: var(--bg);
+      background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      transition: transform 0.2s;
     }
 
     .eff-card.atk { border-top: 4px solid var(--color-atk); }
     .eff-card.def { border-top: 4px solid var(--color-def); }
-    .eff-card.bal { border-top: 4px solid var(--primary); }
+    .eff-card.bal { border-top: 4px solid var(--color-ult); }
 
     .eff-card-title {
-      font-weight: 700;
-      font-size: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 6px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
       border-bottom: 1px dashed var(--border);
+    }
+
+    .eff-card-name {
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--text-main);
     }
 
     .eff-card-cost {
       font-size: 11px;
+      background: var(--primary-light);
       color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
       font-weight: 700;
     }
 
     .eff-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     .eff-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 12px;
+      font-size: 13px;
       padding: 4px 0;
-      border-bottom: 1px solid #edf2f7;
+      border-bottom: 1px solid #f1f5f9;
     }
 
     .eff-item:last-child {
@@ -197,6 +224,9 @@
     .eff-item-name {
       font-weight: 600;
       color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .eff-item-right {
@@ -206,17 +236,20 @@
     .eff-item-add {
       font-weight: 700;
       color: var(--text-main);
+      font-size: 13px;
     }
 
+    /* 레벨 증가분 빨간색 강조 스타일 */
     .eff-highlight-add {
       color: #ef4444;
-      font-weight: 700;
-      margin-left: 2px;
+      font-weight: 800;
+      margin-left: 3px;
     }
 
     .eff-item-cost {
       font-size: 10px;
       color: var(--text-sub);
+      margin-top: 1px;
     }
 
     /* 하단 기존 스탯 카드 그리드 */
@@ -361,7 +394,7 @@
       .container { padding: 12px; }
       .stat-current-val { max-width: 60%; font-size: 10px; }
       .inv-input-row { flex-direction: column; align-items: stretch; gap: 8px; }
-      .inv-input-group { width: 100%; }
+      .inv-inputs-container { flex-direction: column; gap: 8px; }
       .eff-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -380,42 +413,43 @@
     </nav>
 
     <div id="tab-gold" class="tab-content active">
-      <!-- 1. 투자 골드 & 효율 투자 상단 계산 영역 -->
+      <!-- 1. Option A 스타일 투자 골드 & 효율 계산 영역 -->
       <div class="investment-card">
-        <div class="inv-title">
-          <span>💰 투자 골드 입력 & 효율 분배 분석</span>
+        <div class="inv-header">
+          <div class="inv-title">
+            <span>💰 투자 골드 입력 & 효율 분배 분석</span>
+          </div>
         </div>
         
-        <!-- 단위 2개 입력 영역 (예: 100조 9,000억) -->
+        <!-- 단위 2개 복합 입력 영역 -->
         <div class="inv-input-row">
-          <div class="inv-input-group">
-            <div class="inv-input-box">
+          <span class="inv-label">보유 골드:</span>
+          <div class="inv-inputs-container">
+            <div class="inv-input-group">
               <input type="text" id="inv-amount1" placeholder="0" oninput="formatLevelWithComma(this); calcEfficiencyAllocation(); handleInput();">
+              <select id="inv-unit1" class="unit-select" onchange="calcEfficiencyAllocation(); handleInput();">
+                <option value="10000">만</option>
+                <option value="100000000">억</option>
+                <option value="1000000000000" selected>조</option>
+                <option value="1000000000000000">경</option>
+                <option value="10000000000000000000">해</option>
+                <option value="100000000000000000000000">자</option>
+                <option value="1000000000000000000000000000">양</option>
+              </select>
             </div>
-            <select id="inv-unit1" class="unit-select" onchange="calcEfficiencyAllocation(); handleInput();">
-              <option value="10000">만</option>
-              <option value="100000000">억</option>
-              <option value="1000000000000" selected>조</option>
-              <option value="1000000000000000">경</option>
-              <option value="10000000000000000000">해</option>
-              <option value="100000000000000000000000">자</option>
-              <option value="1000000000000000000000000000">양</option>
-            </select>
-          </div>
 
-          <div class="inv-input-group">
-            <div class="inv-input-box">
+            <div class="inv-input-group">
               <input type="text" id="inv-amount2" placeholder="0" oninput="formatLevelWithComma(this); calcEfficiencyAllocation(); handleInput();">
+              <select id="inv-unit2" class="unit-select" onchange="calcEfficiencyAllocation(); handleInput();">
+                <option value="10000">만</option>
+                <option value="100000000" selected>억</option>
+                <option value="1000000000000">조</option>
+                <option value="1000000000000000">경</option>
+                <option value="10000000000000000000">해</option>
+                <option value="100000000000000000000000">자</option>
+                <option value="1000000000000000000000000000">양</option>
+              </select>
             </div>
-            <select id="inv-unit2" class="unit-select" onchange="calcEfficiencyAllocation(); handleInput();">
-              <option value="10000">만</option>
-              <option value="100000000" selected>억</option>
-              <option value="1000000000000">조</option>
-              <option value="1000000000000000">경</option>
-              <option value="10000000000000000000">해</option>
-              <option value="100000000000000000000000">자</option>
-              <option value="1000000000000000000000000000">양</option>
-            </select>
           </div>
         </div>
 
@@ -424,7 +458,7 @@
           <!-- 공격형 배분 -->
           <div class="eff-card atk">
             <div class="eff-card-title">
-              <span>⚔️ 공격형 배분</span>
+              <span class="eff-card-name">⚔️ 공격형 배분</span>
               <span id="eff-atk-cost" class="eff-card-cost">공격형 총 투자 비용: 0 골드</span>
             </div>
             <div id="eff-atk-list" class="eff-list"></div>
@@ -433,7 +467,7 @@
           <!-- 생존형 배분 -->
           <div class="eff-card def">
             <div class="eff-card-title">
-              <span>🛡️ 생존형 배분</span>
+              <span class="eff-card-name">🛡️ 생존형 배분</span>
               <span id="eff-def-cost" class="eff-card-cost">생존형 총 투자 비용: 0 골드</span>
             </div>
             <div id="eff-def-list" class="eff-list"></div>
@@ -442,7 +476,7 @@
           <!-- 밸런스형 배분 -->
           <div class="eff-card bal">
             <div class="eff-card-title">
-              <span>⚖️ 밸런스형 배분</span>
+              <span class="eff-card-name">⚖️ 밸런스형 배분</span>
               <span id="eff-bal-cost" class="eff-card-cost">밸런스형 총 투자 비용: 0 골드</span>
             </div>
             <div id="eff-bal-list" class="eff-list"></div>
@@ -738,7 +772,7 @@
     }
 
     function calcEfficiencyAllocation() {
-      // 입력 2개 조합 계산
+      // 복합 단위 2개 합산 계산
       const invNum1 = parseNumber(document.getElementById('inv-amount1')?.value);
       const invUnitMult1 = Number(document.getElementById('inv-unit1')?.value) || 1000000000000;
 
