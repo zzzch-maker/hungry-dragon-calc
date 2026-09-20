@@ -829,11 +829,11 @@
 
         <div class="category-summary-grid" style="margin-bottom: 12px;">
           <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
-            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 다이아</div>
+            <div class="cat-summary-title" style="color: #94a3b8;">일일 총 획득 다이아</div>
             <div class="cat-summary-cost" id="top-total-period-dia" style="color: #38bdf8; font-size: 18px;">0 💎</div>
           </div>
           <div class="cat-summary-card" style="background: #1e293b; border-color: #334155; grid-column: span 2;">
-            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 던전 열쇠 및 아이템</div>
+            <div class="cat-summary-title" style="color: #94a3b8;">일일 총 획득 던전 열쇠 및 아이템</div>
             <div class="item-badge-list" id="top-total-period-keys" style="justify-content: center; margin-top: 4px;"></div>
           </div>
         </div>
@@ -978,7 +978,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
             <strong style="font-size: 15px;">💎 주간 상점 무료 다이아 수령 항목 (주 1회)</strong>
-            <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 주간 상점에서 무료로 수령 가능한 다이아 항목입니다. (최상단 주 1회 추가 항목에 합산)</p>
+            <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 주간 상점에서 무료로 수령 가능한 다이아 항목입니다. </p>
           </div>
           <div>
             <button onclick="toggleAllFreeDia(true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
@@ -1166,10 +1166,10 @@
           { keyType: 'heart', name: '하트던전 열쇠', count: 3, color: 'var(--key-heart)' },
           { keyType: 'material', name: '재료던전 열쇠', count: 3, color: 'var(--key-material)' },
           { keyType: 'ticket', name: '가속권(1분)', count: 90, color: 'var(--key-ticket)' },
-          { keyType: 'core', name: '코어던전 열쇠 (파란색)', count: 3, color: 'var(--key-core)' },
-          { keyType: 'labyrinth', name: '미궁던전 열쇠 (보라색)', count: 3, color: 'var(--key-labyrinth)' },
-          { keyType: 'weekday', name: '요일던전 열쇠 (진한녹색)', count: 3, color: 'var(--key-weekday)' },
-          { keyType: 'spirit', name: '정령던전 열쇠 (핑크색)', count: 3, color: 'var(--key-spirit)' }
+          { keyType: 'core', name: '코어던전 열쇠', count: 3, color: 'var(--key-core)' },
+          { keyType: 'labyrinth', name: '미궁던전 열쇠', count: 3, color: 'var(--key-labyrinth)' },
+          { keyType: 'weekday', name: '요일던전 열쇠', count: 3, color: 'var(--key-weekday)' },
+          { keyType: 'spirit', name: '정령던전 열쇠', count: 3, color: 'var(--key-spirit)' }
         ]
       }
     ];
@@ -1232,7 +1232,7 @@
         if (m.hasTimeCalc) {
           extraInputHtml = `
             <div class="smart-calc-box">
-              <label>⏱️ 플레이 타임 시간/분 입력 (시간: 0~24, 분: 0~59)</label>
+              <label>⏱️ 플레이 타임 시간/분 입력</label>
               <div class="smart-row">
                 <div class="input-box" style="background: white; flex: 1;">
                   <input type="text" id="calc-time-hours" value="0" placeholder="시간 (0~24)" oninput="formatLevelWithComma(this); validateTimeInput('hours', 24); calcTimeFromHoursMinutes();">
