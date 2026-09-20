@@ -135,7 +135,7 @@
     .input-field {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
 
     .input-field.full-width {
@@ -183,6 +183,15 @@
       color: var(--text-sub);
       margin-left: 4px;
       white-space: nowrap;
+    }
+
+    .korean-hint {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      text-align: right;
+      min-height: 16px;
+      margin-top: 1px;
     }
 
     .result-box {
@@ -243,7 +252,7 @@
       <div class="result-box">
         <h3 style="font-size: 16px; margin-bottom: 12px;">💰 보유 예산 입력</h3>
         <div class="input-box" style="background: white;">
-          <input type="text" id="budget" placeholder="예산 입력" style="text-align: left;" oninput="formatInputWithComma(this)">
+          <input type="text" id="budget" placeholder="예산 입력" style="text-align: left;" oninput="cleanNumberInput(this)">
           <span class="unit">조 골드</span>
         </div>
         <button class="btn-calc" onclick="calculateEfficiency()">최적 배분 계산하기</button>
@@ -252,7 +261,6 @@
   </div>
 
   <script>
-    // 골드 스탯별 상승량 계수 및 골드 계산 기준 파라미터
     const goldStats = [
       { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', perLv: 132000000 / 146400, defaultLv: 146400, defaultTarget: 150000, baseCostLv: 311151790000 / Math.pow(146400, 1.5) },
       { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', perLv: 2957200 / 100000, defaultLv: 100000, defaultTarget: 110000, baseCostLv: 30517290000 / Math.pow(100000, 1.5) },
@@ -264,30 +272,38 @@
       { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) }
     ];
 
-    function toCommaStr(val) {
-      if (val === null || val === undefined || isNaN(val)) return '0';
-      const parts = val.toString().split('.');
-      parts[0] = Number(parts[0]).toLocaleString();
-      return parts.join('.');
-    }
-
+    // 입력값에서 콤마 및 기타 문자를 완전히 제거
     function parseNumber(str) {
       if (!str) return 0;
-      return Number(str.toString().replace(/,/g, '')) || 0;
+      return Number(str.toString().replace(/[^0-9.]/g, '')) || 0;
     }
 
-    function formatInputWithComma(inputEl) {
-      const cursorPosition = inputEl.selectionStart;
-      const originalLen = inputEl.value.length;
-      
-      const num = parseNumber(inputEl.value);
-      inputEl.value = inputEl.value ? toCommaStr(num) : '';
-      
-      const newLen = inputEl.value.length;
-      inputEl.setSelectionRange(cursorPosition + (newLen - originalLen), cursorPosition + (newLen - originalLen));
+    function cleanNumberInput(inputEl) {
+      inputEl.value = inputEl.value.replace(/[^0-9.]/g, '');
     }
 
-    // 카드 렌더링 (+1Lv당 필요 골드 삭제 반영)
+    // 숫자를 직관적인 한글 단위로 변환 (천 단위 콤마 제거)
+    function toKoreanText(num, isPercent = false) {
+      if (num <= 0 || isNaN(num)) return '0';
+      if (isPercent) return `${num.toFixed(2)}%`;
+
+      const units = ['', '만', '억', '조', '경'];
+      let result = [];
+      let temp = Math.floor(num);
+      let unitIdx = 0;
+
+      while (temp > 0 && unitIdx < units.length) {
+        let mod = temp % 10000;
+        if (mod > 0) {
+          result.unshift(`${mod}${units[unitIdx]}`);
+        }
+        temp = Math.floor(temp / 10000);
+        unitIdx++;
+      }
+
+      return result.length > 0 ? result.slice(0, 2).join(' ') : '0';
+    }
+
     function renderGoldStats() {
       const container = document.getElementById('gold-stat-container');
       container.innerHTML = goldStats.map(s => `
@@ -302,12 +318,13 @@
             <div class="input-field">
               <label>현재 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="formatInputWithComma(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-lv" value="${s.defaultLv}" oninput="cleanNumberInput(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
+              <div class="korean-hint" id="gold-${s.id}-lv-hint"></div>
             </div>
 
-            <!-- 2. 현재 수치 (ReadOnly) -->
+            <!-- 2. 현재 수치 -->
             <div class="input-field">
               <label>현재 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -320,12 +337,13 @@
             <div class="input-field">
               <label>목표 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="formatInputWithComma(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-target-lv" value="${s.defaultTarget}" oninput="cleanNumberInput(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
+              <div class="korean-hint" id="gold-${s.id}-target-lv-hint"></div>
             </div>
 
-            <!-- 4. 목표 수치 (ReadOnly) -->
+            <!-- 4. 목표 수치 -->
             <div class="input-field">
               <label>목표 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -334,11 +352,11 @@
               </div>
             </div>
 
-            <!-- 5. 목표 레벨까지 필요 금액 (전체 가로 배치 및 자동 계산) -->
+            <!-- 5. 목표까지 필요 금액 -->
             <div class="input-field full-width">
               <label>목표 레벨까지 필요 금액 (자동 계산)</label>
               <div class="input-box readonly">
-                <input type="text" id="gold-${s.id}-total-cost" value="0" readonly style="font-size: 13px; font-weight: 800;">
+                <input type="text" id="gold-${s.id}-total-cost" value="0" readonly style="font-size: 13px; font-weight: 800; color: #0284c7;">
                 <span class="unit">골드</span>
               </div>
             </div>
@@ -347,17 +365,14 @@
       `).join('');
     }
 
-    // 레벨 구간별 누적 골드 비용 계산 함수
     function calculateTotalRequiredGold(statConfig, curLv, targetLv) {
       if (targetLv <= curLv) return 0;
       
       let totalCost = 0;
-      // 계산 최적화를 위해 구간 간격 설정
       const step = Math.max(1, Math.floor((targetLv - curLv) / 100)); 
       
       for (let lv = curLv; lv < targetLv; lv += step) {
         const count = Math.min(step, targetLv - lv);
-        // 레벨별 스케일링 공식 (인게임 증가 곡선 반영)
         const costPerLv = statConfig.baseCostLv * Math.pow(lv, 1.5);
         totalCost += costPerLv * count;
       }
@@ -365,45 +380,37 @@
       return totalCost;
     }
 
-    // 실시간 연산 로직
     function calcGoldStat(id) {
       const statConfig = goldStats.find(s => s.id === id);
       if (!statConfig) return;
 
       const curLv = parseNumber(document.getElementById(`gold-${id}-lv`)?.value);
       const targetLv = parseNumber(document.getElementById(`gold-${id}-target-lv`)?.value);
+      const isPercent = statConfig.unit === '%';
 
-      // 스탯 수치 연산
-      const curVal = Math.floor(curLv * statConfig.perLv);
-      const targetVal = Math.floor(targetLv * statConfig.perLv);
+      // 수치 계산
+      const curVal = isPercent ? (curLv * statConfig.perLv) : Math.floor(curLv * statConfig.perLv);
+      const targetVal = isPercent ? (targetLv * statConfig.perLv) : Math.floor(targetLv * statConfig.perLv);
 
+      // 한글 단위로 화면 출력
       const curValEl = document.getElementById(`gold-${id}-val`);
       const targetValEl = document.getElementById(`gold-${id}-target-val`);
       const dispEl = document.getElementById(`gold-${id}-val-disp`);
 
-      if (curValEl) curValEl.value = toCommaStr(curVal);
-      if (targetValEl) targetValEl.value = toCommaStr(targetVal);
-      if (dispEl) dispEl.innerText = formatKoreanUnit(curVal);
+      if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
+      if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
+      if (dispEl) dispEl.innerText = toKoreanText(curVal, isPercent);
 
-      // 목표 레벨까지 필요 금액 자동 계산
+      // 레벨 한글 힌트 업데이트
+      document.getElementById(`gold-${id}-lv-hint`).innerText = `= ${toKoreanText(curLv)} Lv`;
+      document.getElementById(`gold-${id}-target-lv-hint`).innerText = `= ${toKoreanText(targetLv)} Lv`;
+
+      // 필요 금액 계산 및 한글 표기
       const totalCost = calculateTotalRequiredGold(statConfig, curLv, targetLv);
       const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
       if (totalCostEl) {
-        totalCostEl.value = formatKoreanUnit(totalCost);
+        totalCostEl.value = toKoreanText(totalCost);
       }
-    }
-
-    // 한글 단주 표기 (조, 억, 만)
-    function formatKoreanUnit(num) {
-      if (num <= 0) return '0';
-      if (num >= 1000000000000) {
-        return (num / 1000000000000).toFixed(2) + '조';
-      } else if (num >= 100000000) {
-        return (num / 100000000).toFixed(2) + '억';
-      } else if (num >= 10000) {
-        return (num / 10000).toFixed(0) + '만';
-      }
-      return toCommaStr(Math.floor(num));
     }
 
     function switchTab(tabId) {
@@ -424,11 +431,11 @@
           if (el) saveData[key] = el.value;
         });
       });
-      localStorage.setItem('hungryDragonGoldV4Data', JSON.stringify(saveData));
+      localStorage.setItem('hungryDragonGoldV6Data', JSON.stringify(saveData));
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('hungryDragonGoldV4Data');
+      const saved = localStorage.getItem('hungryDragonGoldV6Data');
       if (saved) {
         const data = JSON.parse(saved);
         Object.keys(data).forEach(k => {
