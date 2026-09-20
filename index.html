@@ -119,6 +119,11 @@
       cursor: pointer;
     }
 
+    .unit-select option:disabled {
+      color: #cbd5e1;
+      background: #f1f5f9;
+    }
+
     .category-summary-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -406,12 +411,12 @@
             <div class="input-field" style="flex: 2;">
               <label>보유 투자 골드 1</label>
               <div class="input-box" style="background: white;">
-                <input type="text" id="invest-amount1" value="100" placeholder="숫자 입력" oninput="formatLevelWithComma(this); runInvestmentCalc(); handleInput();">
+                <input type="text" id="invest-amount1" value="100" placeholder="숫자 입력" oninput="formatLevelWithComma(this); validateInvestUnits(); runInvestmentCalc(); handleInput();">
               </div>
             </div>
             <div class="input-field" style="flex: 1;">
               <label>단위</label>
-              <select id="invest-unit1" class="unit-select" onchange="runInvestmentCalc(); handleInput();">
+              <select id="invest-unit1" class="unit-select" onchange="validateInvestUnits(); runInvestmentCalc(); handleInput();">
                 <option value="10000">만</option>
                 <option value="100000000">억</option>
                 <option value="1000000000000" selected>조</option>
@@ -427,12 +432,13 @@
             <div class="input-field" style="flex: 2;">
               <label>보유 투자 골드 2</label>
               <div class="input-box" style="background: white;">
-                <input type="text" id="invest-amount2" value="0" placeholder="숫자 입력" oninput="formatLevelWithComma(this); runInvestmentCalc(); handleInput();">
+                <input type="text" id="invest-amount2" value="0" placeholder="숫자 입력" oninput="formatLevelWithComma(this); validateInvestUnits(); runInvestmentCalc(); handleInput();">
               </div>
             </div>
             <div class="input-field" style="flex: 1;">
               <label>단위</label>
-              <select id="invest-unit2" class="unit-select" onchange="runInvestmentCalc(); handleInput();">
+              <select id="invest-unit2" class="unit-select" onchange="validateInvestUnits(); runInvestmentCalc(); handleInput();">
+                <option value="1">원</option>
                 <option value="10000">만</option>
                 <option value="100000000" selected>억</option>
                 <option value="1000000000000">조</option>
@@ -645,6 +651,42 @@
 
       if (val > statConfig.maxLv) {
         inputEl.value = toCommaStr(statConfig.maxLv);
+      }
+    }
+
+    // 골드 1, 골드 2 단위 상호 검증 및 입력값 범위 제어
+    function validateInvestUnits() {
+      const unit1El = document.getElementById('invest-unit1');
+      const unit2El = document.getElementById('invest-unit2');
+      const amt2El = document.getElementById('invest-amount2');
+
+      if (!unit1El || !unit2El) return;
+
+      const u1 = Number(unit1El.value) || 1000000000000;
+
+      // 1. 골드 2 단위 드롭다운에서 골드 1 이상 단위 비활성화
+      Array.from(unit2El.options).forEach(opt => {
+        const val = Number(opt.value);
+        opt.disabled = (val >= u1);
+      });
+
+      // 2. 현재 골드 2 단위가 골드 1 이상일 경우 골드 1 바로 아래 단위로 자동 변경
+      let u2 = Number(unit2El.value);
+      if (u2 >= u1) {
+        const validOpts = Array.from(unit2El.options).filter(opt => !opt.disabled);
+        if (validOpts.length > 0) {
+          unit2El.value = validOpts[validOpts.length - 1].value;
+          u2 = Number(unit2El.value);
+        }
+      }
+
+      // 3. 골드 2에 입력할 수 있는 최대 수치 제어 (예: 조-억 관계 시 9,999억 까지만 허용)
+      if (amt2El && u1 > u2) {
+        const maxAllowedAmt2 = Math.floor(u1 / u2) - 1;
+        const curAmt2 = parseNumber(amt2El.value);
+        if (curAmt2 > maxAllowedAmt2) {
+          amt2El.value = toCommaStr(maxAllowedAmt2);
+        }
       }
     }
 
@@ -920,6 +962,7 @@
         calcGoldStat(s.id);
       });
 
+      validateInvestUnits();
       runInvestmentCalc();
     }
 
