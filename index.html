@@ -1,15 +1,41 @@
 <!DOCTYPE html>
 <html lang="ko">
-   <header>
-  <img src="logo.png" alt="배용키 로고" class="header-logo">
-  <span>배용키 환산기</span>
-</header>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>배용키 환산기</title>
+  <style>
+    :root {
+      --primary-color: #0284c7;
+      --bg-color: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-color: #1e293b;
+    }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color); }
 
-    /* 헤더 */
-    header { background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 16px 24px; font-size: 20px; font-weight: bold; color: #0f172a; }
+    /* 헤더: 캐릭터 아이콘 + 제목 정렬 */
+    header { 
+      background: #ffffff; 
+      border-bottom: 1px solid var(--border-color); 
+      padding: 12px 24px; 
+      font-size: 20px; 
+      font-weight: bold; 
+      color: #0f172a; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+
+    /* 캐릭터 원형 아이콘 스타일 */
+    .header-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border-color);
+    }
 
     /* 메인 레이아웃 (좌측 메뉴 + 우측 콘텐츠) */
     .app-container { display: flex; min-height: calc(100vh - 61px); }
@@ -28,7 +54,7 @@
     /* 섹션 제목 */
     .section-title { font-size: 18px; font-weight: bold; margin-bottom: 16px; color: #0f172a; border-left: 4px solid var(--primary-color); padding-left: 8px; }
 
-    /* [예시 이미지 스타일 - 테이블 카드] */
+    /* 테이블 스타일 */
     .stat-table { width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 24px; }
     .stat-table th { background: #f8fafc; padding: 10px 12px; font-size: 13px; color: #64748b; text-align: left; border-bottom: 1px solid var(--border-color); }
     .stat-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; vertical-align: middle; }
@@ -43,13 +69,13 @@
     .input-level { width: 90px; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; font-weight: bold; }
     .unit-text { font-size: 13px; color: #64748b; margin-left: 4px; }
 
-    /* 결과 카드 (예산 계산 영역) */
+    /* 결과 카드 영역 */
     .result-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
     .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .result-title { font-weight: bold; font-size: 15px; }
     .badge-btn { background: #16a34a; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer; }
 
-    /* [모바일 반응형 최적화] 화면이 좁을 때 상단 탭으로 변경 */
+    /* 반응형 스타일 */
     @media (max-width: 768px) {
       .app-container { flex-direction: column; }
       .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border-color); padding: 8px; }
@@ -61,20 +87,20 @@
 </head>
 <body>
 
-  <header>🐉 배고파용키우기 환산 계산기</header>
+  <!-- 헤더: 업로드해주신 이미지 적용 & '배용키 환산기' 로 변경 -->
+  <header>
+    <img src="https://i.ibb.co/L5B7Drm/dragon-icon.png" alt="배용키 로고" class="header-logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'36\' height=\'36\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%230284c7\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><circle cx=\'12\' cy=\'12\' r=\'10\'/><path d=\'M8 14s1.5 2 4 2 4-2 4-2\'/><line x1=\'9\' y1=\'9\' x2=\'9.01\' y2=\'9\'/><line x1=\'15\' y1=\'9\' x2=\'15.01\' y2=\'9\'/></svg>'">
+    <span>배용키 환산기</span>
+  </header>
 
   <div class="app-container">
-    <!-- 1. [좌측 사이드바 메뉴] -->
     <nav class="sidebar">
       <button class="menu-item active" onclick="switchTab('tab-gold')">1. 골드 스탯 레벨</button>
       <button class="menu-item" onclick="switchTab('tab-opt')">2. 최적화 영향 스탯</button>
       <button class="menu-item" onclick="switchTab('tab-calc')">3. 예산 및 계산 결과</button>
     </nav>
 
-    <!-- 2. [우측 메인 콘텐츠 영역] -->
     <main class="main-content">
-
-      <!-- 메뉴 1: 골드 스탯 레벨 탭 -->
       <div id="tab-gold" class="tab-pane active">
         <h2 class="section-title">골드 스탯 레벨</h2>
         <table class="stat-table">
@@ -85,13 +111,10 @@
               <th style="text-align: right;">레벨 입력</th>
             </tr>
           </thead>
-          <tbody id="gold-stats-body">
-            <!-- JavaScript가 스탯 행을 자동 생성합니다 -->
-          </tbody>
+          <tbody id="gold-stats-body"></tbody>
         </table>
       </div>
 
-      <!-- 메뉴 2: 최적화 영향 스탯 탭 -->
       <div id="tab-opt" class="tab-pane">
         <h2 class="section-title">최적화 영향 스탯</h2>
         <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">골드 레벨이 아니지만 배분 추천에 들어가는 값입니다.</p>
@@ -103,45 +126,30 @@
               <th style="text-align: right;">값 입력</th>
             </tr>
           </thead>
-          <tbody id="opt-stats-body">
-            <!-- JavaScript가 스탯 행을 자동 생성합니다 -->
-          </tbody>
+          <tbody id="opt-stats-body"></tbody>
         </table>
       </div>
 
-      <!-- 메뉴 3: 예산 및 계산 결과 탭 -->
       <div id="tab-calc" class="tab-pane">
         <h2 class="section-title">예산 및 효율 추천</h2>
-        
         <div style="margin-bottom: 20px; display: flex; gap: 8px; align-items: center;">
           <input type="number" id="budget-input" class="input-level" style="width: 120px; text-align: left;" placeholder="예산 입력">
           <span class="unit-text">조 골드</span>
           <button class="badge-btn" style="background: #0284c7;" onclick="calculateEfficiency()">효율 계산</button>
         </div>
 
-        <!-- 결과 카드 예시들 -->
         <div class="result-card">
           <div class="result-header">
-            <span class="result-title" style="color: #16a34a;">밸런스 (공격 +0.0% × 생존 +72.4%)</span>
+            <span class="result-title" style="color: #16a34a;">밸런스 추천</span>
             <button class="badge-btn">밸런스 적용</button>
           </div>
           <p style="font-size: 13px; color: #64748b;" id="result-balance-desc">골드 스탯 레벨을 입력한 후 '효율 계산'을 눌러주세요.</p>
         </div>
-
-        <div class="result-card">
-          <div class="result-header">
-            <span class="result-title" style="color: #dc2626;">공격 집중</span>
-            <button class="badge-btn">공격 적용</button>
-          </div>
-          <p style="font-size: 13px; color: #64748b;" id="result-atk-desc">효율적인 스탯 업그레이드 경로를 계산합니다.</p>
-        </div>
       </div>
-
     </main>
   </div>
 
   <script>
-    // [데이터 구조] 메뉴별로 구분된 스탯 데이터
     const goldStats = [
       { id: 'atk', name: '공격력', colorClass: 'label-red', value: '0', defaultLv: 0 },
       { id: 'hp', name: '생명력', colorClass: 'label-blue', value: '0', defaultLv: 0 },
@@ -155,9 +163,7 @@
       { id: 'abiCritDmg', name: '어빌리티 치명타 데미지', colorClass: 'label-orange', value: '+0%', defaultVal: 0, unit: '%' }
     ];
 
-    // 1. 화면에 테이블 행 동적 생성
     function renderTables() {
-      // 골드 스탯 생성
       const goldBody = document.getElementById('gold-stats-body');
       goldBody.innerHTML = goldStats.map(s => `
         <tr>
@@ -170,7 +176,6 @@
         </tr>
       `).join('');
 
-      // 최적화 스탯 생성
       const optBody = document.getElementById('opt-stats-body');
       optBody.innerHTML = optStats.map(s => `
         <tr>
@@ -184,21 +189,15 @@
       `).join('');
     }
 
-    // 2. [메뉴/탭 전환 기능] 좌측 메뉴 클릭 시 해당 화면만 표시
     function switchTab(tabId) {
-      // 모든 탭 숨기기
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
 
-      // 선택한 탭 활성화
       document.getElementById(tabId).classList.add('active');
-      
-      // 버튼 active 상태 변경
       const btnIndex = tabId === 'tab-gold' ? 0 : tabId === 'tab-opt' ? 1 : 2;
       document.querySelectorAll('.menu-item')[btnIndex].classList.add('active');
     }
 
-    // 3. [자동 저장 및 불러오기]
     function handleInput() {
       const saveData = {};
       [...goldStats, ...optStats].forEach(s => {
@@ -220,17 +219,12 @@
       }
     }
 
-    // 4. [효율 계산 처리]
     function calculateEfficiency() {
       const atkLv = Number(document.getElementById('atk').value) || 0;
-      const critDmgLv = Number(document.getElementById('critDmg').value) || 0;
-
-      // 결과 메시지 업데이트
       document.getElementById('result-balance-desc').innerText = 
-        `현재 공격력 Lv.${atkLv}, 치명타데미지 Lv.${critDmgLv} 상태에 맞춰 최적의 스탯 상승 비율이 적용되었습니다.`;
+        `현재 공격력 Lv.${atkLv} 상태에 맞춰 최적의 스탯 상승 비율을 계산합니다.`;
     }
 
-    // 초기화 실행
     window.onload = function() {
       renderTables();
       loadSavedData();
