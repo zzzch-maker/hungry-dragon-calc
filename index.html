@@ -5,21 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>배고파용키우기 환산 계산기</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: 0 auto; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 16px; max-width: 480px; margin: 0 auto; background-color: #f9fafb; }
     .input-group { margin-bottom: 12px; }
-    label { display: block; margin-bottom: 4px; font-weight: bold; }
-    input { width: 100%; padding: 8px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; background: #22c55e; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    .result { margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 6px; text-align: center; }
+    label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px; }
+    input { width: 100%; height: 44px; padding: 8px 12px; box-sizing: border-box; border: 1px solid #d1d5db; border-radius: 6px; font-size: 16px; }
+    button { width: 100%; height: 48px; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .result { margin-top: 20px; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center; }
+    .save-notice { font-size: 12px; color: #16a34a; text-align: center; margin-top: 8px; height: 16px; }
   </style>
 </head>
 <body>
   <h1>🐉 배고파용키우기 환산 계산기</h1>
   
-  <!-- 스탯 입력창들이 JS에 의해 자동으로 들어갈 공간 -->
+  <!-- [위치 1] 스탯 입력창들이 자동으로 들어가는 곳 -->
   <div id="stats-form"></div>
 
   <button onclick="calculate()">환산하기</button>
+  <div id="save-msg" class="save-notice"></div>
 
   <div class="result">
     <h3>환산 전투력 기댓값</h3>
@@ -27,46 +29,75 @@
   </div>
 
   <script>
-    // 1. [데이터 정의] 스탯 항목을 JSON 형태의 배열로 관리합니다.
-    // 나중에 스탯이 늘어나면 이 배열에 항목만 추가하면 됩니다.
+    // ==========================================
+    // [위치 2] 스탯 데이터 정의 (항목 추가 시 여기만 수정!)
+    // ==========================================
     const statsData = [
       { id: 'atk', label: '기본 공격력', placeholder: '예: 1000', defaultValue: 0 },
-      { id: 'critRate', label: '치명타 확률 (%)', placeholder: '예: 50', defaultValue: 0, max: 100 },
+      { id: 'critRate', label: '치명타 확률 (%)', placeholder: '예: 50', defaultValue: 0 },
       { id: 'critDmg', label: '치명타 피해 (%)', placeholder: '예: 150', defaultValue: 0 },
-      { id: 'bossDmg', label: '보스 피해량 (%)', placeholder: '예: 20', defaultValue: 0 } // 항목 추가 예시
+      { id: 'bossDmg', label: '보스 피해량 (%)', placeholder: '예: 20', defaultValue: 0 }
     ];
 
-    // 2. [화면 자동 생성] 데이터 기반으로 HTML 입력 폼을 동적으로 만듭니다.
+    // 1. 화면에 입력 폼 생성
     const formContainer = document.getElementById('stats-form');
-    
     statsData.forEach(stat => {
       const group = document.createElement('div');
       group.className = 'input-group';
       group.innerHTML = `
         <label>${stat.label}</label>
-        <input type="number" id="${stat.id}" placeholder="${stat.placeholder}">
+        <input type="number" id="${stat.id}" placeholder="${stat.placeholder}" oninput="saveData()">
       `;
       formContainer.appendChild(group);
     });
 
-    // 3. [연산 처리] 입력된 값들을 모아 계산합니다.
+    // 2. [자동 불러오기] 페이지 접속 시 기기에 저장된 값 복원
+    window.onload = function() {
+      const saved = localStorage.getItem('hungryDragonStats');
+      if (saved) {
+        const parsedData = JSON.parse(saved);
+        statsData.forEach(stat => {
+          if (parsedData[stat.id] !== undefined) {
+            document.getElementById(stat.id).value = parsedData[stat.id];
+          }
+        });
+        calculate(); // 불러온 값으로 자동 계산
+      }
+    };
+
+    // 3. [자동 저장하기] 유저가 값을 입력할 때마다 브라우저에 저장
+    function saveData() {
+      const values = {};
+      statsData.forEach(stat => {
+        values[stat.id] = document.getElementById(stat.id).value;
+      });
+      localStorage.setItem('hungryDragonStats', JSON.stringify(values));
+      
+      const msg = document.getElementById('save-msg');
+      msg.innerText = '✓ 입력값 자동 저장됨';
+      setTimeout(() => { msg.innerText = ''; }, 1500);
+    }
+
+    // ==========================================
+    // [위치 3] 환산 공식 (계산식 변경 시 여기만 수정!)
+    // ==========================================
     function calculate() {
-      // 모든 입력값을 객체 형태로 수집
       const values = {};
       statsData.forEach(stat => {
         const val = Number(document.getElementById(stat.id).value) || stat.defaultValue;
         values[stat.id] = val;
       });
 
-      // 계산 공식 적용
+      // 스탯 변수 추출
       const atk = values.atk;
       const critRate = Math.min(values.critRate, 100) / 100;
       const critDmg = values.critDmg / 100;
       const bossDmg = values.bossDmg / 100;
 
-      // 예시 환산 공식: 공격력 * (1 + 크확*크뎀) * (1 + 보스피해)
+      // 환산 공식 계산
       const totalPower = Math.floor(atk * (1 + (critRate * critDmg)) * (1 + bossDmg));
       
+      // 결과 출력
       document.getElementById('output').innerText = totalPower.toLocaleString();
     }
   </script>
