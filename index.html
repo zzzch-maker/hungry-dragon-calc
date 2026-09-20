@@ -73,6 +73,159 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* 투자 계산기 상단 섹션 스타일 */
+    .invest-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    }
+
+    .invest-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary);
+    }
+
+    .invest-input-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .unit-select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .category-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .cat-summary-card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+
+    .cat-summary-card.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .cat-summary-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    .cat-summary-cost {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      word-break: break-all;
+    }
+
+    .mode-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .gain-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+    }
+
+    .gain-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .gain-item-name {
+      font-weight: 700;
+    }
+
+    .gain-item-val {
+      text-align: right;
+    }
+
+    .gain-lv-up {
+      color: #059669;
+      font-weight: 800;
+    }
+
+    .gain-cost {
+      font-size: 10px;
+      color: var(--text-sub);
+      display: block;
+    }
+
+    .btn-apply-targets {
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px;
+      background: #059669;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-apply-targets:hover {
+      background: #047857;
+    }
+
     .stat-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
@@ -213,6 +366,7 @@
       .stat-grid { grid-template-columns: 1fr; }
       .container { padding: 12px; }
       .stat-current-val { max-width: 60%; font-size: 10px; }
+      .category-summary-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -230,6 +384,62 @@
     </nav>
 
     <div id="tab-gold" class="tab-content active">
+      
+      <!-- 최상단 효율 골드 투자 계산기 섹션 -->
+      <div class="invest-card">
+        <div class="invest-title">⚡ 효율적 골드 투자 분배 계산기</div>
+        
+        <div class="invest-input-row">
+          <div class="input-field" style="flex: 2;">
+            <label>보유 투자 골드</label>
+            <div class="input-box" style="background: white;">
+              <input type="text" id="invest-amount" value="100" placeholder="숫자 입력" oninput="formatLevelWithComma(this); runInvestmentCalc(); handleInput();">
+            </div>
+          </div>
+          <div class="input-field" style="flex: 1;">
+            <label>단위</label>
+            <select id="invest-unit" class="unit-select" onchange="runInvestmentCalc(); handleInput();">
+              <option value="10000">만</option>
+              <option value="100000000">억</option>
+              <option value="1000000000000" selected>조</option>
+              <option value="10000000000000000">경</option>
+              <option value="100000000000000000000">해</option>
+              <option value="1000000000000000000000000">자</option>
+              <option value="10000000000000000000000000000">양</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 큰 항목별 총 소모 골드 요약 -->
+        <div class="category-summary-grid">
+          <div class="cat-summary-card" id="cat-summary-atk">
+            <div class="cat-summary-title">⚔️ 공격 총 소모</div>
+            <div class="cat-summary-cost" id="sum-cost-atk">0 골드</div>
+          </div>
+          <div class="cat-summary-card" id="cat-summary-def">
+            <div class="cat-summary-title">🛡️ 생존 총 소모</div>
+            <div class="cat-summary-cost" id="sum-cost-def">0 골드</div>
+          </div>
+          <div class="cat-summary-card" id="cat-summary-balance">
+            <div class="cat-summary-title">⚖️ 밸런스 총 소모</div>
+            <div class="cat-summary-cost" id="sum-cost-balance">0 골드</div>
+          </div>
+        </div>
+
+        <!-- 세부 항목 모드 선택 버튼 -->
+        <div class="mode-tabs">
+          <button class="mode-btn active" id="btn-mode-atk" onclick="setInvestMode('atk')">⚔️ 공격 세부</button>
+          <button class="mode-btn" id="btn-mode-def" onclick="setInvestMode('def')">🛡️ 생존 세부</button>
+          <button class="mode-btn" id="btn-mode-balance" onclick="setInvestMode('balance')">⚖️ 밸런스 세부</button>
+        </div>
+
+        <!-- 스탯별 상세 레벨업 및 소모 비용 목록 -->
+        <div class="gain-list" id="invest-gain-list"></div>
+
+        <button class="btn-apply-targets" onclick="applyInvestToTargets()">🎯 계산된 목표 레벨을 하단 스탯에 반영하기</button>
+      </div>
+
+      <!-- 기존 골드 스탯 목록 -->
       <div class="stat-grid" id="gold-stat-container"></div>
     </div>
 
@@ -253,15 +463,18 @@
 
   <script>
     const goldStats = [
-      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', defaultLv: 146400, defaultTarget: 150000, maxLv: 300000 },
-      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', defaultLv: 100000, defaultTarget: 110000, maxLv: 300000 },
-      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '', defaultLv: 50200, defaultTarget: 60000, maxLv: 300000 },
-      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '', defaultLv: 25000, defaultTarget: 30000, maxLv: 300000 },
-      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 1000, maxLv: 1000 },
-      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%', perLv: 5200 / 19000, defaultLv: 19000, defaultTarget: 20000, maxLv: 40000 },
-      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%', perLv: 0.1, defaultLv: 400, defaultTarget: 500, maxLv: 1000 },
-      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 0.15, defaultLv: 2000, defaultTarget: 3000, maxLv: 10000 }
+      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', category: 'atk', unit: '', defaultLv: 146400, defaultTarget: 150000, maxLv: 300000 },
+      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', category: 'def', unit: '', defaultLv: 100000, defaultTarget: 110000, maxLv: 300000 },
+      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', category: 'def', unit: '', defaultLv: 50200, defaultTarget: 60000, maxLv: 300000 },
+      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', category: 'atk', unit: '', defaultLv: 25000, defaultTarget: 30000, maxLv: 300000 },
+      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', category: 'atk', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 1000, maxLv: 1000 },
+      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', category: 'atk', unit: '%', perLv: 5200 / 19000, defaultLv: 19000, defaultTarget: 20000, maxLv: 40000 },
+      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', category: 'atk', unit: '%', perLv: 0.1, defaultLv: 400, defaultTarget: 500, maxLv: 1000 },
+      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', category: 'atk', unit: '%', perLv: 0.15, defaultLv: 2000, defaultTarget: 3000, maxLv: 10000 }
     ];
+
+    let currentInvestMode = 'atk';
+    let lastCalculatedTargets = {};
 
     function toCommaStr(val) {
       if (val === null || val === undefined || isNaN(val)) return '0';
@@ -292,7 +505,7 @@
         return `${num.toFixed(2)}`;
       }
 
-      const units = ['', '만', '억', '조', '경', '해'];
+      const units = ['', '만', '억', '조', '경', '해', '자', '양'];
       let result = [];
       let temp = Math.floor(num);
       let unitIdx = 0;
@@ -344,7 +557,7 @@
             <div class="input-field">
               <label>현재 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="validateMaxLevel('${s.id}', 'lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="validateMaxLevel('${s.id}', 'lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); runInvestmentCalc(); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -386,7 +599,6 @@
       }).join('');
     }
 
-    // 입력 필드의 레벨이 maxLv를 초과하면 maxLv로 조정하는 함수
     function validateMaxLevel(id, fieldType = 'target-lv') {
       const statConfig = goldStats.find(s => s.id === id);
       if (!statConfig) return;
@@ -450,6 +662,159 @@
       }
     }
 
+    /* 효율적 골드 투자 계산 로직 */
+    function simulateInvestment(statIds, budget) {
+      if (budget <= 0) {
+        let emptyGains = {}, emptyCosts = {};
+        statIds.forEach(id => { emptyGains[id] = 0; emptyCosts[id] = 0; });
+        return { gains: emptyGains, costs: emptyCosts, totalCost: 0 };
+      }
+
+      let curLevels = {};
+      let maxLevels = {};
+      statIds.forEach(id => {
+        const s = goldStats.find(x => x.id === id);
+        curLevels[id] = parseNumber(document.getElementById(`gold-${id}-lv`)?.value) || 0;
+        maxLevels[id] = s.maxLv;
+      });
+
+      let lowLv = Math.min(...statIds.map(id => curLevels[id]));
+      let highLv = 300000;
+      let bestT = lowLv;
+
+      for (let i = 0; i < 40; i++) {
+        let mid = Math.floor((lowLv + highLv) / 2);
+        let cost = 0;
+        statIds.forEach(id => {
+          let target = Math.min(mid, maxLevels[id]);
+          if (target > curLevels[id]) {
+            cost += calculateTotalRequiredGold(null, curLevels[id], target);
+          }
+        });
+
+        if (cost <= budget) {
+          bestT = mid;
+          lowLv = mid + 1;
+        } else {
+          highLv = mid - 1;
+        }
+      }
+
+      let gains = {};
+      let costs = {};
+      let updatedLevels = {};
+      let totalCost = 0;
+
+      statIds.forEach(id => {
+        let target = Math.min(bestT, maxLevels[id]);
+        target = Math.max(target, curLevels[id]);
+        let cost = calculateTotalRequiredGold(null, curLevels[id], target);
+        gains[id] = target - curLevels[id];
+        costs[id] = cost;
+        totalCost += cost;
+        updatedLevels[id] = target;
+      });
+
+      let remBudget = budget - totalCost;
+      let eligible = statIds.filter(id => updatedLevels[id] < maxLevels[id]).sort((a, b) => updatedLevels[a] - updatedLevels[b]);
+
+      for (let id of eligible) {
+        let sLow = updatedLevels[id] + 1;
+        let sHigh = maxLevels[id];
+        let sBest = updatedLevels[id];
+
+        while (sLow <= sHigh) {
+          let sMid = Math.floor((sLow + sHigh) / 2);
+          let c = calculateTotalRequiredGold(null, updatedLevels[id], sMid);
+          if (c <= remBudget) {
+            sBest = sMid;
+            sLow = sMid + 1;
+          } else {
+            sHigh = sMid - 1;
+          }
+        }
+
+        let addCost = calculateTotalRequiredGold(null, updatedLevels[id], sBest);
+        remBudget -= addCost;
+        totalCost += addCost;
+        gains[id] += (sBest - updatedLevels[id]);
+        costs[id] += addCost;
+        updatedLevels[id] = sBest;
+      }
+
+      return { gains, costs, totalCost };
+    }
+
+    function runInvestmentCalc() {
+      const amount = parseNumber(document.getElementById('invest-amount')?.value);
+      const unitMult = Number(document.getElementById('invest-unit')?.value) || 1;
+      const budget = amount * unitMult;
+
+      const atkStatIds = goldStats.filter(s => s.category === 'atk').map(s => s.id);
+      const defStatIds = goldStats.filter(s => s.category === 'def').map(s => s.id);
+      const allStatIds = goldStats.map(s => s.id);
+
+      const atkRes = simulateInvestment(atkStatIds, budget);
+      const defRes = simulateInvestment(defStatIds, budget);
+      const balanceRes = simulateInvestment(allStatIds, budget);
+
+      const sumAtkEl = document.getElementById('sum-cost-atk');
+      const sumDefEl = document.getElementById('sum-cost-def');
+      const sumBalEl = document.getElementById('sum-cost-balance');
+
+      if (sumAtkEl) sumAtkEl.innerText = `${toKoreanText(atkRes.totalCost)} 골드`;
+      if (sumDefEl) sumDefEl.innerText = `${toKoreanText(defRes.totalCost)} 골드`;
+      if (sumBalEl) sumBalEl.innerText = `${toKoreanText(balanceRes.totalCost)} 골드`;
+
+      document.querySelectorAll('.cat-summary-card').forEach(c => c.classList.remove('active'));
+      document.getElementById(`cat-summary-${currentInvestMode}`)?.classList.add('active');
+
+      let currentRes = currentInvestMode === 'atk' ? atkRes : currentInvestMode === 'def' ? defRes : balanceRes;
+      let targetStatList = currentInvestMode === 'atk' ? atkStatIds : currentInvestMode === 'def' ? defStatIds : allStatIds;
+
+      lastCalculatedTargets = {};
+      const gainListContainer = document.getElementById('invest-gain-list');
+      
+      gainListContainer.innerHTML = targetStatList.map(id => {
+        const s = goldStats.find(x => x.id === id);
+        const curLv = parseNumber(document.getElementById(`gold-${id}-lv`)?.value) || 0;
+        const gainLv = currentRes.gains[id] || 0;
+        const reqCost = currentRes.costs[id] || 0;
+
+        lastCalculatedTargets[id] = curLv + gainLv;
+
+        return `
+          <div class="gain-item">
+            <span class="gain-item-name">${s.icon} ${s.name}</span>
+            <div class="gain-item-val">
+              <span class="gain-lv-up">+${toCommaStr(gainLv)} Lv</span>
+              <span class="gain-cost">필요: ${toKoreanText(reqCost)} 골드</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setInvestMode(mode) {
+      currentInvestMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`btn-mode-${mode}`)?.classList.add('active');
+      runInvestmentCalc();
+    }
+
+    function applyInvestToTargets() {
+      Object.keys(lastCalculatedTargets).forEach(id => {
+        const targetInput = document.getElementById(`gold-${id}-target-lv`);
+        if (targetInput) {
+          targetInput.value = toCommaStr(lastCalculatedTargets[id]);
+          validateMaxLevel(id, 'target-lv');
+          calcGoldStat(id);
+        }
+      });
+      handleInput();
+      alert('계산된 효율적인 목표 레벨이 하단 스탯에 적용되었습니다!');
+    }
+
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -468,6 +833,11 @@
           if (el) saveData[key] = el.value;
         });
       });
+
+      saveData['invest-amount'] = document.getElementById('invest-amount')?.value;
+      saveData['invest-unit'] = document.getElementById('invest-unit')?.value;
+      saveData['invest-mode'] = currentInvestMode;
+
       localStorage.setItem('hungryDragonGoldV8Data', JSON.stringify(saveData));
     }
 
@@ -479,12 +849,21 @@
           const el = document.getElementById(k);
           if (el) el.value = data[k];
         });
+
+        if (data['invest-mode']) {
+          currentInvestMode = data['invest-mode'];
+          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+          document.getElementById(`btn-mode-${currentInvestMode}`)?.classList.add('active');
+        }
       }
+
       goldStats.forEach(s => {
         validateMaxLevel(s.id, 'lv');
         validateMaxLevel(s.id, 'target-lv');
         calcGoldStat(s.id);
       });
+
+      runInvestmentCalc();
     }
 
     window.onload = function() {
