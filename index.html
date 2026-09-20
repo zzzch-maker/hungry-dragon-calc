@@ -344,16 +344,9 @@
       overflow: hidden;
     }
 
-    .input-box input[readonly] {
+    .input-box input[readonly], .input-box input:disabled {
       color: var(--primary);
       cursor: default;
-    }
-
-    .input-box .unit {
-      font-size: 11px;
-      color: var(--text-sub);
-      margin-left: 4px;
-      white-space: nowrap;
     }
 
     .result-box {
@@ -545,7 +538,7 @@
       { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', category: 'atk', unit: '%', perLv: 0.15, defaultLv: 2000, defaultTarget: 3000, maxLv: 10000 }
     ];
 
-    // 레벨 스탯 기본 정보 (이동속도, 공격속도, 처치시 체력회복, 최대 생명력비례회복, 회피율만 % 유지)
+    // 레벨 스탯 기본 정보
     const levelStats = [
       { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
       { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
@@ -693,7 +686,7 @@
 
             <div class="input-field">
               <label>목표 레벨</label>
-              <div class="input-box">
+              <div class="input-box" id="gold-${s.id}-target-box">
                 <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateGoldMaxLevel('${s.id}', 'target-lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
@@ -755,7 +748,7 @@
 
             <div class="input-field">
               <label>목표 레벨</label>
-              <div class="input-box">
+              <div class="input-box" id="level-${s.id}-target-box">
                 <input type="text" id="level-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateLevelMaxLevel('${s.id}', 'target-lv'); formatLevelWithComma(this); calcLevelStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
@@ -886,8 +879,25 @@
       const statConfig = goldStats.find(s => s.id === id);
       if (!statConfig) return;
 
-      const curLv = parseNumber(document.getElementById(`gold-${id}-lv`)?.value);
-      const targetLv = parseNumber(document.getElementById(`gold-${id}-target-lv`)?.value);
+      const curLvInput = document.getElementById(`gold-${id}-lv`);
+      const targetLvInput = document.getElementById(`gold-${id}-target-lv`);
+      const targetBox = document.getElementById(`gold-${id}-target-box`);
+
+      const curLv = parseNumber(curLvInput?.value);
+
+      // 맥스 레벨 달성 시 목표 레벨 입력창 자동 비활성화
+      if (curLvInput && targetLvInput) {
+        if (curLv >= statConfig.maxLv) {
+          targetLvInput.value = toCommaStr(statConfig.maxLv);
+          targetLvInput.disabled = true;
+          if (targetBox) targetBox.classList.add('readonly');
+        } else {
+          targetLvInput.disabled = false;
+          if (targetBox) targetBox.classList.remove('readonly');
+        }
+      }
+
+      const targetLv = parseNumber(targetLvInput?.value);
       const isPercent = statConfig.unit === '%';
 
       const curVal = getGoldStatValue(id, curLv);
@@ -948,8 +958,25 @@
       const statConfig = levelStats.find(s => s.id === id);
       if (!statConfig) return;
 
-      const curLv = parseNumber(document.getElementById(`level-${id}-lv`)?.value);
-      const targetLv = parseNumber(document.getElementById(`level-${id}-target-lv`)?.value);
+      const curLvInput = document.getElementById(`level-${id}-lv`);
+      const targetLvInput = document.getElementById(`level-${id}-target-lv`);
+      const targetBox = document.getElementById(`level-${id}-target-box`);
+
+      const curLv = parseNumber(curLvInput?.value);
+
+      // 맥스 레벨 달성 시 목표 레벨 입력창 자동 비활성화
+      if (curLvInput && targetLvInput) {
+        if (curLv >= statConfig.maxLv) {
+          targetLvInput.value = toCommaStr(statConfig.maxLv);
+          targetLvInput.disabled = true;
+          if (targetBox) targetBox.classList.add('readonly');
+        } else {
+          targetLvInput.disabled = false;
+          if (targetBox) targetBox.classList.remove('readonly');
+        }
+      }
+
+      const targetLv = parseNumber(targetLvInput?.value);
       const isPercent = statConfig.unit === '%';
 
       const curVal = getLevelStatValue(id, curLv);
