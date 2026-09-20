@@ -480,6 +480,15 @@
 
     <!-- 2. 레벨 스탯 탭 -->
     <div id="tab-level" class="tab-content">
+      <!-- 최상단 레벨 스탯 총 필요 렙업 자동 계산기 카드 -->
+      <div class="invest-card">
+        <div class="invest-title">📊 레벨 스탯 총 필요 렙업 자동 계산기</div>
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px; font-weight: 700; color: var(--text-main);">모든 항목 목표 레벨까지 총 필요 렙업</span>
+          <span id="total-needed-level-sum" style="font-size: 18px; font-weight: 800; color: #0284c7;">0 Lv</span>
+        </div>
+      </div>
+
       <div class="stat-grid" id="level-stat-container"></div>
     </div>
 
@@ -509,12 +518,12 @@
       { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', category: 'atk', unit: '%', perLv: 0.15, defaultLv: 2000, defaultTarget: 3000, maxLv: 10000 }
     ];
 
-    // 레벨 스탯 기본 정보
+    // 레벨 스탯 기본 정보 (이동속도, 공격속도, 처치시 체력회복, 최대 생명력비례회복, 회피율만 % 유지)
     const levelStats = [
-      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '%', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
-      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '%', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
-      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '%', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
-      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '%', defaultLv: 5000, defaultTarget: 10000, maxLv: 100000 },
+      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
+      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
+      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
+      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '', defaultLv: 5000, defaultTarget: 10000, maxLv: 100000 },
       { id: 'moveSpd', name: '이동속도 증가', icon: '👟', type: 'crit', unit: '%', defaultLv: 1000, defaultTarget: 2000, maxLv: 20000 },
       { id: 'atkSpd', name: '공격속도 증가', icon: '⚡', type: 'crit', unit: '%', defaultLv: 1000, defaultTarget: 2000, maxLv: 20000 },
       { id: 'killHpRec', name: '처치 시 체력 회복', icon: '🩸', type: 'ult', unit: '%', defaultLv: 500, defaultTarget: 1000, maxLv: 5000 },
@@ -870,6 +879,19 @@
       }
     }
 
+    function calcTotalLevelNeeded() {
+      let totalNeeded = 0;
+      levelStats.forEach(s => {
+        const curLv = parseNumber(document.getElementById(`level-${s.id}-lv`)?.value) || 0;
+        const targetLv = parseNumber(document.getElementById(`level-${s.id}-target-lv`)?.value) || 0;
+        totalNeeded += Math.max(0, targetLv - curLv);
+      });
+      const sumEl = document.getElementById('total-needed-level-sum');
+      if (sumEl) {
+        sumEl.innerText = `${toCommaStr(totalNeeded)} Lv`;
+      }
+    }
+
     function calcLevelStat(id) {
       const statConfig = levelStats.find(s => s.id === id);
       if (!statConfig) return;
@@ -892,6 +914,8 @@
       if (neededLvEl) {
         neededLvEl.value = toCommaStr(neededLv);
       }
+
+      calcTotalLevelNeeded();
     }
 
     /* 효율적 골드 투자 계산 로직 */
@@ -1129,6 +1153,7 @@
         calcLevelStat(s.id);
       });
 
+      calcTotalLevelNeeded();
       validateInvestUnits();
       runInvestmentCalc();
     }
