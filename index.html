@@ -399,13 +399,11 @@
       <button class="nav-btn" onclick="switchTab('tab-calc')">3. 예산 및 계산 결과</button>
     </nav>
 
+    <!-- 1. 골드 스탯 탭 -->
     <div id="tab-gold" class="tab-content active">
-      
-      <!-- 최상단 효율 골드 투자 계산기 섹션 -->
       <div class="invest-card">
         <div class="invest-title">⚡ 효율적 골드 투자 분배 계산기</div>
         
-        <!-- 단위 2개 복합 입력 영역 -->
         <div class="invest-input-row">
           <div class="invest-input-group">
             <div class="input-field" style="flex: 2;">
@@ -451,7 +449,6 @@
           </div>
         </div>
 
-        <!-- 큰 항목별 총 소모 골드 요약 -->
         <div class="category-summary-grid">
           <div class="cat-summary-card" id="cat-summary-atk">
             <div class="cat-summary-title">⚔️ 공격형 총 투자 비용</div>
@@ -467,29 +464,26 @@
           </div>
         </div>
 
-        <!-- 세부 항목 모드 선택 버튼 -->
         <div class="mode-tabs">
           <button class="mode-btn active" id="btn-mode-atk" onclick="setInvestMode('atk')">⚔️ 공격형 배분</button>
           <button class="mode-btn" id="btn-mode-def" onclick="setInvestMode('def')">🛡️ 생존형 배분</button>
           <button class="mode-btn" id="btn-mode-balance" onclick="setInvestMode('balance')">⚖️ 밸런스형 배분</button>
         </div>
 
-        <!-- 스탯별 상세 레벨업 및 소모 비용 목록 -->
         <div class="gain-list" id="invest-gain-list"></div>
 
         <button class="btn-apply-targets" onclick="applyInvestToTargets()">🎯 계산된 목표 레벨을 하단 스탯에 반영하기</button>
       </div>
 
-      <!-- 기존 골드 스탯 목록 -->
       <div class="stat-grid" id="gold-stat-container"></div>
     </div>
 
+    <!-- 2. 레벨 스탯 탭 -->
     <div id="tab-level" class="tab-content">
-      <div style="padding: 20px; text-align: center; color: var(--text-sub);">
-        2. 레벨 스탯 탭 내용
-      </div>
+      <div class="stat-grid" id="level-stat-container"></div>
     </div>
 
+    <!-- 3. 예산 및 계산 결과 탭 -->
     <div id="tab-calc" class="tab-content">
       <div class="result-box">
         <h3 style="font-size: 16px; margin-bottom: 12px;">💰 보유 예산 입력</h3>
@@ -503,6 +497,7 @@
   </div>
 
   <script>
+    // 골드 스탯 기본 정보
     const goldStats = [
       { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', category: 'atk', unit: '', defaultLv: 146400, defaultTarget: 150000, maxLv: 300000 },
       { id: 'hp', name: '생명력', icon: '❤️', type: 'def', category: 'def', unit: '', defaultLv: 100000, defaultTarget: 110000, maxLv: 300000 },
@@ -512,6 +507,19 @@
       { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', category: 'atk', unit: '%', perLv: 5200 / 19000, defaultLv: 19000, defaultTarget: 20000, maxLv: 40000 },
       { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', category: 'atk', unit: '%', perLv: 0.1, defaultLv: 400, defaultTarget: 500, maxLv: 1000 },
       { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', category: 'atk', unit: '%', perLv: 0.15, defaultLv: 2000, defaultTarget: 3000, maxLv: 10000 }
+    ];
+
+    // 레벨 스탯 기본 정보
+    const levelStats = [
+      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '%', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
+      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '%', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
+      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '%', defaultLv: 10000, defaultTarget: 15000, maxLv: 100000 },
+      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '%', defaultLv: 5000, defaultTarget: 10000, maxLv: 100000 },
+      { id: 'moveSpd', name: '이동속도 증가', icon: '👟', type: 'crit', unit: '%', defaultLv: 1000, defaultTarget: 2000, maxLv: 20000 },
+      { id: 'atkSpd', name: '공격속도 증가', icon: '⚡', type: 'crit', unit: '%', defaultLv: 1000, defaultTarget: 2000, maxLv: 20000 },
+      { id: 'killHpRec', name: '처치 시 체력 회복', icon: '🩸', type: 'ult', unit: '%', defaultLv: 500, defaultTarget: 1000, maxLv: 5000 },
+      { id: 'maxHpRec', name: '최대 생명력 비례 회복', icon: '💖', type: 'ult', unit: '%', defaultLv: 500, defaultTarget: 1000, maxLv: 5000 },
+      { id: 'evasion', name: '회피율', icon: '🌀', type: 'crit', unit: '%', defaultLv: 1000, defaultTarget: 2000, maxLv: 10000 }
     ];
 
     let currentInvestMode = 'atk';
@@ -541,9 +549,22 @@
     }
 
     function toKoreanText(num, isPercent = false) {
-      if (num <= 0 || isNaN(num)) return '0';
+      if (num <= 0 || isNaN(num) || !isFinite(num)) return '0';
       if (isPercent) {
-        return `${num.toFixed(2)}`;
+        if (num >= 10000) {
+          const units = ['', '만', '억', '조', '경', '해', '자', '양'];
+          let result = [];
+          let temp = Math.floor(num);
+          let unitIdx = 0;
+          while (temp > 0 && unitIdx < units.length) {
+            let mod = temp % 10000;
+            if (mod > 0) result.unshift(`${mod}${units[unitIdx]}`);
+            temp = Math.floor(temp / 10000);
+            unitIdx++;
+          }
+          return result.length > 0 ? result.slice(0, 2).join(' ') : '0';
+        }
+        return num % 1 === 0 ? toCommaStr(num) : toCommaStr(Number(num.toFixed(2)));
       }
 
       const units = ['', '만', '억', '조', '경', '해', '자', '양'];
@@ -563,8 +584,8 @@
       return result.length > 0 ? result.slice(0, 2).join(' ') : '0';
     }
 
-    // 스탯 종류별 인게임 수치 계산 공식
-    function getStatValue(id, level) {
+    // 골드 스탯 종류별 인게임 수치 계산 공식
+    function getGoldStatValue(id, level) {
       if (id === 'pen') {
         const k = Math.floor(level / 1000);
         return 500 * k * (k + 1) + (level - k * 1000) * (k + 1);
@@ -578,11 +599,34 @@
       }
     }
 
+    // 레벨 스탯 종류별 인게임 수치 계산 공식
+    function getLevelStatValue(id, level) {
+      if (['atk', 'hp', 'def', 'pen'].includes(id)) {
+        const k = Math.floor(level / 1000);
+        const rem = level - k * 1000;
+        return 500 * k * (k + 1) + rem * (k + 1);
+      } else if (id === 'moveSpd' || id === 'atkSpd') {
+        return level * 0.003;
+      } else if (id === 'killHpRec') {
+        return level * 0.0002;
+      } else if (id === 'maxHpRec') {
+        let base = level * 0.0002;
+        let bonus = 0;
+        if (level >= 4000) bonus = 1.2;
+        else if (level >= 3000) bonus = 0.6;
+        else if (level >= 2000) bonus = 0.2;
+        return base + bonus;
+      } else if (id === 'evasion') {
+        return level * 0.001;
+      }
+      return 0;
+    }
+
     function renderGoldStats() {
       const container = document.getElementById('gold-stat-container');
       container.innerHTML = goldStats.map(s => {
         const isPercent = s.unit === '%';
-        const maxVal = getStatValue(s.id, s.maxLv);
+        const maxVal = getGoldStatValue(s.id, s.maxLv);
         const maxValText = toKoreanText(maxVal, isPercent);
 
         return `
@@ -598,7 +642,7 @@
             <div class="input-field">
               <label>현재 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="validateMaxLevel('${s.id}', 'lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); runInvestmentCalc(); handleInput();">
+                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="validateGoldMaxLevel('${s.id}', 'lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); runInvestmentCalc(); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -614,7 +658,7 @@
             <div class="input-field">
               <label>목표 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateMaxLevel('${s.id}', 'target-lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateGoldMaxLevel('${s.id}', 'target-lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -640,7 +684,69 @@
       }).join('');
     }
 
-    function validateMaxLevel(id, fieldType = 'target-lv') {
+    function renderLevelStats() {
+      const container = document.getElementById('level-stat-container');
+      container.innerHTML = levelStats.map(s => {
+        const isPercent = s.unit === '%';
+        const maxVal = getLevelStatValue(s.id, s.maxLv);
+        const maxValText = toKoreanText(maxVal, isPercent);
+
+        return `
+        <div class="stat-card ${s.type}">
+          <div class="card-header">
+            <span class="stat-title">${s.icon} ${s.name}</span>
+            <span class="stat-current-val" title="Max ${toCommaStr(s.maxLv)}렙 / ${maxValText}${s.unit}">
+              Max ${toCommaStr(s.maxLv)}렙 / ${maxValText}${s.unit}
+            </span>
+          </div>
+          
+          <div class="input-grid">
+            <div class="input-field">
+              <label>현재 레벨</label>
+              <div class="input-box">
+                <input type="text" id="level-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="validateLevelMaxLevel('${s.id}', 'lv'); formatLevelWithComma(this); calcLevelStat('${s.id}'); handleInput();">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>현재 수치 (자동계산)</label>
+              <div class="input-box readonly">
+                <input type="text" id="level-${s.id}-val" value="0" readonly>
+                <span class="unit">${s.unit}</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>목표 레벨</label>
+              <div class="input-box">
+                <input type="text" id="level-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateLevelMaxLevel('${s.id}', 'target-lv'); formatLevelWithComma(this); calcLevelStat('${s.id}'); handleInput();">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>목표 수치 (자동계산)</label>
+              <div class="input-box readonly">
+                <input type="text" id="level-${s.id}-target-val" value="0" readonly>
+                <span class="unit">${s.unit}</span>
+              </div>
+            </div>
+
+            <div class="input-field full-width">
+              <label>목표 레벨까지 필요 렙업 (자동 계산)</label>
+              <div class="input-box readonly">
+                <input type="text" id="level-${s.id}-needed-lv" value="0" readonly style="font-size: 13px; font-weight: 800; color: #0284c7;">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    function validateGoldMaxLevel(id, fieldType = 'target-lv') {
       const statConfig = goldStats.find(s => s.id === id);
       if (!statConfig) return;
 
@@ -654,7 +760,20 @@
       }
     }
 
-    // 골드 1, 골드 2 단위 상호 검증 및 입력값 범위 제어
+    function validateLevelMaxLevel(id, fieldType = 'target-lv') {
+      const statConfig = levelStats.find(s => s.id === id);
+      if (!statConfig) return;
+
+      const inputEl = document.getElementById(`level-${id}-${fieldType}`);
+      if (!inputEl) return;
+
+      const val = parseNumber(inputEl.value);
+
+      if (val > statConfig.maxLv) {
+        inputEl.value = toCommaStr(statConfig.maxLv);
+      }
+    }
+
     function validateInvestUnits() {
       const unit1El = document.getElementById('invest-unit1');
       const unit2El = document.getElementById('invest-unit2');
@@ -665,7 +784,6 @@
 
       const u1 = Number(unit1El.value) || 1000000000000;
 
-      // 1. 보유 투자 골드 1 입력값 최대 입력 자동 제한 (상위 단위 범위인 9,999를 초과하지 않도록 함)
       if (amt1El) {
         const u1Index = unit1El.selectedIndex;
         const u1NextOpt = unit1El.options[u1Index + 1];
@@ -680,13 +798,11 @@
         }
       }
 
-      // 2. 골드 2 단위 드롭다운에서 골드 1 이상 단위 비활성화
       Array.from(unit2El.options).forEach(opt => {
         const val = Number(opt.value);
         opt.disabled = (val >= u1);
       });
 
-      // 3. 현재 골드 2 단위가 골드 1 이상일 경우 골드 1 바로 아래 단위로 자동 변경
       let u2 = Number(unit2El.value);
       if (u2 >= u1) {
         const validOpts = Array.from(unit2El.options).filter(opt => !opt.disabled);
@@ -696,7 +812,6 @@
         }
       }
 
-      // 4. 골드 2에 입력할 수 있는 최대 수치 제어 (예: 조-억 관계 시 9,999억 까지만 허용)
       if (amt2El && u1 > u2) {
         const maxAllowedAmt2 = Math.floor(u1 / u2) - 1;
         const curAmt2 = parseNumber(amt2El.value);
@@ -739,8 +854,8 @@
       const targetLv = parseNumber(document.getElementById(`gold-${id}-target-lv`)?.value);
       const isPercent = statConfig.unit === '%';
 
-      const curVal = getStatValue(id, curLv);
-      const targetVal = getStatValue(id, targetLv);
+      const curVal = getGoldStatValue(id, curLv);
+      const targetVal = getGoldStatValue(id, targetLv);
 
       const curValEl = document.getElementById(`gold-${id}-val`);
       const targetValEl = document.getElementById(`gold-${id}-target-val`);
@@ -752,6 +867,30 @@
       const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
       if (totalCostEl) {
         totalCostEl.value = toKoreanText(totalCost);
+      }
+    }
+
+    function calcLevelStat(id) {
+      const statConfig = levelStats.find(s => s.id === id);
+      if (!statConfig) return;
+
+      const curLv = parseNumber(document.getElementById(`level-${id}-lv`)?.value);
+      const targetLv = parseNumber(document.getElementById(`level-${id}-target-lv`)?.value);
+      const isPercent = statConfig.unit === '%';
+
+      const curVal = getLevelStatValue(id, curLv);
+      const targetVal = getLevelStatValue(id, targetLv);
+
+      const curValEl = document.getElementById(`level-${id}-val`);
+      const targetValEl = document.getElementById(`level-${id}-target-val`);
+
+      if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
+      if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
+
+      const neededLv = Math.max(0, targetLv - curLv);
+      const neededLvEl = document.getElementById(`level-${id}-needed-lv`);
+      if (neededLvEl) {
+        neededLvEl.value = toCommaStr(neededLv);
       }
     }
 
@@ -870,14 +1009,12 @@
 
       lastCalculatedTargets = {};
       
-      // 전체 스탯 목표 레벨 저장
       targetStatList.forEach(id => {
         const curLv = parseNumber(document.getElementById(`gold-${id}-lv`)?.value) || 0;
         const gainLv = currentRes.gains[id] || 0;
         lastCalculatedTargets[id] = curLv + gainLv;
       });
 
-      // 레벨이 증가하는(+1 Lv 이상) 항목만 필터링하여 출력
       const activeStatList = targetStatList.filter(id => (currentRes.gains[id] || 0) > 0);
       const gainListContainer = document.getElementById('invest-gain-list');
       
@@ -920,7 +1057,7 @@
         const targetInput = document.getElementById(`gold-${id}-target-lv`);
         if (targetInput) {
           targetInput.value = toCommaStr(lastCalculatedTargets[id]);
-          validateMaxLevel(id, 'target-lv');
+          validateGoldMaxLevel(id, 'target-lv');
           calcGoldStat(id);
         }
       });
@@ -942,6 +1079,14 @@
       goldStats.forEach(s => {
         ['lv', 'target-lv'].forEach(field => {
           const key = `gold-${s.id}-${field}`;
+          const el = document.getElementById(key);
+          if (el) saveData[key] = el.value;
+        });
+      });
+
+      levelStats.forEach(s => {
+        ['lv', 'target-lv'].forEach(field => {
+          const key = `level-${s.id}-${field}`;
           const el = document.getElementById(key);
           if (el) saveData[key] = el.value;
         });
@@ -973,9 +1118,15 @@
       }
 
       goldStats.forEach(s => {
-        validateMaxLevel(s.id, 'lv');
-        validateMaxLevel(s.id, 'target-lv');
+        validateGoldMaxLevel(s.id, 'lv');
+        validateGoldMaxLevel(s.id, 'target-lv');
         calcGoldStat(s.id);
+      });
+
+      levelStats.forEach(s => {
+        validateLevelMaxLevel(s.id, 'lv');
+        validateLevelMaxLevel(s.id, 'target-lv');
+        calcLevelStat(s.id);
       });
 
       validateInvestUnits();
@@ -984,6 +1135,7 @@
 
     window.onload = function() {
       renderGoldStats();
+      renderLevelStats();
       loadSavedData();
     };
   </script>
