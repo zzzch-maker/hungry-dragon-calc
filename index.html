@@ -811,27 +811,43 @@
       let targetStatList = currentInvestMode === 'atk' ? atkStatIds : currentInvestMode === 'def' ? defStatIds : allStatIds;
 
       lastCalculatedTargets = {};
-      const gainListContainer = document.getElementById('invest-gain-list');
       
-      gainListContainer.innerHTML = targetStatList.map(id => {
-        const s = goldStats.find(x => x.id === id);
+      // 전체 스탯 목표 레벨 저장
+      targetStatList.forEach(id => {
         const curLv = parseNumber(document.getElementById(`gold-${id}-lv`)?.value) || 0;
         const gainLv = currentRes.gains[id] || 0;
-        const reqCost = currentRes.costs[id] || 0;
-        const finalLv = curLv + gainLv;
+        lastCalculatedTargets[id] = curLv + gainLv;
+      });
 
-        lastCalculatedTargets[id] = finalLv;
-
-        return `
-          <div class="gain-item">
-            <span class="gain-item-name">${s.icon} ${s.name}</span>
-            <div class="gain-item-val">
-              <div>${toCommaStr(finalLv)} Lv <span class="gain-lv-up">(+${toCommaStr(gainLv)} Lv)</span></div>
-              <span class="gain-cost">필요: ${toKoreanText(reqCost)} 골드</span>
-            </div>
+      // 레벨이 증가하는(+1 Lv 이상) 항목만 필터링하여 출력
+      const activeStatList = targetStatList.filter(id => (currentRes.gains[id] || 0) > 0);
+      const gainListContainer = document.getElementById('invest-gain-list');
+      
+      if (activeStatList.length === 0) {
+        gainListContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 14px; color: var(--text-sub); font-size: 13px;">
+            💡 투자 가능한 골드가 부족하거나 더 이상 올릴 수 있는 스탯이 없습니다.
           </div>
         `;
-      }).join('');
+      } else {
+        gainListContainer.innerHTML = activeStatList.map(id => {
+          const s = goldStats.find(x => x.id === id);
+          const curLv = parseNumber(document.getElementById(`gold-${id}-lv`)?.value) || 0;
+          const gainLv = currentRes.gains[id] || 0;
+          const reqCost = currentRes.costs[id] || 0;
+          const finalLv = curLv + gainLv;
+
+          return `
+            <div class="gain-item">
+              <span class="gain-item-name">${s.icon} ${s.name}</span>
+              <div class="gain-item-val">
+                <div>${toCommaStr(finalLv)} Lv <span class="gain-lv-up">(+${toCommaStr(gainLv)} Lv)</span></div>
+                <span class="gain-cost">필요: ${toKoreanText(reqCost)} 골드</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     function setInvestMode(mode) {
