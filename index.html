@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>효율 계산기</title>
+  <title>배용키 환산기</title>
   <style>
     :root {
       --primary: #0284c7;
@@ -15,10 +15,10 @@
       --text-sub: #64748b;
       
       /* 스탯별 포인트 컬러 */
-      --color-atk: #ef4444;
-      --color-hp: #3b82f6;
-      --color-def: #10b981;
-      --color-crit: #f59e0b;
+      --color-atk: #ef4444;      /* 공격력, 관통력 - Red */
+      --color-def: #3b82f6;      /* 생명력, 방어력 - Blue */
+      --color-crit: #f59e0b;     /* 치명타계열 - Yellow/Orange */
+      --color-ult: #8b5cf6;      /* 궁극계열 - Purple */
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,14 +45,14 @@
       border: 2px solid var(--primary-light);
     }
 
-    /* 컨테이너 */
+    /* 메인 컨테이너 */
     .container {
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
       padding: 20px;
     }
 
-    /* 상단 네비게이션 탭 */
+    /* 네비게이션 탭 */
     .nav-tabs {
       display: flex;
       gap: 8px;
@@ -82,24 +82,22 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
-    /* 탭 콘텐츠 */
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    /* 카드 그리드 레이아웃 */
+    /* 스탯 카드 그리드 레이아웃 */
     .stat-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 16px;
     }
 
+    /* 스탯 카드 기본 스타일 */
     .stat-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
-      position: relative;
-      overflow: hidden;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
       transition: transform 0.15s, box-shadow 0.15s;
     }
@@ -109,17 +107,19 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
-    /* 스탯 카드 테두리 포인트 */
+    /* 컬러 포인트 */
     .stat-card.atk { border-left: 4px solid var(--color-atk); }
-    .stat-card.hp { border-left: 4px solid var(--color-hp); }
     .stat-card.def { border-left: 4px solid var(--color-def); }
     .stat-card.crit { border-left: 4px solid var(--color-crit); }
+    .stat-card.ult { border-left: 4px solid var(--color-ult); }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed var(--border);
     }
 
     .stat-title {
@@ -130,38 +130,61 @@
       gap: 6px;
     }
 
-    .stat-value {
-      font-size: 13px;
-      color: var(--text-sub);
-      margin-bottom: 12px;
+    /* 현재 수치 요약 배지 */
+    .stat-current-val {
+      font-size: 12px;
+      font-weight: 600;
+      background: #f1f5f9;
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 6px;
     }
 
-    .input-group {
+    /* 입력 폼 2x2 그리드 */
+    .input-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .input-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .input-field label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .input-box {
       display: flex;
       align-items: center;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 4px 8px;
     }
 
-    .input-group input {
+    .input-box input {
       width: 100%;
       border: none;
       background: transparent;
-      padding: 6px;
+      padding: 4px 0;
       font-weight: 700;
-      font-size: 15px;
+      font-size: 13px;
       text-align: right;
       outline: none;
       color: var(--text-main);
     }
 
-    .input-group .unit {
-      font-size: 12px;
+    .input-box .unit {
+      font-size: 11px;
       color: var(--text-sub);
-      font-weight: 600;
       margin-left: 4px;
+      white-space: nowrap;
     }
 
     /* 결과 카드 */
@@ -186,7 +209,7 @@
       margin-top: 12px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .stat-grid { grid-template-columns: 1fr; }
       .container { padding: 12px; }
     }
@@ -195,88 +218,38 @@
 <body>
 
   <header>
-    <span>효율 계산기</span>
+    <img src="logo.png" alt="로고" class="header-logo" onerror="this.src='https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f409.png'">
+    <span>배용키 환산기</span>
   </header>
 
   <div class="container">
-    <!-- 상단 네비게이션 -->
+    <!-- 상단 메뉴 -->
     <nav class="nav-tabs">
-      <button class="nav-btn active" onclick="switchTab('tab-gold')">1. 골드 스탯</button>
-      <button class="nav-btn" onclick="switchTab('tab-opt')">2. 최적화 스탯</button>
-      <button class="nav-btn" onclick="switchTab('tab-calc')">3. 효율 계산</button>
+      <button class="nav-btn active" onclick="switchTab('tab-gold')">1. 골드 스탯 설정 (8종)</button>
+      <button class="nav-btn" onclick="switchTab('tab-opt')">2. 최적화 영향 스탯</button>
+      <button class="nav-btn" onclick="switchTab('tab-calc')">3. 예산 및 계산 결과</button>
     </nav>
 
-    <!-- 1. 골드 스탯 카드 그리드 -->
+    <!-- 1. 골드 스탯 탭 (8종 확장) -->
     <div id="tab-gold" class="tab-content active">
-      <div class="stat-grid">
-        <div class="stat-card atk">
-          <div class="card-header">
-            <span class="stat-title">⚔️ 공격력</span>
-          </div>
-          <div class="stat-value">현재 수치: <b id="val-atk">0</b></div>
-          <div class="input-group">
-            <input type="number" id="atk" value="0" oninput="handleInput()">
-            <span class="unit">Lv</span>
-          </div>
-        </div>
-
-        <div class="stat-card hp">
-          <div class="card-header">
-            <span class="stat-title">❤️ 생명력</span>
-          </div>
-          <div class="stat-value">현재 수치: <b id="val-hp">0</b></div>
-          <div class="input-group">
-            <input type="number" id="hp" value="0" oninput="handleInput()">
-            <span class="unit">Lv</span>
-          </div>
-        </div>
-
-        <div class="stat-card def">
-          <div class="card-header">
-            <span class="stat-title">🛡️ 방어력</span>
-          </div>
-          <div class="stat-value">현재 수치: <b id="val-def">0</b></div>
-          <div class="input-group">
-            <input type="number" id="def" value="0" oninput="handleInput()">
-            <span class="unit">Lv</span>
-          </div>
-        </div>
-
-        <div class="stat-card crit">
-          <div class="card-header">
-            <span class="stat-title">🎯 치명타 확률</span>
-          </div>
-          <div class="stat-value">현재 수치: <b id="val-critRate">0%</b></div>
-          <div class="input-group">
-            <input type="number" id="critRate" value="0" oninput="handleInput()">
-            <span class="unit">Lv</span>
-          </div>
-        </div>
-
-        <div class="stat-card crit">
-          <div class="card-header">
-            <span class="stat-title">💥 치명타 데미지</span>
-          </div>
-          <div class="stat-value">현재 수치: <b id="val-critDmg">0%</b></div>
-          <div class="input-group">
-            <input type="number" id="critDmg" value="0" oninput="handleInput()">
-            <span class="unit">Lv</span>
-          </div>
-        </div>
+      <div class="stat-grid" id="gold-stat-container">
+        <!-- JS로 8종 스탯 카드가 동적 생성됩니다 -->
       </div>
     </div>
 
-    <!-- 2. 최적화 영향 스탯 -->
+    <!-- 2. 최적화 영향 스탯 탭 -->
     <div id="tab-opt" class="tab-content">
       <div class="stat-grid">
         <div class="stat-card crit">
           <div class="card-header">
             <span class="stat-title">⭐ 공격력 레벨 포인트</span>
           </div>
-          <div class="stat-value">추가 포인트</div>
-          <div class="input-group">
-            <input type="number" id="atkPoint" value="0" oninput="handleInput()">
-            <span class="unit">pt</span>
+          <div class="input-field">
+            <label>추가 포인트 입력</label>
+            <div class="input-box">
+              <input type="number" id="atkPoint" value="0" oninput="handleInput()">
+              <span class="unit">pt</span>
+            </div>
           </div>
         </div>
 
@@ -284,30 +257,32 @@
           <div class="card-header">
             <span class="stat-title">✨ 어빌리티 치명타 데미지</span>
           </div>
-          <div class="stat-value">추가 데미지</div>
-          <div class="input-group">
-            <input type="number" id="abiCritDmg" value="0" oninput="handleInput()">
-            <span class="unit">%</span>
+          <div class="input-field">
+            <label>추가 데미지 입력</label>
+            <div class="input-box">
+              <input type="number" id="abiCritDmg" value="0" oninput="handleInput()">
+              <span class="unit">%</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 3. 예산 및 계산 결과 -->
+    <!-- 3. 예산 및 계산 결과 탭 -->
     <div id="tab-calc" class="tab-content">
       <div class="result-box">
         <h3 style="font-size: 16px; margin-bottom: 12px;">💰 보유 예산 입력</h3>
-        <div class="input-group" style="background: white;">
+        <div class="input-box" style="background: white;">
           <input type="number" id="budget" placeholder="예산 입력" style="text-align: left;">
           <span class="unit">조 골드</span>
         </div>
         <button class="btn-calc" onclick="calculateEfficiency()">최적 배분 계산하기</button>
       </div>
 
-      <div class="result-box" style="margin-top: 16px; border-left: 4px solid var(--color-def);">
-        <h4 style="color: var(--color-def); margin-bottom: 8px;">⚖️ 밸런스 추천 경로</h4>
+      <div class="result-box" style="margin-top: 16px; border-left: 4px solid var(--primary);">
+        <h4 style="color: var(--primary); margin-bottom: 8px;">📊 스탯 효율 추천</h4>
         <p id="result-desc" style="font-size: 14px; color: var(--text-sub);">
-          스탯 레벨과 예산을 입력 후 계산하기 버튼을 눌러주세요.
+          스탯 정보를 입력한 후 '최적 배분 계산하기' 버튼을 누르면 추천 업그레이드 경로가 표시됩니다.
         </p>
       </div>
     </div>
@@ -315,6 +290,73 @@
   </div>
 
   <script>
+    // [골드 스탯 8종 정의]
+    const goldStats = [
+      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '' },
+      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '' },
+      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '' },
+      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '' },
+      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%' },
+      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%' },
+      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%' },
+      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%' }
+    ];
+
+    // 스탯 카드 8개 동적 생성
+    function renderGoldStats() {
+      const container = document.getElementById('gold-stat-container');
+      container.innerHTML = goldStats.map(s => `
+        <div class="stat-card ${s.type}">
+          <div class="card-header">
+            <span class="stat-title">${s.icon} ${s.name}</span>
+            <span class="stat-current-val">현재: <span id="${s.id}-val-disp">0</span>${s.unit}</span>
+          </div>
+          
+          <div class="input-grid">
+            <div class="input-field">
+              <label>현재 수치</label>
+              <div class="input-box">
+                <input type="number" id="${s.id}-val" value="0" oninput="updateDisp('${s.id}'); handleInput();">
+                <span class="unit">${s.unit}</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>현재 레벨</label>
+              <div class="input-box">
+                <input type="number" id="${s.id}-lv" value="0" oninput="handleInput()">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>Max 레벨</label>
+              <div class="input-box">
+                <input type="number" id="${s.id}-max" value="10000" oninput="handleInput()">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>+Lv당 필요 금액</label>
+              <div class="input-box">
+                <input type="number" id="${s.id}-cost" value="0" oninput="handleInput()">
+                <span class="unit">골드</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 카드 상단 수치 실시간 업데이트
+    function updateDisp(id) {
+      const val = document.getElementById(`${id}-val`).value || 0;
+      const dispEl = document.getElementById(`${id}-val-disp`);
+      if (dispEl) dispEl.innerText = Number(val).toLocaleString();
+    }
+
+    // 탭 전환
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -324,34 +366,51 @@
       document.querySelectorAll('.nav-btn')[idx].classList.add('active');
     }
 
+    // 데이터 저장
     function handleInput() {
-      const keys = ['atk', 'hp', 'def', 'critRate', 'critDmg', 'atkPoint', 'abiCritDmg'];
       const saveData = {};
-      keys.forEach(k => {
+      goldStats.forEach(s => {
+        ['val', 'lv', 'max', 'cost'].forEach(field => {
+          const key = `${s.id}-${field}`;
+          const el = document.getElementById(key);
+          if (el) saveData[key] = el.value;
+        });
+      });
+
+      ['atkPoint', 'abiCritDmg'].forEach(k => {
         const el = document.getElementById(k);
         if (el) saveData[k] = el.value;
       });
-      localStorage.setItem('hungryDragonCardData', JSON.stringify(saveData));
+
+      localStorage.setItem('hungryDragonFullData', JSON.stringify(saveData));
     }
 
+    // 저장 데이터 불러오기
     function loadSavedData() {
-      const saved = localStorage.getItem('hungryDragonCardData');
+      const saved = localStorage.getItem('hungryDragonFullData');
       if (saved) {
         const data = JSON.parse(saved);
         Object.keys(data).forEach(k => {
           const el = document.getElementById(k);
           if (el) el.value = data[k];
         });
+        // 현재 수치 배지 갱신
+        goldStats.forEach(s => updateDisp(s.id));
       }
     }
 
+    // 효율 계산 버튼 클릭 예시
     function calculateEfficiency() {
-      const atk = document.getElementById('atk').value || 0;
+      const atkLv = document.getElementById('atk-lv').value || 0;
+      const ultCritLv = document.getElementById('ultCritDmg-lv').value || 0;
       document.getElementById('result-desc').innerText = 
-        `현재 공격력 Lv.${atk} 기준 최적의 스탯 업그레이드 수치를 계산했습니다.`;
+        `현재 공격력(Lv.${atkLv}), 궁극 치명타 데미지(Lv.${ultCritLv}) 등의 데이터를 기반으로 효율 계산 준비가 완료되었습니다.`;
     }
 
-    window.onload = loadSavedData;
+    window.onload = function() {
+      renderGoldStats();
+      loadSavedData();
+    };
   </script>
 </body>
 </html>
