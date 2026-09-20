@@ -766,10 +766,10 @@
             </div>
 
             <div class="input-field full-width">
-              <label>목표 레벨까지 필요 렙업 (자동 계산)</label>
+              <label>목표 레벨까지 필요 렙업 (1렙=5P)</label>
               <div class="input-box readonly">
                 <input type="text" id="level-${s.id}-needed-lv" value="0" readonly style="font-size: 13px; font-weight: 800; color: #0284c7;">
-                <span class="unit">Lv</span>
+                <span class="unit">렙업</span>
               </div>
             </div>
           </div>
@@ -942,10 +942,12 @@
       if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
       if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
 
-      const neededLv = Math.max(0, targetLv - curLv);
+      // 개별 항의 필요 포인트 및 캐릭터 렙업 수 계산 (1렙업당 5P 적용)
+      const neededStatPts = Math.max(0, targetLv - curLv);
+      const neededCharLv = Math.ceil(neededStatPts / 5);
       const neededLvEl = document.getElementById(`level-${id}-needed-lv`);
       if (neededLvEl) {
-        neededLvEl.value = toCommaStr(neededLv);
+        neededLvEl.value = toCommaStr(neededCharLv);
       }
 
       calcTotalLevelNeeded();
