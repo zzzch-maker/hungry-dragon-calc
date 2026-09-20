@@ -262,14 +262,14 @@
 
   <script>
     const goldStats = [
-      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', perLv: 132000000 / 146400, defaultLv: 146400, defaultTarget: 150000, baseCostLv: 311151790000 / Math.pow(146400, 1.5) },
-      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', perLv: 2957200 / 100000, defaultLv: 100000, defaultTarget: 110000, baseCostLv: 30517290000 / Math.pow(100000, 1.5) },
-      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '', perLv: 10738910000 / 50200, defaultLv: 50200, defaultTarget: 60000, baseCostLv: 839010000 / Math.pow(50200, 1.5) },
-      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '', perLv: 1000, defaultLv: 25000, defaultTarget: 30000, baseCostLv: 1000000 / Math.pow(25000, 1.2) },
-      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%', perLv: 0.01, defaultLv: 1000, defaultTarget: 2000, baseCostLv: 50000 / Math.pow(1000, 1.2) },
-      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, baseCostLv: 50000 / Math.pow(1000, 1.2) },
-      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%', perLv: 0.01, defaultLv: 1000, defaultTarget: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) },
-      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) }
+      { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', unit: '', perLv: 132000000 / 146400, defaultLv: 146400, defaultTarget: 150000, maxLv: 200000, baseCostLv: 311151790000 / Math.pow(146400, 1.5) },
+      { id: 'hp', name: '생명력', icon: '❤️', type: 'def', unit: '', perLv: 2957200 / 100000, defaultLv: 100000, defaultTarget: 110000, maxLv: 150000, baseCostLv: 30517290000 / Math.pow(100000, 1.5) },
+      { id: 'def', name: '방어력', icon: '🛡️', type: 'def', unit: '', perLv: 10738910000 / 50200, defaultLv: 50200, defaultTarget: 60000, maxLv: 100000, baseCostLv: 839010000 / Math.pow(50200, 1.5) },
+      { id: 'pen', name: '관통력', icon: '🏹', type: 'atk', unit: '', perLv: 1000, defaultLv: 25000, defaultTarget: 30000, maxLv: 50000, baseCostLv: 1000000 / Math.pow(25000, 1.2) },
+      { id: 'critRate', name: '치명타 확률', icon: '🎯', type: 'crit', unit: '%', perLv: 0.01, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 50000 / Math.pow(1000, 1.2) },
+      { id: 'critDmg', name: '치명타 데미지', icon: '💥', type: 'crit', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 50000 / Math.pow(1000, 1.2) },
+      { id: 'ultCritRate', name: '궁극 치명타 확률', icon: '👑', type: 'ult', unit: '%', perLv: 0.01, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) },
+      { id: 'ultCritDmg', name: '궁극 치명타 데미지', icon: '⚡', type: 'ult', unit: '%', perLv: 0.1, defaultLv: 1000, defaultTarget: 2000, maxLv: 2000, baseCostLv: 100000 / Math.pow(1000, 1.2) }
     ];
 
     function toCommaStr(val) {
@@ -284,7 +284,6 @@
       return Number(str.toString().replace(/[^0-9.]/g, '')) || 0;
     }
 
-    // 레벨 입력용 천 단위 콤마 포맷팅
     function formatLevelWithComma(inputEl) {
       const cursorPosition = inputEl.selectionStart;
       const originalLen = inputEl.value.length;
@@ -296,7 +295,6 @@
       inputEl.setSelectionRange(cursorPosition + (newLen - originalLen), cursorPosition + (newLen - originalLen));
     }
 
-    // 스탯 수치/골드용 한글 단위 변환
     function toKoreanText(num, isPercent = false) {
       if (num <= 0 || isNaN(num)) return '0';
       if (isPercent) return `${num.toFixed(2)}%`;
@@ -324,11 +322,14 @@
         <div class="stat-card ${s.type}">
           <div class="card-header">
             <span class="stat-title">${s.icon} ${s.name}</span>
-            <span class="stat-current-val">현재: <span id="gold-${s.id}-val-disp">0</span>${s.unit}</span>
+            <span class="stat-current-val">
+              <span>Max레벨: ${toCommaStr(s.maxLv)}</span> | 
+              현재: <span id="gold-${s.id}-val-disp">0</span>${s.unit}
+            </span>
           </div>
           
           <div class="input-grid">
-            <!-- 1. 현재 레벨 (콤마 표기) -->
+            <!-- 1. 현재 레벨 -->
             <div class="input-field">
               <label>현재 레벨</label>
               <div class="input-box">
@@ -338,7 +339,7 @@
               <div class="korean-hint" id="gold-${s.id}-lv-hint"></div>
             </div>
 
-            <!-- 2. 현재 수치 (한글 표기) -->
+            <!-- 2. 현재 수치 -->
             <div class="input-field">
               <label>현재 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -347,17 +348,17 @@
               </div>
             </div>
 
-            <!-- 3. 목표 레벨 (콤마 표기) -->
+            <!-- 3. 목표 레벨 (Max 초과 제한 검증 포함) -->
             <div class="input-field">
               <label>목표 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateMaxLevel('${s.id}'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
               <div class="korean-hint" id="gold-${s.id}-target-lv-hint"></div>
             </div>
 
-            <!-- 4. 목표 수치 (한글 표기) -->
+            <!-- 4. 목표 수치 -->
             <div class="input-field">
               <label>목표 수치 (자동계산)</label>
               <div class="input-box readonly">
@@ -366,7 +367,7 @@
               </div>
             </div>
 
-            <!-- 5. 목표까지 필요 금액 (한글 표기) -->
+            <!-- 5. 목표까지 필요 금액 -->
             <div class="input-field full-width">
               <label>목표 레벨까지 필요 금액 (자동 계산)</label>
               <div class="input-box readonly">
@@ -377,6 +378,21 @@
           </div>
         </div>
       `).join('');
+    }
+
+    // 목표 레벨이 Max 레벨을 초과하지 못하도록 검증하는 함수
+    function validateMaxLevel(id) {
+      const statConfig = goldStats.find(s => s.id === id);
+      if (!statConfig) return;
+
+      const targetInput = document.getElementById(`gold-${id}-target-lv`);
+      if (!targetInput) return;
+
+      const targetVal = parseNumber(targetInput.value);
+
+      if (targetVal > statConfig.maxLv) {
+        targetInput.value = toCommaStr(statConfig.maxLv);
+      }
     }
 
     function calculateTotalRequiredGold(statConfig, curLv, targetLv) {
@@ -402,7 +418,6 @@
       const targetLv = parseNumber(document.getElementById(`gold-${id}-target-lv`)?.value);
       const isPercent = statConfig.unit === '%';
 
-      // 수치 연산
       const curVal = isPercent ? (curLv * statConfig.perLv) : Math.floor(curLv * statConfig.perLv);
       const targetVal = isPercent ? (targetLv * statConfig.perLv) : Math.floor(targetLv * statConfig.perLv);
 
@@ -414,11 +429,9 @@
       if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
       if (dispEl) dispEl.innerText = toKoreanText(curVal, isPercent);
 
-      // 레벨 한글 힌트에도 콤마 표기 적용 (예: = 146,400 Lv)
       document.getElementById(`gold-${id}-lv-hint`).innerText = `= ${toCommaStr(curLv)} Lv`;
       document.getElementById(`gold-${id}-target-lv-hint`).innerText = `= ${toCommaStr(targetLv)} Lv`;
 
-      // 필요 금액 연산 및 한글 표기
       const totalCost = calculateTotalRequiredGold(statConfig, curLv, targetLv);
       const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
       if (totalCostEl) {
@@ -444,11 +457,11 @@
           if (el) saveData[key] = el.value;
         });
       });
-      localStorage.setItem('hungryDragonGoldV7Data', JSON.stringify(saveData));
+      localStorage.setItem('hungryDragonGoldV8Data', JSON.stringify(saveData));
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('hungryDragonGoldV7Data');
+      const saved = localStorage.getItem('hungryDragonGoldV8Data');
       if (saved) {
         const data = JSON.parse(saved);
         Object.keys(data).forEach(k => {
