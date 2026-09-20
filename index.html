@@ -650,7 +650,6 @@
 
     <!-- 2단계 소분류 서브 탭 컨테이너 -->
     <div class="sub-nav-container">
-      <!-- 1. 캐릭터 육성 소분류 -->
       <div id="main-char" class="sub-tab-group active">
         <button class="sub-nav-btn active" onclick="switchSubTab('tab-gold', this)">골드 스탯</button>
         <button class="sub-nav-btn" onclick="switchSubTab('tab-level', this)">레벨 스탯</button>
@@ -659,7 +658,6 @@
         <button class="sub-nav-btn" onclick="switchSubTab('tab-relic', this)">유물</button>
       </div>
 
-      <!-- 2. 장비&스킬 소분류 -->
       <div id="main-equip" class="sub-tab-group">
         <button class="sub-nav-btn" onclick="switchSubTab('tab-equip', this)">장비</button>
         <button class="sub-nav-btn" onclick="switchSubTab('tab-skill', this)">스킬</button>
@@ -667,20 +665,17 @@
         <button class="sub-nav-btn" onclick="switchSubTab('tab-codex', this)">도감</button>
       </div>
 
-      <!-- 3. 드래곤&정령 소분류 -->
       <div id="main-pet" class="sub-tab-group">
         <button class="sub-nav-btn" onclick="switchSubTab('tab-dragon', this)">드래곤 성장</button>
         <button class="sub-nav-btn" onclick="switchSubTab('tab-spirit', this)">정령</button>
       </div>
 
-      <!-- 4. 콘텐츠 소분류 -->
       <div id="main-content" class="sub-tab-group">
         <button class="sub-nav-btn" onclick="switchSubTab('tab-stage', this)">스테이지</button>
         <button class="sub-nav-btn" onclick="switchSubTab('tab-dungeon', this)">던전</button>
         <button class="sub-nav-btn" onclick="switchSubTab('tab-guild', this)">길드</button>
       </div>
 
-      <!-- 5. 미션&소환 소분류 -->
       <div id="main-summon" class="sub-tab-group">
         <button class="sub-nav-btn active" onclick="switchSubTab('tab-mission', this)">미션&보상</button>
         <button class="sub-nav-btn" onclick="switchSubTab('tab-summon', this)">소환</button>
@@ -1020,7 +1015,7 @@
       </div>
     </div>
 
-    <!-- 4. 소환 계산기 탭 (반지 소환 포함 및 요청 반영 완료) -->
+    <!-- 4. 소환 계산기 탭 (검증 및 수정 완료) -->
     <div id="tab-summon" class="tab-content">
       <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; margin-bottom: 20px;">
         <div class="invest-title" style="color: #38bdf8; margin-bottom: 8px;">
@@ -1187,25 +1182,17 @@
       }
     ];
 
-    /* ===== 소환 항목 데이터 정의 (반지 소환 추가 및 1회당 100다이아 비용 반영) ===== */
-    const summonStats = [
-      { id: 'weapon', name: '무기 소환', icon: '🗡️', type: 'atk', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
-      { id: 'armor', name: '방어구 소환', icon: '🛡️', type: 'def', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
-      { id: 'helmet', name: '투구 소환', icon: '🪖', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
-      { id: 'ring', name: '반지 소환', icon: '💍', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
-      { id: 'skill', name: '스킬 소환', icon: '✨', type: 'ult', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 }
-    ];
+    /* ===== 이미지 표 데이터를 정확하게 반영한 소환 정보 배열 ===== */
+    const equipPullsTable = [300, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000, 33000, 36000, 39000, 42000, 45000, 48000, 51000, 54000, 57000];
+    const skillPullsTable = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500];
 
-    // 레벨별 누적 소환 횟수 기준표 예시 (필요시 상세 레벨별 공식/표에 맞게 확장 가능)
-    function getCumulativePullsForLevel(lv) {
-      if (lv <= 1) return 0;
-      let total = 0;
-      // 대략적인 소환 레벨업 당 필요 누적 횟수 시뮬레이션 공식
-      for (let i = 1; i < lv; i++) {
-        total += Math.round(50 * Math.pow(1.35, i - 1));
-      }
-      return total;
-    }
+    const summonStats = [
+      { id: 'weapon', name: '무기 소환', icon: '🗡️', type: 'atk', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100, pullsTable: equipPullsTable },
+      { id: 'armor', name: '방어구 소환', icon: '🛡️', type: 'def', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100, pullsTable: equipPullsTable },
+      { id: 'helmet', name: '투구 소환', icon: '🪖', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100, pullsTable: equipPullsTable },
+      { id: 'ring', name: '반지 소환', icon: '💍', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 300, pullsTable: equipPullsTable },
+      { id: 'skill', name: '스킬 소환', icon: '✨', type: 'ult', defaultLv: 1, defaultTarget: 10, maxLv: 10, costPerPull: 500, pullsTable: skillPullsTable }
+    ];
 
     function renderMissions() {
       const dailyGrid = document.getElementById('daily-mission-grid');
@@ -1383,7 +1370,7 @@
             <div class="input-field">
               <label>현재 소환 레벨</label>
               <div class="input-box">
-                <input type="text" id="summon-${s.id}-lv" value="${s.defaultLv}" oninput="formatLevelWithComma(this); validateSummonLevel('${s.id}'); calcSummonStat('${s.id}'); handleInput();">
+                <input type="text" id="summon-${s.id}-lv" value="${s.defaultLv}" oninput="validateSummonLevel('${s.id}'); calcSummonStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -1391,7 +1378,7 @@
             <div class="input-field">
               <label>목표 소환 레벨</label>
               <div class="input-box">
-                <input type="text" id="summon-${s.id}-target-lv" value="${s.defaultTarget}" oninput="formatLevelWithComma(this); validateSummonLevel('${s.id}'); calcSummonStat('${s.id}'); handleInput();">
+                <input type="text" id="summon-${s.id}-target-lv" value="${s.defaultTarget}" oninput="validateSummonLevel('${s.id}'); calcSummonStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -1399,7 +1386,7 @@
             <div class="input-field">
               <label>현재 소환 누적 횟수</label>
               <div class="input-box">
-                <input type="text" id="summon-${s.id}-current-cnt" value="0" oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();">
+                <input type="text" id="summon-${s.id}-current-cnt" value="0" placeholder="0" oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();">
                 <span class="unit">회</span>
               </div>
             </div>
@@ -1721,28 +1708,20 @@
       }
     }
 
-    /* ===== 소환 계산 로직 ===== */
+    /* ===== 소환 계산 유효성 및 입력 수정 (입력 중 자동 고정 방지 처리) ===== */
     function validateSummonLevel(id) {
       const s = summonStats.find(x => x.id === id);
       const lvEl = document.getElementById(`summon-${id}-lv`);
       const targetLvEl = document.getElementById(`summon-${id}-target-lv`);
 
+      formatLevelWithComma(lvEl);
+      formatLevelWithComma(targetLvEl);
+
       let curLv = parseNumber(lvEl.value);
-      if (lvEl.value !== '' && curLv < 1) curLv = 1;
-      if (curLv > s.maxLv) curLv = s.maxLv;
+      if (curLv > s.maxLv) lvEl.value = toCommaStr(s.maxLv);
 
       let targetLv = parseNumber(targetLvEl.value);
-      if (targetLvEl.value !== '' && targetLv < curLv) targetLv = curLv;
-      if (targetLv > s.maxLv) targetLv = s.maxLv;
-
-      if (lvEl.value !== '') lvEl.value = toCommaStr(curLv);
-      if (targetLvEl.value !== '') targetLvEl.value = toCommaStr(targetLv);
-
-      // 현재 레벨 변경 시 기본 누적 횟수 추천값 자동 입력 (비어있거나 최초 연동시)
-      const currentCntEl = document.getElementById(`summon-${id}-current-cnt`);
-      if (currentCntEl && (currentCntEl.value === '' || currentCntEl.value === '0')) {
-        currentCntEl.value = toCommaStr(getCumulativePullsForLevel(curLv));
-      }
+      if (targetLv > s.maxLv) targetLvEl.value = toCommaStr(s.maxLv);
     }
 
     function calcSummonStat(id) {
@@ -1753,18 +1732,27 @@
       const neededCntEl = document.getElementById(`summon-${id}-needed-cnt`);
       const diaEl = document.getElementById(`summon-${id}-dia`);
 
-      const curLv = lvEl.value === '' ? 1 : parseNumber(lvEl.value);
-      const targetLv = targetLvEl.value === '' ? curLv : parseNumber(targetLvEl.value);
-      const currentCnt = currentCntEl.value === '' ? 0 : parseNumber(currentCntEl.value);
+      // 입력 중 공란일 경우 기본값 매핑 (계산용)
+      let curLv = lvEl.value === '' ? 1 : Math.max(1, Math.min(s.maxLv, parseNumber(lvEl.value)));
+      let targetLv = targetLvEl.value === '' ? curLv : Math.max(curLv, Math.min(s.maxLv, parseNumber(targetLvEl.value)));
+      let currentCnt = parseNumber(currentCntEl.value) || 0;
 
-      // 목표 레벨 달성 시 필요한 전체 누적 소환 횟수 계산
-      const targetTotalPulls = getCumulativePullsForLevel(targetLv);
+      // 이미지 표 데이터를 바탕으로 한 목표 레벨까지 필요 소환량 실시간 정확 계산
+      let totalPullsNeeded = 0;
+      if (targetLv > curLv) {
+        // 1) 현재 레벨에서 남은 소환량
+        let currentLevelMaxPull = s.pullsTable[curLv - 1] || 0;
+        totalPullsNeeded += Math.max(0, currentLevelMaxPull - currentCnt);
 
-      // 목표까지 추가 소환 횟수 = 목표 누적 횟수 - 현재 소환 누적 횟수 (단, 음수일 경우 0)
-      const neededPulls = Math.max(0, targetTotalPulls - currentCnt);
-      const requiredDia = neededPulls * s.costPerPull;
+        // 2) (현재레벨+1) 부터 (목표레벨-1) 까지의 필요 소환량 누적
+        for (let l = curLv + 1; l < targetLv; l++) {
+          totalPullsNeeded += (s.pullsTable[l - 1] || 0);
+        }
+      }
 
-      neededCntEl.value = toCommaStr(neededPulls);
+      const requiredDia = totalPullsNeeded * s.costPerPull;
+
+      neededCntEl.value = toCommaStr(totalPullsNeeded);
       diaEl.value = toCommaStr(requiredDia);
 
       calcTotalSummonSummary();
@@ -1778,7 +1766,6 @@
       summonStats.forEach(s => {
         const diaVal = parseNumber(document.getElementById(`summon-${s.id}-dia`)?.value) || 0;
         totalAllDia += diaVal;
-        // 장비류 (무기, 방어구, 투구, 반지)
         if (s.id === 'weapon' || s.id === 'armor' || s.id === 'helmet' || s.id === 'ring') {
           equipDia += diaVal;
         } else if (s.id === 'skill') {
@@ -1791,7 +1778,7 @@
       document.getElementById('summary-skill-dia').innerText = `${toCommaStr(skillDia)} 💎`;
     }
 
-    /* ===== 기존 스탯 계산 로직 유지 ===== */
+    /* ===== 기존 골드 및 레벨 스탯 계산 로직 ===== */
     const goldStats = [
       { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', category: 'atk', unit: '', defaultLv: 146400, defaultTarget: 150000, maxLv: 300000 },
       { id: 'hp', name: '생명력', icon: '❤️', type: 'def', category: 'def', unit: '', defaultLv: 100000, defaultTarget: 110000, maxLv: 300000 },
@@ -1831,6 +1818,7 @@
     }
 
     function formatLevelWithComma(inputEl) {
+      if (!inputEl) return;
       const cursorPosition = inputEl.selectionStart;
       const originalLen = inputEl.value.length;
       
@@ -1838,7 +1826,9 @@
       inputEl.value = inputEl.value ? toCommaStr(num) : '';
       
       const newLen = inputEl.value.length;
-      inputEl.setSelectionRange(cursorPosition + (newLen - originalLen), cursorPosition + (newLen - originalLen));
+      if (cursorPosition !== null) {
+        inputEl.setSelectionRange(cursorPosition + (newLen - originalLen), cursorPosition + (newLen - originalLen));
+      }
     }
 
     function toKoreanText(num, isPercent = false) {
