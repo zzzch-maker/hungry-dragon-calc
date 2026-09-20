@@ -483,9 +483,32 @@
       <!-- 최상단 레벨 스탯 총 필요 렙업 자동 계산기 카드 -->
       <div class="invest-card">
         <div class="invest-title">📊 레벨 스탯 총 필요 렙업 자동 계산기</div>
-        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 14px; font-weight: 700; color: var(--text-main);">모든 항목 목표 레벨까지 총 필요 렙업</span>
-          <span id="total-needed-level-sum" style="font-size: 18px; font-weight: 800; color: #0284c7;">0 Lv</span>
+        
+        <!-- 현재 캐릭터 레벨 입력 -->
+        <div class="invest-input-row" style="margin-bottom: 14px;">
+          <div class="input-field" style="flex: 1;">
+            <label>현재 캐릭터 레벨</label>
+            <div class="input-box" style="background: white;">
+              <input type="text" id="char-level" value="1,000" placeholder="캐릭터 레벨 입력" style="text-align: left;" oninput="formatLevelWithComma(this); calcTotalLevelNeeded(); handleInput();">
+              <span class="unit">Lv</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 스탯 포인트 및 캐릭터 레벨 요약 -->
+        <div class="category-summary-grid">
+          <div class="cat-summary-card">
+            <div class="cat-summary-title">필요 레벨 스탯 포인트 총합</div>
+            <div class="cat-summary-cost" id="total-stat-points-sum">0 P</div>
+          </div>
+          <div class="cat-summary-card">
+            <div class="cat-summary-title">필요 캐릭터 렙업 수 (1렙=5P)</div>
+            <div class="cat-summary-cost" id="needed-char-levelup-sum" style="color: #ef4444;">0 렙업</div>
+          </div>
+          <div class="cat-summary-card">
+            <div class="cat-summary-title">목표 캐릭터 레벨</div>
+            <div class="cat-summary-cost" id="target-char-level-sum">0 Lv</div>
+          </div>
         </div>
       </div>
 
@@ -879,17 +902,27 @@
       }
     }
 
+    // 레벨 스탯 총 필요 렙업 및 캐릭터 렙업 수 자동 계산 함수 (1렙업 = 5스탯 포인트)
     function calcTotalLevelNeeded() {
-      let totalNeeded = 0;
+      let totalStatPointsNeeded = 0;
       levelStats.forEach(s => {
         const curLv = parseNumber(document.getElementById(`level-${s.id}-lv`)?.value) || 0;
         const targetLv = parseNumber(document.getElementById(`level-${s.id}-target-lv`)?.value) || 0;
-        totalNeeded += Math.max(0, targetLv - curLv);
+        totalStatPointsNeeded += Math.max(0, targetLv - curLv);
       });
-      const sumEl = document.getElementById('total-needed-level-sum');
-      if (sumEl) {
-        sumEl.innerText = `${toCommaStr(totalNeeded)} Lv`;
-      }
+
+      const curCharLv = parseNumber(document.getElementById('char-level')?.value) || 0;
+      // 1 캐릭터 렙업당 5 스탯 포인트 지급 공식 적용
+      const neededCharLevelUps = Math.ceil(totalStatPointsNeeded / 5);
+      const targetCharLv = curCharLv + neededCharLevelUps;
+
+      const ptsEl = document.getElementById('total-stat-points-sum');
+      const neededLvEl = document.getElementById('needed-char-levelup-sum');
+      const targetCharLvEl = document.getElementById('target-char-level-sum');
+
+      if (ptsEl) ptsEl.innerText = `${toCommaStr(totalStatPointsNeeded)} P`;
+      if (neededLvEl) neededLvEl.innerText = `${toCommaStr(neededCharLevelUps)} 렙업`;
+      if (targetCharLvEl) targetCharLvEl.innerText = `${toCommaStr(targetCharLv)} Lv`;
     }
 
     function calcLevelStat(id) {
@@ -1116,6 +1149,7 @@
         });
       });
 
+      saveData['char-level'] = document.getElementById('char-level')?.value;
       saveData['invest-amount1'] = document.getElementById('invest-amount1')?.value;
       saveData['invest-unit1'] = document.getElementById('invest-unit1')?.value;
       saveData['invest-amount2'] = document.getElementById('invest-amount2')?.value;
