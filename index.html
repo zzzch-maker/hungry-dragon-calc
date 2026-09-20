@@ -19,12 +19,17 @@
       --color-crit: #f59e0b;
       --color-ult: #8b5cf6;
 
-      /* 던전 열쇠 색상 */
+      /* 던전 열쇠 및 아이템 색상 */
       --key-gold: #eab308;
       --key-equip: #64748b;
       --key-skill: #22c55e;
       --key-heart: #ef4444;
       --key-material: #0f172a;
+      --key-core: #3b82f6;
+      --key-labyrinth: #8b5cf6;
+      --key-weekday: #059669;
+      --key-spirit: #ec4899;
+      --key-ticket: #f97316;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -81,7 +86,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.08);
     }
 
-    /* 2단계 소분류 서브 탭 그룹 */
+    /* 2단계 소분류 서브 탭 컨테이너 */
     .sub-nav-container {
       background: #f1f5f9;
       padding: 8px;
@@ -191,7 +196,8 @@
       font-size: 12px;
       color: var(--text-sub);
       display: flex;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
     }
 
     .mission-rewards span {
@@ -312,8 +318,8 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
 
-    /* 열쇠 SVG 아이콘 인라인 스타일 */
-    .key-icon-svg {
+    /* 아이콘 SVG 공통 스타일 */
+    .icon-svg {
       width: 14px;
       height: 14px;
       display: inline-block;
@@ -805,7 +811,7 @@
       <!-- 최상단: 일수 선택 기반 수급 합계 자동계산 카드 -->
       <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none;">
         <div class="invest-title" style="color: #38bdf8;">
-          📅 미션 보상 총 수급합계 계산기 (일일 + 반복 + 무료 + 광고 등)
+          📅 미션 보상 총 수급합계 계산기 <span style="color: #ef4444; font-size: 13px; margin-left: 6px;">(우편보상 제외)</span>
         </div>
         
         <div class="invest-input-row" style="margin-bottom: 14px; align-items: center;">
@@ -817,7 +823,7 @@
             </div>
           </div>
           <div style="font-size: 12px; color: #94a3b8; margin-top: 16px;">
-            * 아래 체크/입력된 일일·반복·무료다이아·광고보상 등을 <span id="days-label-text" style="color: #38bdf8; font-weight: 700;">1일</span> 동안 수행했을 때의 종합입니다.
+            * 아래 체크/입력된 일일·반복·광고보상 등을 <span id="days-label-text" style="color: #38bdf8; font-weight: 700;">1일</span> 동안 수행했을 때의 종합입니다.
           </div>
         </div>
 
@@ -827,7 +833,7 @@
             <div class="cat-summary-cost" id="top-total-period-dia" style="color: #38bdf8; font-size: 18px;">0 💎</div>
           </div>
           <div class="cat-summary-card" style="background: #1e293b; border-color: #334155; grid-column: span 2;">
-            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 던전 열쇠</div>
+            <div class="cat-summary-title" style="color: #94a3b8;">기간 총 획득 던전 열쇠 및 아이템</div>
             <div class="item-badge-list" id="top-total-period-keys" style="justify-content: center; margin-top: 4px;"></div>
           </div>
         </div>
@@ -835,12 +841,12 @@
         <!-- 하단: 주 1회 추가 획득 가능 항목 -->
         <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #475569;">
           <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 6px;">
-            🎁 [주 1회 추가 획득 가능 항목] 주간 미션 완료 보상
+            🎁 [주 1회 추가 획득 가능 항목] (주간미션 완료 보상 + 주간 상점 무료 다이아)
           </div>
           <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 13px;">
-            <div>다이아: <strong style="color: #38bdf8;" id="top-weekly-extra-dia">0 💎</strong></div>
+            <div>총 다이아: <strong style="color: #38bdf8;" id="top-weekly-extra-dia">0 💎</strong></div>
             <div style="display: flex; align-items: center; gap: 6px;">
-              열쇠: <div class="item-badge-list" id="top-weekly-extra-keys" style="margin-top: 0;"></div>
+              획득 항목: <div class="item-badge-list" id="top-weekly-extra-keys" style="margin-top: 0;"></div>
             </div>
           </div>
         </div>
@@ -851,8 +857,8 @@
         <button class="mission-tab-btn active" onclick="switchMissionPanel('panel-daily', this)">☀️ 일일미션</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-weekly', this)">📅 주간미션</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-repeat', this)">🔄 반복미션</button>
-        <button class="mission-tab-btn" onclick="switchMissionPanel('panel-free-dia', this)">💎 무료 다이아</button>
-        <button class="mission-tab-btn" onclick="switchMissionPanel('panel-ad-reward', this)">📺 광고 보상</button>
+        <button class="mission-tab-btn" onclick="switchMissionPanel('panel-free-dia', this)">💎 주간상점 무료다이아</button>
+        <button class="mission-tab-btn" onclick="switchMissionPanel('panel-ad-reward', this)">📺 광고보상</button>
       </div>
 
       <!-- 3-1. 일일미션 패널 -->
@@ -967,38 +973,56 @@
         </div>
       </div>
 
-      <!-- 3-4. 무료 다이아 패널 -->
+      <!-- 3-4. 주간 상점 무료 다이아 패널 -->
       <div id="panel-free-dia" class="mission-panel">
-        <div style="margin-bottom: 12px;">
-          <strong style="font-size: 15px;">💎 무료 다이아 수령 항목 (1일 기준)</strong>
-          <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 게임 내 상점 또는 이벤트 등에서 무료로 수령 가능한 다이아 항목입니다.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <strong style="font-size: 15px;">💎 주간 상점 무료 다이아 수령 항목 (주 1회)</strong>
+            <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 주간 상점에서 무료로 수령 가능한 다이아 항목입니다. (최상단 주 1회 추가 항목에 합산)</p>
+          </div>
+          <div>
+            <button onclick="toggleAllFreeDia(true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
+            <button onclick="toggleAllFreeDia(false)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 해제</button>
+          </div>
         </div>
 
         <div class="mission-grid" id="free-dia-grid"></div>
 
         <div class="mission-summary-card">
-          <div class="mission-summary-title">📊 무료 다이아 1일 획득 결과</div>
+          <div class="mission-summary-title">📊 주간 상점 무료 다이아 획득 결과</div>
           <div style="background: #1e293b; padding: 14px; border-radius: 8px;">
-            <div style="font-size: 12px; color: #94a3b8;">1일 기준 무료 다이아 수급량</div>
+            <div style="font-size: 12px; color: #94a3b8;">주간 무료 다이아 수급량</div>
             <div style="font-size: 22px; font-weight: 800; color: #38bdf8;" id="sum-free-dia-total">0 💎</div>
           </div>
         </div>
       </div>
 
-      <!-- 3-5. 광고 보상 패널 -->
+      <!-- 3-5. 광고보상 패널 -->
       <div id="panel-ad-reward" class="mission-panel">
-        <div style="margin-bottom: 12px;">
-          <strong style="font-size: 15px;">📺 광고 보상 수령 항목 (1일 기준)</strong>
-          <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 일일 광고 시청을 통해 획득 가능한 다이아 및 보상 항목입니다.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <strong style="font-size: 15px;">📺 광고 보상 수령 항목 (1일 기준)</strong>
+            <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 광고 시청을 통해 획득 가능한 다이아 및 각종 던전 열쇠/재화 보상입니다.</p>
+          </div>
+          <div>
+            <button onclick="toggleAllAdRewards(true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
+            <button onclick="toggleAllAdRewards(false)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 해제</button>
+          </div>
         </div>
 
         <div class="mission-grid" id="ad-reward-grid"></div>
 
         <div class="mission-summary-card">
           <div class="mission-summary-title">📊 광고 보상 1일 획득 결과</div>
-          <div style="background: #1e293b; padding: 14px; border-radius: 8px;">
-            <div style="font-size: 12px; color: #94a3b8;">1일 기준 광고 보상 다이아 수급량</div>
-            <div style="font-size: 22px; font-weight: 800; color: #38bdf8;" id="sum-ad-reward-total">0 💎</div>
+          <div class="summary-grid-3">
+            <div class="summary-item">
+              <div class="summary-item-label">광고보상 총 다이아</div>
+              <div class="summary-item-val" id="sum-ad-dia-total" style="color: #38bdf8;">0 💎</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">🎁 획득 아이템 목록 (던전 열쇠 및 가속권):</div>
+            <div class="item-badge-list" id="sum-ad-items" style="justify-content: flex-start;"></div>
           </div>
         </div>
       </div>
@@ -1022,7 +1046,6 @@
   </div>
 
   <script>
-    // 탭 전환 자바스크립트
     function switchMainTab(mainTabId, btnEl) {
       document.querySelectorAll('.main-nav-btn').forEach(btn => btn.classList.remove('active'));
       btnEl.classList.add('active');
@@ -1056,10 +1079,16 @@
       document.getElementById(panelId)?.classList.add('active');
     }
 
-    /* ===== 던전 열쇠 SVG 아이콘 생성 함수 ===== */
+    /* ===== 아이콘 SVG 생성 함수 ===== */
     function getKeySvg(colorHex) {
-      return `<svg class="key-icon-svg" viewBox="0 0 24 24" fill="none" stroke="${colorHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      return `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="${colorHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 2l-2 2m-3 1l-4 4m2 2l-3 3m0 0l-3-3m3 3l2 2m-7 1a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+      </svg>`;
+    }
+
+    function getTicketSvg(colorHex) {
+      return `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="${colorHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
       </svg>`;
     }
 
@@ -1118,14 +1147,31 @@
       { id: 'r7', name: '요리 먹기 (10회)', diaPerCount: 100, unitName: '회', targetPerCount: 10 }
     ];
 
+    // 주간 상점 무료 다이아 (주 1회)
     const freeDiaData = [
-      { id: 'fd1', name: '일일 상점 무료 다이아', dia: 500 },
-      { id: 'fd2', name: '출석 체크 무료 다이아', dia: 1000 }
+      { id: 'fd1', name: '주간 상점 무료 다이아', dia: 20000 }
     ];
 
+    // 광고 보상 데이터 구성
     const adRewardData = [
-      { id: 'ad1', name: '일일 광고 시청 다이아 보상 (1회)', dia: 200 },
-      { id: 'ad2', name: '버프형 광고 시청 다이아 보상 (패키지)', dia: 500 }
+      { id: 'ad1', name: '1. 광고 버프 보상', dia: 10000, items: [] },
+      { 
+        id: 'ad2', 
+        name: '2. 상점 아이템 광고 보상', 
+        dia: 0, 
+        items: [
+          { keyType: 'gold', name: '골드던전 열쇠', count: 3, color: 'var(--key-gold)' },
+          { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
+          { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' },
+          { keyType: 'heart', name: '하트던전 열쇠', count: 3, color: 'var(--key-heart)' },
+          { keyType: 'material', name: '재료던전 열쇠', count: 3, color: 'var(--key-material)' },
+          { keyType: 'ticket', name: '가속권(1분)', count: 90, color: 'var(--key-ticket)' },
+          { keyType: 'core', name: '코어던전 열쇠 (파란색)', count: 3, color: 'var(--key-core)' },
+          { keyType: 'labyrinth', name: '미궁던전 열쇠 (보라색)', count: 3, color: 'var(--key-labyrinth)' },
+          { keyType: 'weekday', name: '요일던전 열쇠 (진한녹색)', count: 3, color: 'var(--key-weekday)' },
+          { keyType: 'spirit', name: '정령던전 열쇠 (핑크색)', count: 3, color: 'var(--key-spirit)' }
+        ]
+      }
     ];
 
     function renderMissions() {
@@ -1257,7 +1303,7 @@
         `;
       }).join('');
 
-      // 4. 무료 다이아
+      // 4. 주간 상점 무료 다이아
       const freeDiaGrid = document.getElementById('free-dia-grid');
       freeDiaGrid.innerHTML = freeDiaData.map(m => `
         <div class="mission-card" id="card-freedia-${m.id}" style="flex-direction: row; align-items: center; justify-content: space-between;">
@@ -1271,17 +1317,27 @@
         </div>
       `).join('');
 
-      // 5. 광고 보상
+      // 5. 광고보상
       const adRewardGrid = document.getElementById('ad-reward-grid');
       adRewardGrid.innerHTML = adRewardData.map(m => `
-        <div class="mission-card" id="card-ad-${m.id}" style="flex-direction: row; align-items: center; justify-content: space-between;">
-          <div class="mission-info">
-            <span class="mission-name">${m.name}</span>
-            <div class="mission-rewards">
-              지급 보상: <span>💎 ${toCommaStr(m.dia)}</span>
+        <div class="mission-card" id="card-ad-${m.id}" style="flex-direction: column; align-items: stretch; justify-content: space-between;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="mission-info">
+              <span class="mission-name">${m.name}</span>
+              <div class="mission-rewards">
+                ${m.dia > 0 ? `다이아: <span>💎 ${toCommaStr(m.dia)}</span>` : ''}
+              </div>
             </div>
+            <input type="checkbox" id="chk-ad-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllMissionCalculations(); handleInput();">
           </div>
-          <input type="checkbox" id="chk-ad-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllMissionCalculations(); handleInput();">
+          ${m.items && m.items.length > 0 ? `
+            <div style="margin-top: 6px; border-top: 1px dashed var(--border); pt-2;">
+              <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 4px;">포함 아이템 (각 3배 지급):</div>
+              <div class="item-badge-list" style="justify-content: flex-start;">
+                ${m.items.map(it => `<span class="item-badge">${it.keyType === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${it.count}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
         </div>
       `).join('');
     }
@@ -1360,7 +1416,25 @@
       handleInput();
     }
 
-    // 종합 수급 합계 계산 로직 (일일미션 + 주간미션 + 반복미션 + 무료다이아 + 광고보상)
+    function toggleAllFreeDia(check) {
+      freeDiaData.forEach(m => {
+        const chk = document.getElementById(`chk-freedia-${m.id}`);
+        if (chk) chk.checked = check;
+      });
+      updateAllMissionCalculations();
+      handleInput();
+    }
+
+    function toggleAllAdRewards(check) {
+      adRewardData.forEach(m => {
+        const chk = document.getElementById(`chk-ad-${m.id}`);
+        if (chk) chk.checked = check;
+      });
+      updateAllMissionCalculations();
+      handleInput();
+    }
+
+    // 종합 수급 합계 계산 로직 (일일미션 + 반복미션 + 광고보상 다이아는 기간 일수 반영 / 주간미션 + 주간상점 무료다이아는 주 1회 추가 항목에 반영)
     function updateAllMissionCalculations() {
       const days = Math.max(1, parseNumber(document.getElementById('mission-days')?.value) || 1);
       document.getElementById('days-label-text').innerText = `${toCommaStr(days)}일`;
@@ -1473,7 +1547,7 @@
 
       document.getElementById('sum-repeat-total-dia').innerText = `${toCommaStr(repeat1DayDia)} 💎`;
 
-      // 4. 무료 다이아
+      // 4. 주간 상점 무료 다이아 (주 1회 항목)
       let freeDiaTotal = 0;
       freeDiaData.forEach(m => {
         const chk = document.getElementById(`chk-freedia-${m.id}`);
@@ -1487,50 +1561,90 @@
       });
       document.getElementById('sum-free-dia-total').innerText = `${toCommaStr(freeDiaTotal)} 💎`;
 
-      // 5. 광고 보상
-      let adRewardTotal = 0;
+      // 5. 광고보상 (1일 기준 다이아 및 아이템 수집)
+      let adDiaTotal = 0;
+      let adAcquiredItems = {};
       adRewardData.forEach(m => {
         const chk = document.getElementById(`chk-ad-${m.id}`);
         const card = document.getElementById(`card-ad-${m.id}`);
         if (chk && chk.checked) {
-          adRewardTotal += m.dia;
+          adDiaTotal += m.dia;
+          if (m.items) {
+            m.items.forEach(it => {
+              adAcquiredItems[it.keyType] = { name: it.name, count: (adAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
+            });
+          }
           if (card) card.classList.add('checked');
         } else {
           if (card) card.classList.remove('checked');
         }
       });
-      document.getElementById('sum-ad-reward-total').innerText = `${toCommaStr(adRewardTotal)} 💎`;
+      document.getElementById('sum-ad-dia-total').innerText = `${toCommaStr(adDiaTotal)} 💎`;
 
-      // 6. 최상단 '일수 기준 수급 합계' 업데이트 (일일미션 + 반복미션 + 무료다이아 + 광고보상) * 일수
-      const dailyPlusFreeAndAdDia = dailyMissionDia + repeat1DayDia + freeDiaTotal + adRewardTotal;
-      const periodTotalDia = dailyPlusFreeAndAdDia * days;
-      document.getElementById('top-total-period-dia').innerText = `${toCommaStr(periodTotalDia)} 💎`;
-
-      const topPeriodKeysEl = document.getElementById('top-total-period-keys');
-      if (dailyKeysList.length === 0) {
-        topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 열쇠 없음</span>`;
+      const adItemSummaryEl = document.getElementById('sum-ad-items');
+      const adItemKeys = Object.keys(adAcquiredItems);
+      if (adItemKeys.length === 0) {
+        adItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 광고보상 아이템 없음</span>`;
       } else {
-        topPeriodKeysEl.innerHTML = dailyKeysList.map(kt => {
-          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
-          const totalKeyCount = dailyAcquiredKeys[kt] * days;
-          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-            ${getKeySvg(cfg.color)} ${cfg.name} x${toCommaStr(totalKeyCount)}
+        adItemSummaryEl.innerHTML = adItemKeys.map(kt => {
+          const it = adAcquiredItems[kt];
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${it.count}
           </span>`;
         }).join('');
       }
 
-      // 최상단 '주 1회 추가 획득 가능 항목' 표기
-      document.getElementById('top-weekly-extra-dia').innerText = `${toCommaStr(weeklyTotalDia)} 💎`;
-      const topWeeklyKeysEl = document.getElementById('top-weekly-extra-keys');
-      if (weeklyKeysList.length === 0) {
-        topWeeklyKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">주간 열쇠 보상 없음</span>`;
+      // 6. 최상단 '일수 기준 수급 합계' 업데이트 (일일미션 + 반복미션 + 광고보상 다이아) * 일수
+      const dailyPlusRepeatAndAdDia = dailyMissionDia + repeat1DayDia + adDiaTotal;
+      const periodTotalDia = dailyPlusRepeatAndAdDia * days;
+      document.getElementById('top-total-period-dia').innerText = `${toCommaStr(periodTotalDia)} 💎`;
+
+      // 기간 총 획득 열쇠 및 아이템 산출 (일일미션 마일스톤 열쇠 + 광고보상 아이템 * 일수)
+      const topPeriodKeysEl = document.getElementById('top-total-period-keys');
+      let combinedPeriodItems = {};
+      dailyKeysList.forEach(kt => {
+        const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+        combinedPeriodItems[kt] = { name: cfg.name, count: dailyAcquiredKeys[kt] * days, color: cfg.color };
+      });
+      adItemKeys.forEach(kt => {
+        const it = adAcquiredItems[kt];
+        combinedPeriodItems[kt] = { name: it.name, count: (combinedPeriodItems[kt]?.count || 0) + (it.count * days), color: it.color };
+      });
+
+      const combinedPeriodKeysList = Object.keys(combinedPeriodItems);
+      if (combinedPeriodKeysList.length === 0) {
+        topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 아이템 없음</span>`;
       } else {
-        topWeeklyKeysEl.innerHTML = weeklyKeysList.map(kt => {
-          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+        topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
+          const it = combinedPeriodItems[kt];
           return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-            ${getKeySvg(cfg.color)} ${cfg.name} x${weeklyAcquiredKeys[kt]}
+            ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${toCommaStr(it.count)}
           </span>`;
         }).join('');
+      }
+
+      // 7. 최상단 '주 1회 추가 획득 가능 항목' 표기 (주간미션 다이아 + 주간 상점 무료다이아)
+      const totalWeeklyExtraDia = weeklyTotalDia + freeDiaTotal;
+      document.getElementById('top-weekly-extra-dia').innerText = `${toCommaStr(totalWeeklyExtraDia)} 💎`;
+
+      let combinedWeeklyItems = {};
+      weeklyKeysList.forEach(kt => {
+        const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+        combinedWeeklyItems[kt] = { name: cfg.name, count: weeklyAcquiredKeys[kt], color: cfg.color };
+      });
+
+      const topWeeklyKeysEl = document.getElementById('top-weekly-extra-keys');
+      const combinedWeeklyKeysList = Object.keys(combinedWeeklyItems);
+      if (combinedWeeklyKeysList.length === 0 && freeDiaTotal === 0) {
+        topWeeklyKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">주간 추가 보상 없음</span>`;
+      } else {
+        let badgeHtml = combinedWeeklyKeysList.map(kt => {
+          const it = combinedWeeklyItems[kt];
+          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
+            ${getKeySvg(it.color)} ${it.name} x${it.count}
+          </span>`;
+        }).join('');
+        topWeeklyKeysEl.innerHTML = badgeHtml;
       }
     }
 
