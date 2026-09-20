@@ -344,7 +344,7 @@
             <div class="input-field">
               <label>현재 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-lv" value="${toCommaStr(s.defaultLv)}" oninput="validateMaxLevel('${s.id}', 'lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -360,7 +360,7 @@
             <div class="input-field">
               <label>목표 레벨</label>
               <div class="input-box">
-                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateMaxLevel('${s.id}'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
+                <input type="text" id="gold-${s.id}-target-lv" value="${toCommaStr(s.defaultTarget)}" oninput="validateMaxLevel('${s.id}', 'target-lv'); formatLevelWithComma(this); calcGoldStat('${s.id}'); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -386,17 +386,18 @@
       }).join('');
     }
 
-    function validateMaxLevel(id) {
+    // 입력 필드의 레벨이 maxLv를 초과하면 maxLv로 조정하는 함수
+    function validateMaxLevel(id, fieldType = 'target-lv') {
       const statConfig = goldStats.find(s => s.id === id);
       if (!statConfig) return;
 
-      const targetInput = document.getElementById(`gold-${id}-target-lv`);
-      if (!targetInput) return;
+      const inputEl = document.getElementById(`gold-${id}-${fieldType}`);
+      if (!inputEl) return;
 
-      const targetVal = parseNumber(targetInput.value);
+      const val = parseNumber(inputEl.value);
 
-      if (targetVal > statConfig.maxLv) {
-        targetInput.value = toCommaStr(statConfig.maxLv);
+      if (val > statConfig.maxLv) {
+        inputEl.value = toCommaStr(statConfig.maxLv);
       }
     }
 
@@ -479,7 +480,11 @@
           if (el) el.value = data[k];
         });
       }
-      goldStats.forEach(s => calcGoldStat(s.id));
+      goldStats.forEach(s => {
+        validateMaxLevel(s.id, 'lv');
+        validateMaxLevel(s.id, 'target-lv');
+        calcGoldStat(s.id);
+      });
     }
 
     window.onload = function() {
