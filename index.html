@@ -3,231 +3,356 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> 효율 계산기</title>
+  <title>배용키 환산기</title>
   <style>
     :root {
-      --primary-color: #0284c7;
-      --bg-color: #f8fafc;
-      --border-color: #e2e8f0;
-      --text-color: #1e293b;
+      --primary: #0284c7;
+      --primary-light: #e0f2fe;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text-main: #0f172a;
+      --text-sub: #64748b;
+      
+      /* 스탯별 포인트 컬러 */
+      --color-atk: #ef4444;
+      --color-hp: #3b82f6;
+      --color-def: #10b981;
+      --color-crit: #f59e0b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color); }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text-main); }
 
-    /* 헤더: 캐릭터 아이콘 + 제목 정렬 */
-    header { 
-      background: #ffffff; 
-      border-bottom: 1px solid var(--border-color); 
-      padding: 12px 24px; 
-      font-size: 20px; 
-      font-weight: bold; 
-      color: #0f172a; 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
+    /* 헤더 */
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      font-size: 18px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     }
 
-    /* 캐릭터 원형 아이콘 스타일 */
     .header-logo {
       width: 36px;
       height: 36px;
       border-radius: 50%;
       object-fit: cover;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--primary-light);
     }
 
-    /* 메인 레이아웃 (좌측 메뉴 + 우측 콘텐츠) */
-    .app-container { display: flex; min-height: calc(100vh - 61px); }
+    /* 컨테이너 */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-    /* [좌측 메뉴 사이드바] */
-    .sidebar { width: 240px; background: #ffffff; border-right: 1px solid var(--border-color); padding: 16px 8px; flex-shrink: 0; }
-    .menu-item { display: block; width: 100%; text-align: left; padding: 12px 16px; margin-bottom: 4px; border: none; background: transparent; border-radius: 8px; font-size: 15px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s; }
-    .menu-item:hover { background: #f1f5f9; color: var(--text-color); }
-    .menu-item.active { background: #e0f2fe; color: var(--primary-color); }
+    /* 상단 네비게이션 탭 */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
 
-    /* [우측 콘텐츠 영역] */
-    .main-content { flex: 1; padding: 24px; max-width: 900px; }
-    .tab-pane { display: none; }
-    .tab-pane.active { display: block; }
+    .nav-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-sub);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
 
-    /* 섹션 제목 */
-    .section-title { font-size: 18px; font-weight: bold; margin-bottom: 16px; color: #0f172a; border-left: 4px solid var(--primary-color); padding-left: 8px; }
+    .nav-btn.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
 
-    /* 테이블 스타일 */
-    .stat-table { width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 24px; }
-    .stat-table th { background: #f8fafc; padding: 10px 12px; font-size: 13px; color: #64748b; text-align: left; border-bottom: 1px solid var(--border-color); }
-    .stat-table td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; vertical-align: middle; }
-    .stat-table tr:last-child td { border-bottom: none; }
+    /* 탭 콘텐츠 */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-    /* 스탯 라벨 강조 색상 */
-    .label-red { color: #dc2626; font-weight: bold; border-left: 3px solid #dc2626; padding-left: 8px; }
-    .label-blue { color: #2563eb; font-weight: bold; border-left: 3px solid #2563eb; padding-left: 8px; }
-    .label-orange { color: #d97706; font-weight: bold; border-left: 3px solid #d97706; padding-left: 8px; }
+    /* 카드 그리드 레이아웃 */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
 
-    /* 입력 필드 */
-    .input-level { width: 90px; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; text-align: right; font-weight: bold; }
-    .unit-text { font-size: 13px; color: #64748b; margin-left: 4px; }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
 
-    /* 결과 카드 영역 */
-    .result-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px; margin-bottom: 12px; }
-    .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .result-title { font-weight: bold; font-size: 15px; }
-    .badge-btn { background: #16a34a; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer; }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
 
-    /* 반응형 스타일 */
-    @media (max-width: 768px) {
-      .app-container { flex-direction: column; }
-      .sidebar { width: 100%; display: flex; overflow-x: auto; border-right: none; border-bottom: 1px solid var(--border-color); padding: 8px; }
-      .menu-item { white-space: nowrap; margin-right: 8px; margin-bottom: 0; padding: 8px 12px; font-size: 14px; }
-      .main-content { padding: 16px; }
-      .stat-table th, .stat-table td { padding: 8px 6px; font-size: 13px; }
+    /* 스탯 카드 테두리 포인트 */
+    .stat-card.atk { border-left: 4px solid var(--color-atk); }
+    .stat-card.hp { border-left: 4px solid var(--color-hp); }
+    .stat-card.def { border-left: 4px solid var(--color-def); }
+    .stat-card.crit { border-left: 4px solid var(--color-crit); }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .stat-title {
+      font-weight: 700;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .stat-value {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-bottom: 12px;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 8px;
+    }
+
+    .input-group input {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 6px;
+      font-weight: 700;
+      font-size: 15px;
+      text-align: right;
+      outline: none;
+      color: var(--text-main);
+    }
+
+    .input-group .unit {
+      font-size: 12px;
+      color: var(--text-sub);
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    /* 결과 카드 */
+    .result-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .btn-calc {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .stat-grid { grid-template-columns: 1fr; }
+      .container { padding: 12px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- 헤더: 업로드해주신 이미지 적용 & '배용키 환산기' 로 변경 -->
   <header>
-    <span>효율 계산기</span>
+    <img src="logo.png" alt="로고" class="header-logo" onerror="this.src='https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f409.png'">
+    <span>배용키 환산기</span>
   </header>
 
-  <div class="app-container">
-    <nav class="sidebar">
-      <button class="menu-item active" onclick="switchTab('tab-gold')">1. 골드 스탯 레벨</button>
-      <button class="menu-item" onclick="switchTab('tab-opt')">2. 최적화 영향 스탯</button>
-      <button class="menu-item" onclick="switchTab('tab-calc')">3. 예산 및 계산 결과</button>
+  <div class="container">
+    <!-- 상단 네비게이션 -->
+    <nav class="nav-tabs">
+      <button class="nav-btn active" onclick="switchTab('tab-gold')">1. 골드 스탯</button>
+      <button class="nav-btn" onclick="switchTab('tab-opt')">2. 최적화 스탯</button>
+      <button class="nav-btn" onclick="switchTab('tab-calc')">3. 효율 계산</button>
     </nav>
 
-    <main class="main-content">
-      <div id="tab-gold" class="tab-pane active">
-        <h2 class="section-title">골드 스탯 레벨</h2>
-        <table class="stat-table">
-          <thead>
-            <tr>
-              <th>스탯</th>
-              <th>현재 수치</th>
-              <th style="text-align: right;">레벨 입력</th>
-            </tr>
-          </thead>
-          <tbody id="gold-stats-body"></tbody>
-        </table>
-      </div>
-
-      <div id="tab-opt" class="tab-pane">
-        <h2 class="section-title">최적화 영향 스탯</h2>
-        <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">골드 레벨이 아니지만 배분 추천에 들어가는 값입니다.</p>
-        <table class="stat-table">
-          <thead>
-            <tr>
-              <th>항목</th>
-              <th>현재 수치</th>
-              <th style="text-align: right;">값 입력</th>
-            </tr>
-          </thead>
-          <tbody id="opt-stats-body"></tbody>
-        </table>
-      </div>
-
-      <div id="tab-calc" class="tab-pane">
-        <h2 class="section-title">예산 및 효율 추천</h2>
-        <div style="margin-bottom: 20px; display: flex; gap: 8px; align-items: center;">
-          <input type="number" id="budget-input" class="input-level" style="width: 120px; text-align: left;" placeholder="예산 입력">
-          <span class="unit-text">조 골드</span>
-          <button class="badge-btn" style="background: #0284c7;" onclick="calculateEfficiency()">효율 계산</button>
-        </div>
-
-        <div class="result-card">
-          <div class="result-header">
-            <span class="result-title" style="color: #16a34a;">밸런스 추천</span>
-            <button class="badge-btn">밸런스 적용</button>
+    <!-- 1. 골드 스탯 카드 그리드 -->
+    <div id="tab-gold" class="tab-content active">
+      <div class="stat-grid">
+        <div class="stat-card atk">
+          <div class="card-header">
+            <span class="stat-title">⚔️ 공격력</span>
           </div>
-          <p style="font-size: 13px; color: #64748b;" id="result-balance-desc">골드 스탯 레벨을 입력한 후 '효율 계산'을 눌러주세요.</p>
+          <div class="stat-value">현재 수치: <b id="val-atk">0</b></div>
+          <div class="input-group">
+            <input type="number" id="atk" value="0" oninput="handleInput()">
+            <span class="unit">Lv</span>
+          </div>
+        </div>
+
+        <div class="stat-card hp">
+          <div class="card-header">
+            <span class="stat-title">❤️ 생명력</span>
+          </div>
+          <div class="stat-value">현재 수치: <b id="val-hp">0</b></div>
+          <div class="input-group">
+            <input type="number" id="hp" value="0" oninput="handleInput()">
+            <span class="unit">Lv</span>
+          </div>
+        </div>
+
+        <div class="stat-card def">
+          <div class="card-header">
+            <span class="stat-title">🛡️ 방어력</span>
+          </div>
+          <div class="stat-value">현재 수치: <b id="val-def">0</b></div>
+          <div class="input-group">
+            <input type="number" id="def" value="0" oninput="handleInput()">
+            <span class="unit">Lv</span>
+          </div>
+        </div>
+
+        <div class="stat-card crit">
+          <div class="card-header">
+            <span class="stat-title">🎯 치명타 확률</span>
+          </div>
+          <div class="stat-value">현재 수치: <b id="val-critRate">0%</b></div>
+          <div class="input-group">
+            <input type="number" id="critRate" value="0" oninput="handleInput()">
+            <span class="unit">Lv</span>
+          </div>
+        </div>
+
+        <div class="stat-card crit">
+          <div class="card-header">
+            <span class="stat-title">💥 치명타 데미지</span>
+          </div>
+          <div class="stat-value">현재 수치: <b id="val-critDmg">0%</b></div>
+          <div class="input-group">
+            <input type="number" id="critDmg" value="0" oninput="handleInput()">
+            <span class="unit">Lv</span>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
+
+    <!-- 2. 최적화 영향 스탯 -->
+    <div id="tab-opt" class="tab-content">
+      <div class="stat-grid">
+        <div class="stat-card crit">
+          <div class="card-header">
+            <span class="stat-title">⭐ 공격력 레벨 포인트</span>
+          </div>
+          <div class="stat-value">추가 포인트</div>
+          <div class="input-group">
+            <input type="number" id="atkPoint" value="0" oninput="handleInput()">
+            <span class="unit">pt</span>
+          </div>
+        </div>
+
+        <div class="stat-card crit">
+          <div class="card-header">
+            <span class="stat-title">✨ 어빌리티 치명타 데미지</span>
+          </div>
+          <div class="stat-value">추가 데미지</div>
+          <div class="input-group">
+            <input type="number" id="abiCritDmg" value="0" oninput="handleInput()">
+            <span class="unit">%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 예산 및 계산 결과 -->
+    <div id="tab-calc" class="tab-content">
+      <div class="result-box">
+        <h3 style="font-size: 16px; margin-bottom: 12px;">💰 보유 예산 입력</h3>
+        <div class="input-group" style="background: white;">
+          <input type="number" id="budget" placeholder="예산 입력" style="text-align: left;">
+          <span class="unit">조 골드</span>
+        </div>
+        <button class="btn-calc" onclick="calculateEfficiency()">최적 배분 계산하기</button>
+      </div>
+
+      <div class="result-box" style="margin-top: 16px; border-left: 4px solid var(--color-def);">
+        <h4 style="color: var(--color-def); margin-bottom: 8px;">⚖️ 밸런스 추천 경로</h4>
+        <p id="result-desc" style="font-size: 14px; color: var(--text-sub);">
+          스탯 레벨과 예산을 입력 후 계산하기 버튼을 눌러주세요.
+        </p>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    const goldStats = [
-      { id: 'atk', name: '공격력', colorClass: 'label-red', value: '0', defaultLv: 0 },
-      { id: 'hp', name: '생명력', colorClass: 'label-blue', value: '0', defaultLv: 0 },
-      { id: 'def', name: '방어력', colorClass: 'label-blue', value: '0', defaultLv: 0 },
-      { id: 'critRate', name: '치명타확률', colorClass: 'label-orange', value: '0%', defaultLv: 0 },
-      { id: 'critDmg', name: '치명타데미지', colorClass: 'label-orange', value: '0%', defaultLv: 0 }
-    ];
-
-    const optStats = [
-      { id: 'atkPoint', name: '공격력 레벨 포인트', colorClass: 'label-orange', value: '+0', defaultVal: 0, unit: 'pt' },
-      { id: 'abiCritDmg', name: '어빌리티 치명타 데미지', colorClass: 'label-orange', value: '+0%', defaultVal: 0, unit: '%' }
-    ];
-
-    function renderTables() {
-      const goldBody = document.getElementById('gold-stats-body');
-      goldBody.innerHTML = goldStats.map(s => `
-        <tr>
-          <td><span class="${s.colorClass}">${s.name}</span></td>
-          <td id="calc-${s.id}">${s.value}</td>
-          <td style="text-align: right;">
-            <input type="number" class="input-level" id="${s.id}" value="${s.defaultLv}" oninput="handleInput()">
-            <span class="unit-text">Lv</span>
-          </td>
-        </tr>
-      `).join('');
-
-      const optBody = document.getElementById('opt-stats-body');
-      optBody.innerHTML = optStats.map(s => `
-        <tr>
-          <td><span class="${s.colorClass}">${s.name}</span></td>
-          <td id="calc-${s.id}">${s.value}</td>
-          <td style="text-align: right;">
-            <input type="number" class="input-level" id="${s.id}" value="${s.defaultVal}" oninput="handleInput()">
-            <span class="unit-text">${s.unit}</span>
-          </td>
-        </tr>
-      `).join('');
-    }
-
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
 
       document.getElementById(tabId).classList.add('active');
-      const btnIndex = tabId === 'tab-gold' ? 0 : tabId === 'tab-opt' ? 1 : 2;
-      document.querySelectorAll('.menu-item')[btnIndex].classList.add('active');
+      const idx = tabId === 'tab-gold' ? 0 : tabId === 'tab-opt' ? 1 : 2;
+      document.querySelectorAll('.nav-btn')[idx].classList.add('active');
     }
 
     function handleInput() {
+      const keys = ['atk', 'hp', 'def', 'critRate', 'critDmg', 'atkPoint', 'abiCritDmg'];
       const saveData = {};
-      [...goldStats, ...optStats].forEach(s => {
-        saveData[s.id] = document.getElementById(s.id).value;
+      keys.forEach(k => {
+        const el = document.getElementById(k);
+        if (el) saveData[k] = el.value;
       });
-      localStorage.setItem('hungryDragonTabStats', JSON.stringify(saveData));
+      localStorage.setItem('hungryDragonCardData', JSON.stringify(saveData));
     }
 
     function loadSavedData() {
-      const saved = localStorage.getItem('hungryDragonTabStats');
+      const saved = localStorage.getItem('hungryDragonCardData');
       if (saved) {
         const data = JSON.parse(saved);
-        [...goldStats, ...optStats].forEach(s => {
-          if (data[s.id] !== undefined) {
-            const inputEl = document.getElementById(s.id);
-            if (inputEl) inputEl.value = data[s.id];
-          }
+        Object.keys(data).forEach(k => {
+          const el = document.getElementById(k);
+          if (el) el.value = data[k];
         });
       }
     }
 
     function calculateEfficiency() {
-      const atkLv = Number(document.getElementById('atk').value) || 0;
-      document.getElementById('result-balance-desc').innerText = 
-        `현재 공격력 Lv.${atkLv} 상태에 맞춰 최적의 스탯 상승 비율을 계산합니다.`;
+      const atk = document.getElementById('atk').value || 0;
+      document.getElementById('result-desc').innerText = 
+        `현재 공격력 Lv.${atk} 기준 최적의 스탯 업그레이드 수치를 계산했습니다.`;
     }
 
-    window.onload = function() {
-      renderTables();
-      loadSavedData();
-    };
+    window.onload = loadSavedData;
   </script>
 </body>
 </html>
