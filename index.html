@@ -808,7 +808,6 @@
 
     <!-- 3. 미션&보상 계산기 탭 -->
     <div id="tab-mission" class="tab-content">
-      <!-- 최상단: 일수 선택 기반 수급 합계 자동계산 카드 -->
       <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none;">
         <div class="invest-title" style="color: #38bdf8;">
           📅 미션 보상 총 수급합계 계산기 <span style="color: #ef4444; font-size: 13px; margin-left: 6px;">(우편보상 제외)</span>
@@ -838,7 +837,6 @@
           </div>
         </div>
 
-        <!-- 하단: 주 1회 추가 획득 가능 항목 -->
         <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #475569;">
           <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 6px;">
             🎁 [주 1회 추가 획득 가능 항목] (주간미션 완료 보상 + 주간 상점 무료 다이아)
@@ -852,7 +850,6 @@
         </div>
       </div>
 
-      <!-- 세부 메뉴 5종 -->
       <div class="mission-sub-nav">
         <button class="mission-tab-btn active" onclick="switchMissionPanel('panel-daily', this)">☀️ 일일미션</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-weekly', this)">📅 주간미션</button>
@@ -861,7 +858,6 @@
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-ad-reward', this)">📺 광고보상</button>
       </div>
 
-      <!-- 3-1. 일일미션 패널 -->
       <div id="panel-daily" class="mission-panel active">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <strong style="font-size: 15px;">☀️ 일일미션 목록 (1회성)</strong>
@@ -908,7 +904,6 @@
         </div>
       </div>
 
-      <!-- 3-2. 주간미션 패널 -->
       <div id="panel-weekly" class="mission-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <strong style="font-size: 15px;">📅 주간미션 목록 (1회성)</strong>
@@ -955,7 +950,6 @@
         </div>
       </div>
 
-      <!-- 3-3. 반복미션 패널 -->
       <div id="panel-repeat" class="mission-panel">
         <div style="margin-bottom: 12px;">
           <strong style="font-size: 15px;">🔄 반복미션 (1일 기준 수행 횟수)</strong>
@@ -973,7 +967,6 @@
         </div>
       </div>
 
-      <!-- 3-4. 주간 상점 무료 다이아 패널 -->
       <div id="panel-free-dia" class="mission-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
@@ -997,7 +990,6 @@
         </div>
       </div>
 
-      <!-- 3-5. 광고보상 패널 -->
       <div id="panel-ad-reward" class="mission-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
@@ -1028,7 +1020,7 @@
       </div>
     </div>
 
-    <!-- 4. 소환 계산기 탭 (수정 완료) -->
+    <!-- 4. 소환 계산기 탭 (반지 소환 포함 및 요청 반영 완료) -->
     <div id="tab-summon" class="tab-content">
       <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; margin-bottom: 20px;">
         <div class="invest-title" style="color: #38bdf8; margin-bottom: 8px;">
@@ -1195,13 +1187,25 @@
       }
     ];
 
-    /* ===== 소환 항목 데이터 정의 ===== */
+    /* ===== 소환 항목 데이터 정의 (반지 소환 추가 및 1회당 100다이아 비용 반영) ===== */
     const summonStats = [
-      { id: 'weapon', name: '무기 소환', icon: '🗡️', type: 'atk', defaultLv: 1, defaultTarget: 10, maxLv: 20 },
-      { id: 'armor', name: '방어구 소환', icon: '🛡️', type: 'def', defaultLv: 1, defaultTarget: 10, maxLv: 20 },
-      { id: 'helmet', name: '투구 소환', icon: '🪖', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20 },
-      { id: 'skill', name: '스킬 소환', icon: '✨', type: 'ult', defaultLv: 1, defaultTarget: 10, maxLv: 20 }
+      { id: 'weapon', name: '무기 소환', icon: '🗡️', type: 'atk', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
+      { id: 'armor', name: '방어구 소환', icon: '🛡️', type: 'def', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
+      { id: 'helmet', name: '투구 소환', icon: '🪖', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
+      { id: 'ring', name: '반지 소환', icon: '💍', type: 'crit', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 },
+      { id: 'skill', name: '스킬 소환', icon: '✨', type: 'ult', defaultLv: 1, defaultTarget: 10, maxLv: 20, costPerPull: 100 }
     ];
+
+    // 레벨별 누적 소환 횟수 기준표 예시 (필요시 상세 레벨별 공식/표에 맞게 확장 가능)
+    function getCumulativePullsForLevel(lv) {
+      if (lv <= 1) return 0;
+      let total = 0;
+      // 대략적인 소환 레벨업 당 필요 누적 횟수 시뮬레이션 공식
+      for (let i = 1; i < lv; i++) {
+        total += Math.round(50 * Math.pow(1.35, i - 1));
+      }
+      return total;
+    }
 
     function renderMissions() {
       const dailyGrid = document.getElementById('daily-mission-grid');
@@ -1393,17 +1397,25 @@
             </div>
 
             <div class="input-field">
-              <label>목표 추가 소환 횟수</label>
+              <label>현재 소환 누적 횟수</label>
+              <div class="input-box">
+                <input type="text" id="summon-${s.id}-current-cnt" value="0" oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();">
+                <span class="unit">회</span>
+              </div>
+            </div>
+
+            <div class="input-field">
+              <label>목표까지 추가 소환 횟수</label>
               <div class="input-box readonly">
                 <input type="text" id="summon-${s.id}-needed-cnt" value="0" readonly>
                 <span class="unit">회</span>
               </div>
             </div>
 
-            <div class="input-field">
-              <label>필요 다이아 기댓값 (1회=100)</label>
+            <div class="input-field full-width">
+              <label>필요 다이아 (자동계산)</label>
               <div class="input-box readonly">
-                <input type="text" id="summon-${s.id}-dia" value="0" readonly style="color: #0284c7; font-weight: 800;">
+                <input type="text" id="summon-${s.id}-dia" value="0" readonly style="color: #0284c7; font-weight: 800; font-size: 13px;">
                 <span class="unit">💎</span>
               </div>
             </div>
@@ -1725,31 +1737,35 @@
 
       if (lvEl.value !== '') lvEl.value = toCommaStr(curLv);
       if (targetLvEl.value !== '') targetLvEl.value = toCommaStr(targetLv);
-    }
 
-    // 예시 환산 함수 (레벨 구간별 누적 소환 횟수 및 다이아 기댓값 산출 함수)
-    function getSummonCostAndCount(curLv, targetLv) {
-      if (targetLv <= curLv) return { count: 0, dia: 0 };
-      let totalCount = 0;
-      for (let lv = curLv; lv < targetLv; lv++) {
-        // 임의의 레벨별 필요 소환 횟수 공식 (레벨이 올라갈수록 필요 횟수 증가)
-        totalCount += Math.round(50 * Math.pow(1.3, lv - 1));
+      // 현재 레벨 변경 시 기본 누적 횟수 추천값 자동 입력 (비어있거나 최초 연동시)
+      const currentCntEl = document.getElementById(`summon-${id}-current-cnt`);
+      if (currentCntEl && (currentCntEl.value === '' || currentCntEl.value === '0')) {
+        currentCntEl.value = toCommaStr(getCumulativePullsForLevel(curLv));
       }
-      return { count: totalCount, dia: totalCount * 100 };
     }
 
     function calcSummonStat(id) {
+      const s = summonStats.find(x => x.id === id);
       const lvEl = document.getElementById(`summon-${id}-lv`);
       const targetLvEl = document.getElementById(`summon-${id}-target-lv`);
+      const currentCntEl = document.getElementById(`summon-${id}-current-cnt`);
       const neededCntEl = document.getElementById(`summon-${id}-needed-cnt`);
       const diaEl = document.getElementById(`summon-${id}-dia`);
 
       const curLv = lvEl.value === '' ? 1 : parseNumber(lvEl.value);
       const targetLv = targetLvEl.value === '' ? curLv : parseNumber(targetLvEl.value);
+      const currentCnt = currentCntEl.value === '' ? 0 : parseNumber(currentCntEl.value);
 
-      const res = getSummonCostAndCount(curLv, targetLv);
-      neededCntEl.value = toCommaStr(res.count);
-      diaEl.value = toCommaStr(res.dia);
+      // 목표 레벨 달성 시 필요한 전체 누적 소환 횟수 계산
+      const targetTotalPulls = getCumulativePullsForLevel(targetLv);
+
+      // 목표까지 추가 소환 횟수 = 목표 누적 횟수 - 현재 소환 누적 횟수 (단, 음수일 경우 0)
+      const neededPulls = Math.max(0, targetTotalPulls - currentCnt);
+      const requiredDia = neededPulls * s.costPerPull;
+
+      neededCntEl.value = toCommaStr(neededPulls);
+      diaEl.value = toCommaStr(requiredDia);
 
       calcTotalSummonSummary();
     }
@@ -1762,7 +1778,8 @@
       summonStats.forEach(s => {
         const diaVal = parseNumber(document.getElementById(`summon-${s.id}-dia`)?.value) || 0;
         totalAllDia += diaVal;
-        if (s.id === 'weapon' || s.id === 'armor' || s.id === 'helmet') {
+        // 장비류 (무기, 방어구, 투구, 반지)
+        if (s.id === 'weapon' || s.id === 'armor' || s.id === 'helmet' || s.id === 'ring') {
           equipDia += diaVal;
         } else if (s.id === 'skill') {
           skillDia += diaVal;
@@ -2415,7 +2432,7 @@
       });
 
       summonStats.forEach(s => {
-        ['lv', 'target-lv'].forEach(field => {
+        ['lv', 'target-lv', 'current-cnt'].forEach(field => {
           const key = `summon-${s.id}-${field}`;
           const el = document.getElementById(key);
           if (el) saveData[key] = el.value;
