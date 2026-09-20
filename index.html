@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>배용키 환산기 - 방식 1 (상단 탭)</title>
+  <title>배용키 환산기 - 방식 2 (사이드바)</title>
   <style>
     :root {
       --primary: #0284c7;
@@ -11,9 +11,11 @@
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --border: #e2e8f0;
+      --sidebar-bg: #0f172a;
+      --sidebar-text: #94a3b8;
       --text-main: #0f172a;
       --text-sub: #64748b;
-      
+
       --color-atk: #ef4444;
       --color-def: #3b82f6;
       --color-crit: #f59e0b;
@@ -23,92 +25,92 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text-main); }
 
-    header {
+    /* 전체 레이아웃 구조 */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 상단 모바일 헤더 */
+    .mobile-header {
+      display: none;
       background: var(--card-bg);
       border-bottom: 1px solid var(--border);
-      padding: 14px 24px;
-      font-size: 18px;
-      font-weight: 700;
-      display: flex;
+      padding: 12px 16px;
       align-items: center;
-      gap: 12px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
-    .container {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    /* 대분류 메인 탭 */
-    .main-nav-tabs {
-      display: flex;
-      gap: 6px;
-      background: #cbd5e1;
-      padding: 6px;
-      border-radius: 12px;
-      margin-bottom: 8px;
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-
-    .main-nav-btn {
-      flex: 1;
-      min-width: 110px;
-      padding: 10px 12px;
-      border: none;
+    .mobile-menu-btn {
       background: transparent;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #475569;
+      border: none;
+      font-size: 20px;
       cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
     }
 
-    .main-nav-btn.active {
-      background: var(--card-bg);
-      color: var(--primary);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    }
-
-    /* 소분류 서브 탭 그룹 */
-    .sub-nav-container {
-      background: #f1f5f9;
-      padding: 8px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      border: 1px solid var(--border);
-    }
-
-    .sub-tab-group {
-      display: none;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .sub-tab-group.active {
+    /* 좌측 사이드바 */
+    .sidebar {
+      width: 240px;
+      background: var(--sidebar-bg);
+      color: white;
+      padding: 20px 12px;
+      flex-shrink: 0;
       display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    .sub-nav-btn {
-      padding: 7px 14px;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
+    .sidebar-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: white;
+      padding: 0 8px 12px 8px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .menu-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      padding: 8px;
+      margin-top: 4px;
+    }
+
+    .menu-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 12px;
+      background: transparent;
+      border: none;
       border-radius: 6px;
-      font-size: 12px;
+      color: var(--sidebar-text);
+      font-size: 13px;
       font-weight: 600;
-      color: var(--text-sub);
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .sub-nav-btn.active {
+    .menu-item:hover {
+      background: #1e293b;
+      color: white;
+    }
+
+    .menu-item.active {
       background: var(--primary);
       color: white;
-      border-color: var(--primary);
+      font-weight: 700;
+    }
+
+    /* 메인 컨텐츠 영역 */
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      max-width: 1080px;
     }
 
     .tab-content { display: none; }
@@ -170,11 +172,6 @@
       color: var(--text-main);
       outline: none;
       cursor: pointer;
-    }
-
-    .unit-select option:disabled {
-      color: #cbd5e1;
-      background: #f1f5f9;
     }
 
     .category-summary-grid {
@@ -272,7 +269,6 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-    .btn-apply-targets:hover { background: #047857; }
 
     .stat-grid {
       display: grid;
@@ -386,9 +382,18 @@
       white-space: nowrap;
     }
 
-    @media (max-width: 640px) {
+    /* 모바일 대응 레이아웃 */
+    @media (max-width: 768px) {
+      .app-layout { flex-direction: column; }
+      .mobile-header { display: flex; }
+      .sidebar {
+        display: none;
+        width: 100%;
+        padding: 12px;
+      }
+      .sidebar.open { display: flex; }
+      .main-content { padding: 12px; }
       .stat-grid { grid-template-columns: 1fr; }
-      .container { padding: 12px; }
       .category-summary-grid { grid-template-columns: 1fr 1fr; }
       .invest-input-row { flex-direction: column; }
     }
@@ -396,221 +401,209 @@
 </head>
 <body>
 
-  <header>
-    <span>배용키 환산기</span>
-  </header>
+  <!-- 모바일 헤더 -->
+  <div class="mobile-header">
+    <strong style="font-size: 16px;">배용키 환산기</strong>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰ 메뉴</button>
+  </div>
 
-  <div class="container">
-    <!-- 1단계 대분류 메인 탭 -->
-    <nav class="main-nav-tabs">
-      <button class="main-nav-btn active" onclick="switchMainTab('main-char', this)">👤 캐릭터 육성</button>
-      <button class="main-nav-btn" onclick="switchMainTab('main-equip', this)">⚔️ 장비&스킬</button>
-      <button class="main-nav-btn" onclick="switchMainTab('main-pet', this)">🐉 드래곤&정령</button>
-      <button class="main-nav-btn" onclick="switchMainTab('main-content', this)">🏰 콘텐츠</button>
-      <button class="main-nav-btn" onclick="switchMainTab('main-shop', this)">🎁 미션&상점</button>
-    </nav>
+  <div class="app-layout">
+    <!-- 좌측 사이드바 내비게이션 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-title">배용키 환산기</div>
 
-    <!-- 2단계 소분류 서브 탭 컨테이너 -->
-    <div class="sub-nav-container">
-      <!-- 1. 캐릭터 육성 소분류 -->
-      <div id="main-char" class="sub-tab-group active">
-        <button class="sub-nav-btn active" onclick="switchSubTab('tab-gold', this)">골드 스탯</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-level', this)">레벨 스탯</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-ability', this)">어빌리티</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-cooking', this)">요리</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-relic', this)">유물</button>
+      <div>
+        <div class="menu-group-title">👤 캐릭터 육성</div>
+        <button class="menu-item active" onclick="switchSidebarTab('tab-gold', this)">골드 스탯</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-level', this)">레벨 스탯</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-ability', this)">어빌리티</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-cooking', this)">요리</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-relic', this)">유물</button>
       </div>
 
-      <!-- 2. 장비&스킬 소분류 -->
-      <div id="main-equip" class="sub-tab-group">
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-equip', this)">장비</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-skill', this)">스킬</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-costume', this)">의상</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-codex', this)">도감</button>
+      <div>
+        <div class="menu-group-title">⚔️ 장비&스킬</div>
+        <button class="menu-item" onclick="switchSidebarTab('tab-equip', this)">장비</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-skill', this)">스킬</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-costume', this)">의상</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-codex', this)">도감</button>
       </div>
 
-      <!-- 3. 드래곤&정령 소분류 -->
-      <div id="main-pet" class="sub-tab-group">
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-dragon', this)">드래곤 성장</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-spirit', this)">정령</button>
+      <div>
+        <div class="menu-group-title">🐉 드래곤&정령</div>
+        <button class="menu-item" onclick="switchSidebarTab('tab-dragon', this)">드래곤 성장</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-spirit', this)">정령</button>
       </div>
 
-      <!-- 4. 콘텐츠 소분류 -->
-      <div id="main-content" class="sub-tab-group">
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-stage', this)">스테이지</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-dungeon', this)">던전</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-guild', this)">길드</button>
+      <div>
+        <div class="menu-group-title">🏰 콘텐츠</div>
+        <button class="menu-item" onclick="switchSidebarTab('tab-stage', this)">스테이지</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-dungeon', this)">던전</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-guild', this)">길드</button>
       </div>
 
-      <!-- 5. 미션&상점 소분류 -->
-      <div id="main-shop" class="sub-tab-group">
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-mission', this)">미션</button>
-        <button class="sub-nav-btn" onclick="switchSubTab('tab-shop', this)">상점</button>
+      <div>
+        <div class="menu-group-title">🎁 미션&상점</div>
+        <button class="menu-item" onclick="switchSidebarTab('tab-mission', this)">미션</button>
+        <button class="menu-item" onclick="switchSidebarTab('tab-shop', this)">상점</button>
       </div>
-    </div>
+    </aside>
 
-    <!-- ===== 탭 콘텐츠 영역 ===== -->
-
-    <!-- 1. 골드 스탯 -->
-    <div id="tab-gold" class="tab-content active">
-      <div class="invest-card">
-        <div class="invest-title">⚡ 효율적 골드 투자 분배 계산기</div>
-        
-        <div class="invest-input-row">
-          <div class="invest-input-group">
-            <div class="input-field" style="flex: 2;">
-              <label>보유 투자 골드 1</label>
-              <div class="input-box" style="background: white;">
-                <input type="text" id="invest-amount1" value="100" placeholder="숫자 입력" oninput="formatLevelWithComma(this); validateInvestUnits(); runInvestmentCalc(); handleInput();">
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="main-content">
+      <!-- 1. 골드 스탯 -->
+      <div id="tab-gold" class="tab-content active">
+        <div class="invest-card">
+          <div class="invest-title">⚡ 효율적 골드 투자 분배 계산기</div>
+          
+          <div class="invest-input-row">
+            <div class="invest-input-group">
+              <div class="input-field" style="flex: 2;">
+                <label>보유 투자 골드 1</label>
+                <div class="input-box" style="background: white;">
+                  <input type="text" id="invest-amount1" value="100" placeholder="숫자 입력" oninput="formatLevelWithComma(this); validateInvestUnits(); runInvestmentCalc(); handleInput();">
+                </div>
+              </div>
+              <div class="input-field" style="flex: 1;">
+                <label>단위</label>
+                <select id="invest-unit1" class="unit-select" onchange="validateInvestUnits(); runInvestmentCalc(); handleInput();">
+                  <option value="10000">만</option>
+                  <option value="100000000">억</option>
+                  <option value="1000000000000" selected>조</option>
+                  <option value="10000000000000000">경</option>
+                  <option value="100000000000000000000">해</option>
+                  <option value="1000000000000000000000000">자</option>
+                  <option value="10000000000000000000000000000">양</option>
+                </select>
               </div>
             </div>
-            <div class="input-field" style="flex: 1;">
-              <label>단위</label>
-              <select id="invest-unit1" class="unit-select" onchange="validateInvestUnits(); runInvestmentCalc(); handleInput();">
-                <option value="10000">만</option>
-                <option value="100000000">억</option>
-                <option value="1000000000000" selected>조</option>
-                <option value="10000000000000000">경</option>
-                <option value="100000000000000000000">해</option>
-                <option value="1000000000000000000000000">자</option>
-                <option value="10000000000000000000000000000">양</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="invest-input-group">
-            <div class="input-field" style="flex: 2;">
-              <label>보유 투자 골드 2</label>
-              <div class="input-box" style="background: white;">
-                <input type="text" id="invest-amount2" value="0" placeholder="숫자 입력" oninput="formatLevelWithComma(this); validateInvestUnits(); runInvestmentCalc(); handleInput();">
+            <div class="invest-input-group">
+              <div class="input-field" style="flex: 2;">
+                <label>보유 투자 골드 2</label>
+                <div class="input-box" style="background: white;">
+                  <input type="text" id="invest-amount2" value="0" placeholder="숫자 입력" oninput="formatLevelWithComma(this); validateInvestUnits(); runInvestmentCalc(); handleInput();">
+                </div>
+              </div>
+              <div class="input-field" style="flex: 1;">
+                <label>단위</label>
+                <select id="invest-unit2" class="unit-select" onchange="validateInvestUnits(); runInvestmentCalc(); handleInput();">
+                  <option value="1">원</option>
+                  <option value="10000">만</option>
+                  <option value="100000000" selected>억</option>
+                  <option value="1000000000000">조</option>
+                  <option value="10000000000000000">경</option>
+                  <option value="100000000000000000000">해</option>
+                  <option value="1000000000000000000000000">자</option>
+                  <option value="10000000000000000000000000000">양</option>
+                </select>
               </div>
             </div>
+          </div>
+
+          <div class="category-summary-grid">
+            <div class="cat-summary-card" id="cat-summary-atk">
+              <div class="cat-summary-title">⚔️ 공격형 총 투자 비용</div>
+              <div class="cat-summary-cost" id="sum-cost-atk">0 골드</div>
+            </div>
+            <div class="cat-summary-card" id="cat-summary-def">
+              <div class="cat-summary-title">🛡️ 생존형 총 투자 비용</div>
+              <div class="cat-summary-cost" id="sum-cost-def">0 골드</div>
+            </div>
+            <div class="cat-summary-card" id="cat-summary-balance">
+              <div class="cat-summary-title">⚖️ 밸런스형 총 투자 비용</div>
+              <div class="cat-summary-cost" id="sum-cost-balance">0 골드</div>
+            </div>
+          </div>
+
+          <div class="mode-tabs">
+            <button class="mode-btn active" id="btn-mode-atk" onclick="setInvestMode('atk')">⚔️ 공격형 배분</button>
+            <button class="mode-btn" id="btn-mode-def" onclick="setInvestMode('def')">🛡️ 생존형 배분</button>
+            <button class="mode-btn" id="btn-mode-balance" onclick="setInvestMode('balance')">⚖️ 밸런스형 배분</button>
+          </div>
+
+          <div class="gain-list" id="invest-gain-list"></div>
+
+          <button class="btn-apply-targets" onclick="applyInvestToTargets()">🎯 계산된 목표 레벨을 하단 스탯에 반영하기</button>
+        </div>
+
+        <div class="stat-grid" id="gold-stat-container"></div>
+      </div>
+
+      <!-- 2. 레벨 스탯 -->
+      <div id="tab-level" class="tab-content">
+        <div class="invest-card">
+          <div class="invest-title">📊 레벨 스탯 총 필요 렙업 자동 계산기</div>
+          
+          <div class="invest-input-row" style="margin-bottom: 14px;">
             <div class="input-field" style="flex: 1;">
-              <label>단위</label>
-              <select id="invest-unit2" class="unit-select" onchange="validateInvestUnits(); runInvestmentCalc(); handleInput();">
-                <option value="1">원</option>
-                <option value="10000">만</option>
-                <option value="100000000" selected>억</option>
-                <option value="1000000000000">조</option>
-                <option value="10000000000000000">경</option>
-                <option value="100000000000000000000">해</option>
-                <option value="1000000000000000000000000">자</option>
-                <option value="10000000000000000000000000000">양</option>
-              </select>
+              <label>현재 캐릭터 레벨</label>
+              <div class="input-box" style="background: white;">
+                <input type="text" id="char-level" value="10,000" placeholder="캐릭터 레벨 입력" style="text-align: left;" oninput="formatLevelWithComma(this); calcTotalLevelNeeded(); handleInput();">
+                <span class="unit">Lv</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="category-summary-grid">
+            <div class="cat-summary-card">
+              <div class="cat-summary-title">보유 미사용 포인트</div>
+              <div class="cat-summary-cost" id="unspent-stat-points-sum" style="color: #059669;">0 P</div>
+            </div>
+            <div class="cat-summary-card">
+              <div class="cat-summary-title">목표 스탯 포인트 총합</div>
+              <div class="cat-summary-cost" id="total-stat-points-sum">0 P</div>
+            </div>
+            <div class="cat-summary-card">
+              <div class="cat-summary-title">필요 캐릭터 렙업 수 (1렙=5P)</div>
+              <div class="cat-summary-cost" id="needed-char-levelup-sum" style="color: #ef4444;">0 렙업</div>
+            </div>
+            <div class="cat-summary-card">
+              <div class="cat-summary-title">목표 캐릭터 레벨</div>
+              <div class="cat-summary-cost" id="target-char-level-sum">0 Lv</div>
             </div>
           </div>
         </div>
 
-        <div class="category-summary-grid">
-          <div class="cat-summary-card" id="cat-summary-atk">
-            <div class="cat-summary-title">⚔️ 공격형 총 투자 비용</div>
-            <div class="cat-summary-cost" id="sum-cost-atk">0 골드</div>
-          </div>
-          <div class="cat-summary-card" id="cat-summary-def">
-            <div class="cat-summary-title">🛡️ 생존형 총 투자 비용</div>
-            <div class="cat-summary-cost" id="sum-cost-def">0 골드</div>
-          </div>
-          <div class="cat-summary-card" id="cat-summary-balance">
-            <div class="cat-summary-title">⚖️ 밸런스형 총 투자 비용</div>
-            <div class="cat-summary-cost" id="sum-cost-balance">0 골드</div>
-          </div>
-        </div>
-
-        <div class="mode-tabs">
-          <button class="mode-btn active" id="btn-mode-atk" onclick="setInvestMode('atk')">⚔️ 공격형 배분</button>
-          <button class="mode-btn" id="btn-mode-def" onclick="setInvestMode('def')">🛡️ 생존형 배분</button>
-          <button class="mode-btn" id="btn-mode-balance" onclick="setInvestMode('balance')">⚖️ 밸런스형 배분</button>
-        </div>
-
-        <div class="gain-list" id="invest-gain-list"></div>
-
-        <button class="btn-apply-targets" onclick="applyInvestToTargets()">🎯 계산된 목표 레벨을 하단 스탯에 반영하기</button>
+        <div class="stat-grid" id="level-stat-container"></div>
       </div>
 
-      <div class="stat-grid" id="gold-stat-container"></div>
-    </div>
-
-    <!-- 2. 레벨 스탯 -->
-    <div id="tab-level" class="tab-content">
-      <div class="invest-card">
-        <div class="invest-title">📊 레벨 스탯 총 필요 렙업 자동 계산기</div>
-        
-        <div class="invest-input-row" style="margin-bottom: 14px;">
-          <div class="input-field" style="flex: 1;">
-            <label>현재 캐릭터 레벨</label>
-            <div class="input-box" style="background: white;">
-              <input type="text" id="char-level" value="10,000" placeholder="캐릭터 레벨 입력" style="text-align: left;" oninput="formatLevelWithComma(this); calcTotalLevelNeeded(); handleInput();">
-              <span class="unit">Lv</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="category-summary-grid">
-          <div class="cat-summary-card">
-            <div class="cat-summary-title">보유 미사용 포인트</div>
-            <div class="cat-summary-cost" id="unspent-stat-points-sum" style="color: #059669;">0 P</div>
-          </div>
-          <div class="cat-summary-card">
-            <div class="cat-summary-title">목표 스탯 포인트 총합</div>
-            <div class="cat-summary-cost" id="total-stat-points-sum">0 P</div>
-          </div>
-          <div class="cat-summary-card">
-            <div class="cat-summary-title">필요 캐릭터 렙업 수 (1렙=5P)</div>
-            <div class="cat-summary-cost" id="needed-char-levelup-sum" style="color: #ef4444;">0 렙업</div>
-          </div>
-          <div class="cat-summary-card">
-            <div class="cat-summary-title">목표 캐릭터 레벨</div>
-            <div class="cat-summary-cost" id="target-char-level-sum">0 Lv</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="stat-grid" id="level-stat-container"></div>
-    </div>
-
-    <!-- 기타 서브탭 준비중 플레이스홀더들 -->
-    <div id="tab-ability" class="tab-content"><div class="placeholder-card">🧬 어빌리티 계산기 준비 중입니다.</div></div>
-    <div id="tab-cooking" class="tab-content"><div class="placeholder-card">🍳 요리 계산기 준비 중입니다.</div></div>
-    <div id="tab-relic" class="tab-content"><div class="placeholder-card">🔮 유물 계산기 준비 중입니다.</div></div>
-    <div id="tab-equip" class="tab-content"><div class="placeholder-card">🗡️ 장비 계산기 준비 중입니다.</div></div>
-    <div id="tab-skill" class="tab-content"><div class="placeholder-card">✨ 스킬 계산기 준비 중입니다.</div></div>
-    <div id="tab-costume" class="tab-content"><div class="placeholder-card">👗 의상 계산기 준비 중입니다.</div></div>
-    <div id="tab-codex" class="tab-content"><div class="placeholder-card">📖 도감 계산기 준비 중입니다.</div></div>
-    <div id="tab-dragon" class="tab-content"><div class="placeholder-card">🐉 드래곤 성장 계산기 준비 중입니다.</div></div>
-    <div id="tab-spirit" class="tab-content"><div class="placeholder-card">🧚 정령 계산기 준비 중입니다.</div></div>
-    <div id="tab-stage" class="tab-content"><div class="placeholder-card">🗺️ 스테이지 계산기 준비 중입니다.</div></div>
-    <div id="tab-dungeon" class="tab-content"><div class="placeholder-card">🗝️ 던전 계산기 준비 중입니다.</div></div>
-    <div id="tab-guild" class="tab-content"><div class="placeholder-card">🛡️ 길드 계산기 준비 중입니다.</div></div>
-    <div id="tab-mission" class="tab-content"><div class="placeholder-card">📜 미션 계산기 준비 중입니다.</div></div>
-    <div id="tab-shop" class="tab-content"><div class="placeholder-card">🛒 상점 계산기 준비 중입니다.</div></div>
-
+      <!-- 기타 플레이스홀더들 -->
+      <div id="tab-ability" class="tab-content"><div class="placeholder-card">🧬 어빌리티 계산기 준비 중입니다.</div></div>
+      <div id="tab-cooking" class="tab-content"><div class="placeholder-card">🍳 요리 계산기 준비 중입니다.</div></div>
+      <div id="tab-relic" class="tab-content"><div class="placeholder-card">🔮 유물 계산기 준비 중입니다.</div></div>
+      <div id="tab-equip" class="tab-content"><div class="placeholder-card">🗡️ 장비 계산기 준비 중입니다.</div></div>
+      <div id="tab-skill" class="tab-content"><div class="placeholder-card">✨ 스킬 계산기 준비 중입니다.</div></div>
+      <div id="tab-costume" class="tab-content"><div class="placeholder-card">👗 의상 계산기 준비 중입니다.</div></div>
+      <div id="tab-codex" class="tab-content"><div class="placeholder-card">📖 도감 계산기 준비 중입니다.</div></div>
+      <div id="tab-dragon" class="tab-content"><div class="placeholder-card">🐉 드래곤 성장 계산기 준비 중입니다.</div></div>
+      <div id="tab-spirit" class="tab-content"><div class="placeholder-card">🧚 정령 계산기 준비 중입니다.</div></div>
+      <div id="tab-stage" class="tab-content"><div class="placeholder-card">🗺️ 스테이지 계산기 준비 중입니다.</div></div>
+      <div id="tab-dungeon" class="tab-content"><div class="placeholder-card">🗝️ 던전 계산기 준비 중입니다.</div></div>
+      <div id="tab-guild" class="tab-content"><div class="placeholder-card">🛡️ 길드 계산기 준비 중입니다.</div></div>
+      <div id="tab-mission" class="tab-content"><div class="placeholder-card">📜 미션 계산기 준비 중입니다.</div></div>
+      <div id="tab-shop" class="tab-content"><div class="placeholder-card">🛒 상점 계산기 준비 중입니다.</div></div>
+    </main>
   </div>
 
   <script>
-    // 탭 전환 자바스크립트
-    function switchMainTab(mainTabId, btnEl) {
-      document.querySelectorAll('.main-nav-btn').forEach(btn => btn.classList.remove('active'));
-      btnEl.classList.add('active');
-
-      document.querySelectorAll('.sub-tab-group').forEach(group => group.classList.remove('active'));
-      const activeGroup = document.getElementById(mainTabId);
-      if (activeGroup) {
-        activeGroup.classList.add('active');
-        const firstSubBtn = activeGroup.querySelector('.sub-nav-btn');
-        if (firstSubBtn) firstSubBtn.click();
-      }
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('open');
     }
 
-    function switchSubTab(contentId, btnEl) {
-      const parentGroup = btnEl.closest('.sub-tab-group');
-      if (parentGroup) {
-        parentGroup.querySelectorAll('.sub-nav-btn').forEach(btn => btn.classList.remove('active'));
-      }
+    function switchSidebarTab(contentId, btnEl) {
+      document.querySelectorAll('.menu-item').forEach(btn => btn.classList.remove('active'));
       btnEl.classList.add('active');
 
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       const activeContent = document.getElementById(contentId);
       if (activeContent) activeContent.classList.add('active');
+
+      // 모바일에서 선택 후 사이드바 닫기
+      if (window.innerWidth <= 768) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
     }
 
     // 골드 스탯 기본 정보
