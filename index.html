@@ -302,7 +302,7 @@
     .input-field {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
     }
 
     .input-field.full-width {
@@ -315,13 +315,17 @@
       color: var(--text-sub);
     }
 
+    /* 레이아웃 깨짐 방지 정밀 수정된 input-box 스타일 */
     .input-box {
       display: flex;
       align-items: center;
+      flex-wrap: nowrap;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 4px 8px;
+      height: 32px;
+      box-sizing: border-box;
       overflow: hidden;
     }
 
@@ -330,10 +334,12 @@
     }
 
     .input-box input {
+      flex: 1;
+      min-width: 0;
       width: 100%;
       border: none;
       background: transparent;
-      padding: 4px 0;
+      padding: 0;
       font-weight: 700;
       font-size: 13px;
       text-align: right;
@@ -347,6 +353,14 @@
     .input-box input[readonly], .input-box input:disabled {
       color: var(--primary);
       cursor: default;
+    }
+
+    .input-box .unit {
+      flex-shrink: 0;
+      font-size: 11px;
+      color: var(--text-sub);
+      margin-left: 4px;
+      white-space: nowrap;
     }
 
     .result-box {
@@ -884,23 +898,29 @@
       const targetBox = document.getElementById(`gold-${id}-target-box`);
 
       const curLv = parseNumber(curLvInput?.value);
+      const isPercent = statConfig.unit === '%';
 
-      // 맥스 레벨 달성 시 목표 레벨 입력창 자동 비활성화
-      if (curLvInput && targetLvInput) {
-        if (curLv >= statConfig.maxLv) {
-          targetLvInput.value = toCommaStr(statConfig.maxLv);
-          targetLvInput.disabled = true;
-          if (targetBox) targetBox.classList.add('readonly');
-        } else {
+      // 현재 레벨이 맥스 레벨 이상인 경우 비활성화 및 빈값 처리
+      if (curLv >= statConfig.maxLv) {
+        if (targetLvInput) {
+          targetLvInput.value = ''; // 입력된 데이터 없게 만듦
+          targetLvInput.disabled = true; // 비활성화 상태
+        }
+        if (targetBox) targetBox.classList.add('readonly');
+      } else {
+        if (targetLvInput) {
           targetLvInput.disabled = false;
           if (targetBox) targetBox.classList.remove('readonly');
         }
       }
 
-      const targetLv = parseNumber(targetLvInput?.value);
-      const isPercent = statConfig.unit === '%';
-
       const curVal = getGoldStatValue(id, curLv);
+      let targetLv = parseNumber(targetLvInput?.value);
+
+      if (curLv >= statConfig.maxLv) {
+        targetLv = statConfig.maxLv;
+      }
+
       const targetVal = getGoldStatValue(id, targetLv);
 
       const curValEl = document.getElementById(`gold-${id}-val`);
@@ -909,7 +929,7 @@
       if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
       if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
 
-      const totalCost = calculateTotalRequiredGold(statConfig, curLv, targetLv);
+      const totalCost = (curLv >= statConfig.maxLv || targetLv <= curLv) ? 0 : calculateTotalRequiredGold(statConfig, curLv, targetLv);
       const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
       if (totalCostEl) {
         totalCostEl.value = toKoreanText(totalCost);
@@ -923,7 +943,9 @@
 
       levelStats.forEach(s => {
         const curLv = parseNumber(document.getElementById(`level-${s.id}-lv`)?.value) || 0;
-        const targetLv = parseNumber(document.getElementById(`level-${s.id}-target-lv`)?.value) || 0;
+        const targetInputVal = document.getElementById(`level-${s.id}-target-lv`)?.value;
+        const targetLv = (curLv >= s.maxLv || !targetInputVal) ? curLv : parseNumber(targetInputVal);
+
         currentStatPointsSum += curLv;
         targetStatPointsSum += Math.max(curLv, targetLv);
       });
@@ -931,16 +953,9 @@
       const curCharLv = parseNumber(document.getElementById('char-level')?.value) || 0;
       const totalEarnedPoints = curCharLv * 5; // 현재 캐릭터 레벨 기준 보유한 총 스탯 포인트
       
-      // 아직 찍지 않고 남은 보유 미사용 포인트 계산
       const unspentPoints = Math.max(0, totalEarnedPoints - currentStatPointsSum);
-      
-      // 순수 추가로 더 필요한 스탯 포인트 계산 (목표 포인트 - 보유 총 포인트)
       const netPointsNeeded = Math.max(0, targetStatPointsSum - totalEarnedPoints);
-      
-      // 실제 추가로 해야 하는 캐릭터 렙업 수 (1렙당 5P)
       const neededCharLevelUps = Math.ceil(netPointsNeeded / 5);
-      
-      // 최종 목표 캐릭터 레벨
       const targetCharLv = Math.max(curCharLv, Math.ceil(targetStatPointsSum / 5));
 
       const unspentEl = document.getElementById('unspent-stat-points-sum');
@@ -963,23 +978,29 @@
       const targetBox = document.getElementById(`level-${id}-target-box`);
 
       const curLv = parseNumber(curLvInput?.value);
+      const isPercent = statConfig.unit === '%';
 
-      // 맥스 레벨 달성 시 목표 레벨 입력창 자동 비활성화
-      if (curLvInput && targetLvInput) {
-        if (curLv >= statConfig.maxLv) {
-          targetLvInput.value = toCommaStr(statConfig.maxLv);
-          targetLvInput.disabled = true;
-          if (targetBox) targetBox.classList.add('readonly');
-        } else {
+      // 현재 레벨이 맥스 레벨 이상인 경우 비활성화 및 빈값 처리
+      if (curLv >= statConfig.maxLv) {
+        if (targetLvInput) {
+          targetLvInput.value = ''; // 입력된 데이터 없게 만듦
+          targetLvInput.disabled = true; // 비활성화 상태
+        }
+        if (targetBox) targetBox.classList.add('readonly');
+      } else {
+        if (targetLvInput) {
           targetLvInput.disabled = false;
           if (targetBox) targetBox.classList.remove('readonly');
         }
       }
 
-      const targetLv = parseNumber(targetLvInput?.value);
-      const isPercent = statConfig.unit === '%';
-
       const curVal = getLevelStatValue(id, curLv);
+      let targetLv = parseNumber(targetLvInput?.value);
+
+      if (curLv >= statConfig.maxLv) {
+        targetLv = statConfig.maxLv;
+      }
+
       const targetVal = getLevelStatValue(id, targetLv);
 
       const curValEl = document.getElementById(`level-${id}-val`);
@@ -988,8 +1009,7 @@
       if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
       if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
 
-      // 개별 항의 필요 포인트 및 캐릭터 렙업 수 계산 (1렙업당 5P 적용)
-      const neededStatPts = Math.max(0, targetLv - curLv);
+      const neededStatPts = (curLv >= statConfig.maxLv || targetLv <= curLv) ? 0 : Math.max(0, targetLv - curLv);
       const neededCharLv = Math.ceil(neededStatPts / 5);
       const neededLvEl = document.getElementById(`level-${id}-needed-lv`);
       if (neededLvEl) {
@@ -1160,7 +1180,7 @@
     function applyInvestToTargets() {
       Object.keys(lastCalculatedTargets).forEach(id => {
         const targetInput = document.getElementById(`gold-${id}-target-lv`);
-        if (targetInput) {
+        if (targetInput && !targetInput.disabled) {
           targetInput.value = toCommaStr(lastCalculatedTargets[id]);
           validateGoldMaxLevel(id, 'target-lv');
           calcGoldStat(id);
