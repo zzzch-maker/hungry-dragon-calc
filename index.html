@@ -315,7 +315,6 @@
       color: var(--text-sub);
     }
 
-    /* 레이아웃 깨짐 방지 정밀 수정된 input-box 스타일 */
     .input-box {
       display: flex;
       align-items: center;
@@ -896,17 +895,26 @@
       const curLvInput = document.getElementById(`gold-${id}-lv`);
       const targetLvInput = document.getElementById(`gold-${id}-target-lv`);
       const targetBox = document.getElementById(`gold-${id}-target-box`);
+      const curValEl = document.getElementById(`gold-${id}-val`);
+      const targetValEl = document.getElementById(`gold-${id}-target-val`);
+      const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
 
       const curLv = parseNumber(curLvInput?.value);
       const isPercent = statConfig.unit === '%';
 
-      // 현재 레벨이 맥스 레벨 이상인 경우 비활성화 및 빈값 처리
+      const curVal = getGoldStatValue(id, curLv);
+      if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
+
+      // 현재 레벨이 맥스 레벨 이상인 경우 목표 레벨 및 목표 수치를 모두 빈값('') 처리
       if (curLv >= statConfig.maxLv) {
         if (targetLvInput) {
-          targetLvInput.value = ''; // 입력된 데이터 없게 만듦
-          targetLvInput.disabled = true; // 비활성화 상태
+          targetLvInput.value = '';
+          targetLvInput.disabled = true;
         }
         if (targetBox) targetBox.classList.add('readonly');
+        if (targetValEl) targetValEl.value = ''; // 목표 수치도 동일하게 빈칸 처리
+        if (totalCostEl) totalCostEl.value = '0';
+        return;
       } else {
         if (targetLvInput) {
           targetLvInput.disabled = false;
@@ -914,23 +922,14 @@
         }
       }
 
-      const curVal = getGoldStatValue(id, curLv);
-      let targetLv = parseNumber(targetLvInput?.value);
-
-      if (curLv >= statConfig.maxLv) {
-        targetLv = statConfig.maxLv;
-      }
-
+      const targetLv = parseNumber(targetLvInput?.value);
       const targetVal = getGoldStatValue(id, targetLv);
 
-      const curValEl = document.getElementById(`gold-${id}-val`);
-      const targetValEl = document.getElementById(`gold-${id}-target-val`);
+      if (targetValEl) {
+        targetValEl.value = targetLvInput?.value ? toKoreanText(targetVal, isPercent) : '';
+      }
 
-      if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
-      if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
-
-      const totalCost = (curLv >= statConfig.maxLv || targetLv <= curLv) ? 0 : calculateTotalRequiredGold(statConfig, curLv, targetLv);
-      const totalCostEl = document.getElementById(`gold-${id}-total-cost`);
+      const totalCost = (targetLv <= curLv) ? 0 : calculateTotalRequiredGold(statConfig, curLv, targetLv);
       if (totalCostEl) {
         totalCostEl.value = toKoreanText(totalCost);
       }
@@ -976,17 +975,27 @@
       const curLvInput = document.getElementById(`level-${id}-lv`);
       const targetLvInput = document.getElementById(`level-${id}-target-lv`);
       const targetBox = document.getElementById(`level-${id}-target-box`);
+      const curValEl = document.getElementById(`level-${id}-val`);
+      const targetValEl = document.getElementById(`level-${id}-target-val`);
+      const neededLvEl = document.getElementById(`level-${id}-needed-lv`);
 
       const curLv = parseNumber(curLvInput?.value);
       const isPercent = statConfig.unit === '%';
 
-      // 현재 레벨이 맥스 레벨 이상인 경우 비활성화 및 빈값 처리
+      const curVal = getLevelStatValue(id, curLv);
+      if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
+
+      // 현재 레벨이 맥스 레벨 이상인 경우 목표 레벨 및 목표 수치를 모두 빈값('') 처리
       if (curLv >= statConfig.maxLv) {
         if (targetLvInput) {
-          targetLvInput.value = ''; // 입력된 데이터 없게 만듦
-          targetLvInput.disabled = true; // 비활성화 상태
+          targetLvInput.value = '';
+          targetLvInput.disabled = true;
         }
         if (targetBox) targetBox.classList.add('readonly');
+        if (targetValEl) targetValEl.value = ''; // 목표 수치도 동일하게 빈칸 처리
+        if (neededLvEl) neededLvEl.value = '0';
+        calcTotalLevelNeeded();
+        return;
       } else {
         if (targetLvInput) {
           targetLvInput.disabled = false;
@@ -994,24 +1003,15 @@
         }
       }
 
-      const curVal = getLevelStatValue(id, curLv);
-      let targetLv = parseNumber(targetLvInput?.value);
-
-      if (curLv >= statConfig.maxLv) {
-        targetLv = statConfig.maxLv;
-      }
-
+      const targetLv = parseNumber(targetLvInput?.value);
       const targetVal = getLevelStatValue(id, targetLv);
 
-      const curValEl = document.getElementById(`level-${id}-val`);
-      const targetValEl = document.getElementById(`level-${id}-target-val`);
+      if (targetValEl) {
+        targetValEl.value = targetLvInput?.value ? toKoreanText(targetVal, isPercent) : '';
+      }
 
-      if (curValEl) curValEl.value = toKoreanText(curVal, isPercent);
-      if (targetValEl) targetValEl.value = toKoreanText(targetVal, isPercent);
-
-      const neededStatPts = (curLv >= statConfig.maxLv || targetLv <= curLv) ? 0 : Math.max(0, targetLv - curLv);
+      const neededStatPts = (targetLv <= curLv) ? 0 : Math.max(0, targetLv - curLv);
       const neededCharLv = Math.ceil(neededStatPts / 5);
-      const neededLvEl = document.getElementById(`level-${id}-needed-lv`);
       if (neededLvEl) {
         neededLvEl.value = toCommaStr(neededCharLv);
       }
