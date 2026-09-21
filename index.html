@@ -1568,7 +1568,16 @@
   </div>
 
   <script>
-    // 1) 티켓 출석부 자동 순환 날짜 계산 함수
+    // [찾을 위치] <script> 태그 내부의 하단 함수들 근처에 아래 함수들을 추가해 주세요.
+    
+    function onTicketStartDayChange() {
+      // 사용자가 셀렉트박스를 직접 바꿨을 때 오늘 날짜를 기준(베이스)으로 저장합니다.
+      const todayStr = new Date().toISOString().split('T')[0];
+      localStorage.setItem('att2-base-date', todayStr);
+      updateAllMissionCalculations();
+      handleInput();
+    }
+    
     function getAutoTicketDay() {
       const selectEl = document.getElementById('att2-start-day');
       if (!selectEl) return 1;
@@ -1577,45 +1586,23 @@
       let baseDateStr = localStorage.getItem('att2-base-date');
       const todayStr = new Date().toISOString().split('T')[0];
       
+      // 저장된 기준일이 없다면 오늘을 기준일로 설정합니다.
       if (!baseDateStr) {
         baseDateStr = todayStr;
         localStorage.setItem('att2-base-date', baseDateStr);
       }
       
+      // 기준일로부터 오늘까지 경과한 일수 계산
       const baseDate = new Date(baseDateStr);
       const today = new Date(todayStr);
       const diffTime = today - baseDate;
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       
+      // 4일 주기로 자동 순환 (1~4 반복)
       let currentDay = ((baseDay - 1 + diffDays) % 4 + 4) % 4 + 1;
       return currentDay;
     }
     
-    // 2) 셀렉트박스 변경 시 기준일 저장 함수
-    function onTicketStartDayChange() {
-      const todayStr = new Date().toISOString().split('T')[0];
-      localStorage.setItem('att2-base-date', todayStr);
-      updateAllMissionCalculations();
-      handleInput();
-    }
-    
-    // 3) 출석부 전체 선택/해제 연동 함수
-    function toggleAllAttendance(check) {
-      attendanceData.forEach(m => {
-        const chk = document.getElementById(`chk-attendance-${m.id}`);
-        const card = document.getElementById(`card-attendance-${m.id}`);
-        if (chk) {
-          chk.checked = check;
-          if (card) {
-            if (check) card.classList.add('checked');
-            else card.classList.remove('checked');
-          }
-        }
-      });
-      updateAllMissionCalculations();
-      handleInput();
-    }
- 
     function switchMainTab(mainTabId, btnEl) {
       document.querySelectorAll('.main-nav-btn').forEach(btn => btn.classList.remove('active'));
       btnEl.classList.add('active');
@@ -2313,21 +2300,13 @@
       handleInput();
     }
 
-    // [찾을 위치] toggleAllAttendance 함수 정의 부분
     function toggleAllAttendance(check) {
       attendanceData.forEach(m => {
         const chk = document.getElementById(`chk-attendance-${m.id}`);
-        const card = document.getElementById(`card-attendance-${m.id}`);
-        if (chk) {
-          chk.checked = check;
-          if (card) {
-            if (check) card.classList.add('checked');
-            else card.classList.remove('checked');
-          }
-        }
+        if (chk) chk.checked = check;
       });
-      updateAllMissionCalculations(); // 👈 실시간 계산 반영
-      handleInput();                  // 👈 로컬스토리지 저장 반영
+      updateAllMissionCalculations();
+      handleInput();
     }
 
     function updateAllMissionCalculations() {
@@ -2484,57 +2463,51 @@
         }).join('');
       }
 
-// [찾을 위치] updateAllMissionCalculations() 함수 안의 출석부 계산부터 상단 기간 획득 아이템 렌더링 직전까지
-// 기존 출석부 관련 계산 코드를 아래 코드로 교체해 주세요.
-
-// [찾을 위치] updateAllMissionCalculations() 함수 안의 출석부 계산 파트부터 하단 아이템 렌더링까지
-
-      let attendanceDiaTotal = 0;
-      let attendanceAcquiredItems = {};
-      
-      attendanceData.forEach(m => {
-        const chk = document.getElementById(`chk-attendance-${m.id}`);
-        const card = document.getElementById(`card-attendance-${m.id}`);
-        if (chk && chk.checked) {
-          attendanceDiaTotal += m.dia;
-          
-          if (m.isCycle) {
-            const activeDay = typeof getAutoTicketDay === 'function' ? getAutoTicketDay() : 1;
-            const cycleList = [
-              { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
-              { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
-              { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
-              { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
-            ];
-            let item = cycleList[activeDay - 1];
-            attendanceAcquiredItems[item.keyType] = {
-              name: item.name,
-              count: item.count,
-              color: item.color
-            };
+        let attendanceDiaTotal = 0;
+        let attendanceAcquiredItems = {};
+        
+        // 1) [출석 보상 1일 획득 결과 카드용] 계산 기준 일수(days)와 무관하게 1일 기준 보상 산출
+        attendanceData.forEach(m => {
+          const chk = document.getElementById(`chk-attendance-${m.id}`);
+          const card = document.getElementById(`card-attendance-${m.id}`);
+          if (chk && chk.checked) {
+            attendanceDiaTotal += m.dia;
+            
+                  if (m.isCycle) {
+                  // 👇 [수정] 셀렉트박스 고정값이 아닌 날짜 경과에 따른 자동 순환 일차 적용
+                  const activeDay = getAutoTicketDay();
+                  const cycleList = [
+                    { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
+                    { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
+                    { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
+                    { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
+                  ];
+                  let item = cycleList[activeDay - 1];
+                  attendanceAcquiredItems[item.keyType] = {
+                    name: item.name,
+                    count: item.count,
+                    color: item.color
+                  };
+              } else {
+                if (m.items) {
+                  m.items.forEach(it => {
+                    attendanceAcquiredItems[it.keyType] = { 
+                      name: it.name, 
+                      count: it.count, 
+                      color: it.color 
+                    };
+                  });
+                }
+              }
+            if (card) card.classList.add('checked');
           } else {
-            if (m.items) {
-              m.items.forEach(it => {
-                attendanceAcquiredItems[it.keyType] = { 
-                  name: it.name, 
-                  count: it.count, 
-                  color: it.color 
-                };
-              });
-            }
+            if (card) card.classList.remove('checked');
           }
+        });
 
-          if (card) card.classList.add('checked');
-        } else {
-          if (card) card.classList.remove('checked');
-        }
-      });
+    document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
 
-      const sumAttDiaEl = document.getElementById('sum-attendance-dia-total');
-      if (sumAttDiaEl) sumAttDiaEl.innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
-
-      const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
-      if (attendanceItemSummaryEl) {
+        const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
         const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
         if (attendanceItemKeys.length === 0) {
           attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
@@ -2544,14 +2517,14 @@
             let iconHtml = getTicketSvg(it.color);
             if (kt === 'material_pocket') iconHtml = getBagSvg(it.color);
             else if (kt === 'ticket') iconHtml = getTicketSvg(it.color);
-
+  
             return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
               ${iconHtml} ${it.name} x${toCommaStr(it.count)}
             </span>`;
           }).join('');
         }
-      }
 
+      // 2) [상단 수급 합계 기간 총합용] 기간 일수(days)에 따른 순환 누적 계산
       let attendancePeriodDiaTotal = 0;
       let attendancePeriodAcquiredItems = {};
       attendanceData.forEach(m => {
@@ -2591,52 +2564,52 @@
 
       const dailyPlusRepeatAndAdDia = dailyMissionDia + repeat1DayDia + adDiaTotal;
       const periodTotalDia = (dailyPlusRepeatAndAdDia * days) + attendancePeriodDiaTotal;
-      
-      const topPeriodDiaEl = document.getElementById('top-total-period-dia');
-      if (topPeriodDiaEl) topPeriodDiaEl.innerText = `${toCommaStr(periodTotalDia)} 💎`;
+      document.getElementById('top-total-period-dia').innerText = `${toCommaStr(periodTotalDia)} 💎`;
 
       const topPeriodKeysEl = document.getElementById('top-total-period-keys');
-      if (topPeriodKeysEl) {
-        let combinedPeriodItems = {};
-        
-        dailyKeysList.forEach(kt => {
-          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
-          if (cfg) combinedPeriodItems[kt] = { name: cfg.name, count: dailyAcquiredKeys[kt] * days, color: cfg.color };
-        });
-        
-        adItemKeys.forEach(kt => {
-          const it = adAcquiredItems[kt];
-          combinedPeriodItems[kt] = { name: it.name, count: (it.count * days), color: it.color };
-        });
-        
-        Object.keys(attendancePeriodAcquiredItems).forEach(kt => {
-          const it = attendancePeriodAcquiredItems[kt];
-          if (combinedPeriodItems[kt]) {
-            combinedPeriodItems[kt].count += it.count;
-          } else {
-            combinedPeriodItems[kt] = { name: it.name, count: it.count, color: it.color };
-          }
-        });
-
-        const combinedPeriodKeysList = Object.keys(combinedPeriodItems);
-        if (combinedPeriodKeysList.length === 0) {
-          topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 아이템 없음</span>`;
+      let combinedPeriodItems = {};
+      
+      // 1) 일일 마일스톤 아이템 추가
+      dailyKeysList.forEach(kt => {
+        const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+        combinedPeriodItems[kt] = { name: cfg.name, count: dailyAcquiredKeys[kt] * days, color: cfg.color };
+      });
+      
+      // 2) 광고 보상 아이템 추가
+      adItemKeys.forEach(kt => {
+        const it = adAcquiredItems[kt];
+        combinedPeriodItems[kt] = { name: it.name, count: (it.count * days), color: it.color };
+      });
+      
+      // 3) 출석 보상 아이템 추가 (keyType이 다르면 절대 합쳐지지 않고 개별 유지됨)
+      Object.keys(attendancePeriodAcquiredItems).forEach(kt => {
+        const it = attendancePeriodAcquiredItems[kt];
+        if (combinedPeriodItems[kt]) {
+          combinedPeriodItems[kt].count += it.count;
         } else {
-          topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
-            const it = combinedPeriodItems[kt];
-            
-            let iconHtml = getTicketSvg(it.color);
-            if (kt === 'material_pocket') {
-              iconHtml = getBagSvg(it.color);
-            } else if (kt === 'material' || kt === 'gold' || kt === 'equip' || kt === 'skill' || kt === 'heart' || kt === 'core' || kt === 'labyrinth' || kt === 'weekday' || kt === 'spirit') {
-              iconHtml = getKeySvg(it.color);
-            }
-
-            return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-              ${iconHtml} ${it.name} x${toCommaStr(it.count)}
-            </span>`;
-          }).join('');
+          combinedPeriodItems[kt] = { name: it.name, count: it.count, color: it.color };
         }
+      });
+
+      const combinedPeriodKeysList = Object.keys(combinedPeriodItems);
+      if (combinedPeriodKeysList.length === 0) {
+        topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 아이템 없음</span>`;
+      } else {
+        topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
+          const it = combinedPeriodItems[kt];
+          
+          // 아이템 종류별 전용 아이콘 매칭 (식재료 주머니는 주머니 아이콘 고정)
+          let iconHtml = getTicketSvg(it.color);
+          if (kt === 'material_pocket') {
+            iconHtml = getBagSvg(it.color); // 식재료 주머니 전용 아이콘
+          } else if (kt === 'material' || kt === 'gold' || kt === 'equip' || kt === 'skill' || kt === 'heart' || kt === 'core' || kt === 'labyrinth' || kt === 'weekday' || kt === 'spirit') {
+            iconHtml = getKeySvg(it.color); // 각종 던전 열쇠 아이콘
+          }
+
+          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
+            ${iconHtml} ${it.name} x${toCommaStr(it.count)}
+          </span>`;
+        }).join('');
       }
 
       const totalWeeklyExtraDia = weeklyTotalDia + freeDiaTotal;
