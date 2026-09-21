@@ -1407,21 +1407,28 @@
         </div>
       </div>
     
-      <!-- Panel 5) 길드 상점 -->
+    <!-- Panel 5) 길드 상점 (가독성 개편) -->
       <div id="guild-panel-shop" class="guild-panel" style="display:none;">
         <div class="invest-card">
           <div class="invest-title">🛒 길드 상점 구매 계산기</div>
     
-          <div style="margin-bottom: 16px;">
-            <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 8px;">🪙 길드 코인 상점 아이템 구매</strong>
-            <div class="gain-list" id="guild-shop-coin-list"></div>
+    <!-- 길드 코인 상점 -->
+          <div style="margin-bottom: 20px;">
+            <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">
+              🪙 길드 코인 상점 아이템
+            </strong>
+            <div id="guild-shop-coin-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;"></div>
           </div>
     
-          <div style="margin-bottom: 16px;">
-            <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 8px;">🍺 용사의 주점 코인 상점 아이템 구매</strong>
-            <div class="gain-list" id="guild-shop-tavern-list"></div>
+          <!-- 용사의 주점 코인 상점 -->
+          <div style="margin-bottom: 20px;">
+            <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">
+              🍺 용사의 주점 코인 상점 아이템
+            </strong>
+            <div id="guild-shop-tavern-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;"></div>
           </div>
     
+    <!-- 상점 구매 총 필요 코인 요약 -->
           <div class="category-summary-grid">
             <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
               <div class="cat-summary-title" style="color: #94a3b8;">구매에 필요한 총 길드 코인</div>
@@ -3494,31 +3501,31 @@
       document.getElementById('guild-ability-expected-dice').innerText = `${toCommaStr(totalDice)} 개`;
     }
     
-    /* ===== 4. 길드 상점 데이터 (요청 목록 및 최대 구매 수량 반영) ===== */
+    /* ===== 4. 던전별 열쇠 아이콘 및 고유 색상 매핑 데이터 ===== */
     const guildCoinShopItems = [
-      { id: 'gshop1',  name: '🔑 골드던전 열쇠 1개', max: 3, price: 150, unit: '🪙' },
-      { id: 'gshop2',  name: '🔑 장비던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
-      { id: 'gshop3',  name: '🔑 스킬던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
-      { id: 'gshop4',  name: '🔑 하트던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
-      { id: 'gshop5',  name: '🔑 재료던전 열쇠 1개', max: 3, price: 300, unit: '🪙' },
-      { id: 'gshop6',  name: '🔑 코어던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
-      { id: 'gshop7',  name: '🔑 미궁던전 열쇠 1개', max: 3, price: 400, unit: '🪙' },
-      { id: 'gshop8',  name: '🔑 요일던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
-      { id: 'gshop9',  name: '🔑 정령던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
-      { id: 'gshop10', name: '⚡ 가속권(1분) 10개', max: null, price: 100, unit: '🪙' }
+      { id: 'gshop1',  icon: '🗝️', color: '#f59e0b', name: '골드던전 열쇠 1개', max: 3, price: 150, unit: '🪙' },
+      { id: 'gshop2',  icon: '🗝️', color: '#ef4444', name: '장비던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
+      { id: 'gshop3',  icon: '🗝️', color: '#8b5cf6', name: '스킬던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
+      { id: 'gshop4',  icon: '🗝️', color: '#ec4899', name: '하트던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
+      { id: 'gshop5',  icon: '🗝️', color: '#d97706', name: '재료던전 열쇠 1개', max: 3, price: 300, unit: '🪙' },
+      { id: 'gshop6',  icon: '🗝️', color: '#06b6d4', name: '코어던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
+      { id: 'gshop7',  icon: '🗝️', color: '#6366f1', name: '미궁던전 열쇠 1개', max: 3, price: 400, unit: '🪙' },
+      { id: 'gshop8',  icon: '🗝️', color: '#10b981', name: '요일던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
+      { id: 'gshop9',  icon: '🗝️', color: '#14b8a6', name: '정령던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
+      { id: 'gshop10', icon: '⚡', color: '#eab308', name: '가속권(1분) 10개', max: null, price: 100, unit: '🪙' }
     ];
     
     const tavernCoinShopItems = [
-      { id: 'tshop1', name: '🔑 골드던전 열쇠 1개', max: 3, price: 30, unit: '🍺' },
-      { id: 'tshop2', name: '🔑 장비던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
-      { id: 'tshop3', name: '🔑 스킬던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
-      { id: 'tshop4', name: '🔑 하트던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
-      { id: 'tshop5', name: '🔑 코어던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
-      { id: 'tshop6', name: '🔑 미궁던전 열쇠 1개', max: 3, price: 80, unit: '🍺' },
-      { id: 'tshop7', name: '🔑 요일던전 열쇠 1개', max: 3, price: 140, unit: '🍺' },
-      { id: 'tshop8', name: '🔑 정령던전 열쇠 1개', max: 3, price: 120, unit: '🍺' }
+      { id: 'tshop1', icon: '🗝️', color: '#f59e0b', name: '골드던전 열쇠 1개', max: 3, price: 30, unit: '🍺' },
+      { id: 'tshop2', icon: '🗝️', color: '#ef4444', name: '장비던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
+      { id: 'tshop3', icon: '🗝️', color: '#8b5cf6', name: '스킬던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
+      { id: 'tshop4', icon: '🗝️', color: '#ec4899', name: '하트던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
+      { id: 'tshop5', icon: '🗝️', color: '#06b6d4', name: '코어던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
+      { id: 'tshop6', icon: '🗝️', color: '#6366f1', name: '미궁던전 열쇠 1개', max: 3, price: 80, unit: '🍺' },
+      { id: 'tshop7', icon: '🗝️', color: '#10b981', name: '요일던전 열쇠 1개', max: 3, price: 140, unit: '🍺' },
+      { id: 'tshop8', icon: '🗝️', color: '#14b8a6', name: '정령던전 열쇠 1개', max: 3, price: 120, unit: '🍺' }
     ];
-
+    
     /* ===== 상점 수량 입력 제한 검증 함수 ===== */
     function validateShopItemInput(inputEl, maxVal) {
       formatLevelWithComma(inputEl);
@@ -3530,20 +3537,26 @@
       }
     }
     
-    /* ===== 길드 상점 랜더링 함수 (열쇠 아이콘 색상 연동) ===== */
+    /* ===== 길드 상점 렌더링 함수 (던전별 고유 색상 및 아이콘 적용) ===== */
     function renderGuildShopItems() {
-      // 미션/소환 항목의 열쇠 색상(#f59e0b)과 동일하게 스타일을 입혀주는 헬퍼 함수
-      const formatItemName = (name) => name.replace('🔑', '<span style="color: #f59e0b; font-weight: bold;">🔑</span>');
-    
       const coinListEl = document.getElementById('guild-shop-coin-list');
       if (coinListEl) {
         coinListEl.innerHTML = guildCoinShopItems.map(item => `
-          <div class="gain-item">
-            <span class="gain-item-name">${formatItemName(item.name)} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
-            <div class="input-box" style="width: 110px; background: white;">
-              <input type="text" id="input-gshop-${item.id}" value="0" placeholder="수량" 
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;">
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 13px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                <span style="font-size: 16px; color: ${item.color}; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.15));">${item.icon}</span> ${item.name}
+              </div>
+              <div style="font-size: 11px; display: flex; align-items: center; gap: 6px;">
+                <span style="color: #d97706; font-weight: 700;">${toCommaStr(item.price)} ${item.unit}</span>
+                ${item.max ? `<span style="background: #f1f5f9; color: #475569; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">최대 ${item.max}회</span>` : '<span style="background: #ecfdf5; color: #047857; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">무제한</span>'}
+              </div>
+            </div>
+    
+            <div class="input-box" style="width: 80px; background: #f8fafc; border: 1px solid #94a3b8; padding: 2px 6px;">
+              <input type="text" id="input-gshop-${item.id}" value="0" placeholder="0" style="text-align: right; font-weight: 700; font-size: 13px;"
                      oninput="validateShopItemInput(this, ${item.max}); calcGuildShopTotal(); handleInput();">
-              <span class="unit">개</span>
+              <span class="unit" style="font-size: 11px; color: #64748b;">개</span>
             </div>
           </div>
         `).join('');
@@ -3552,12 +3565,21 @@
     const tavernListEl = document.getElementById('guild-shop-tavern-list');
       if (tavernListEl) {
         tavernListEl.innerHTML = tavernCoinShopItems.map(item => `
-          <div class="gain-item">
-            <span class="gain-item-name">${formatItemName(item.name)} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
-            <div class="input-box" style="width: 110px; background: white;">
-              <input type="text" id="input-tshop-${item.id}" value="0" placeholder="수량" 
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;">
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 13px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                <span style="font-size: 16px; color: ${item.color}; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.15));">${item.icon}</span> ${item.name}
+              </div>
+              <div style="font-size: 11px; display: flex; align-items: center; gap: 6px;">
+                <span style="color: #0284c7; font-weight: 700;">${toCommaStr(item.price)} ${item.unit}</span>
+                ${item.max ? `<span style="background: #f1f5f9; color: #475569; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">최대 ${item.max}회</span>` : '<span style="background: #ecfdf5; color: #047857; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600;">무제한</span>'}
+              </div>
+            </div>
+    
+            <div class="input-box" style="width: 80px; background: #f8fafc; border: 1px solid #94a3b8; padding: 2px 6px;">
+              <input type="text" id="input-tshop-${item.id}" value="0" placeholder="0" style="text-align: right; font-weight: 700; font-size: 13px;"
                      oninput="validateShopItemInput(this, ${item.max}); calcGuildShopTotal(); handleInput();">
-              <span class="unit">개</span>
+              <span class="unit" style="font-size: 11px; color: #64748b;">개</span>
             </div>
           </div>
         `).join('');
