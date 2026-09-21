@@ -3422,7 +3422,7 @@
     
       document.getElementById('guild-info-max-members').innerText = `${curInfo.maxMembers} 명`;
     
-      // 목표까지 필요 경험치 계산 (현재 레벨부터 목표 레벨 직전까지의 경험치 합)
+      // 목표까지 필요 경험치 계산
       let totalExpNeeded = 0;
       for (let l = curLv; l < targetLv; l++) {
         const info = guildLevelExpTable.find(x => x.lv === l);
@@ -3455,7 +3455,7 @@
         `).join('');
       }
     
-      // 2. 목표 레벨 능력치 및 상승폭 (+상승 수치 및 최종 수치) 출력
+      // 2. 목표 레벨 능력치 및 상승폭 (요청 양식 반영: 증가: +00% → 적용 후: +00%)
       const targetListEl = document.getElementById('guild-target-buff-list');
       const targetStatKeys = Object.keys(targetStats);
     
@@ -3468,7 +3468,7 @@
           const diff = targetVal - curVal;
     
           if (diff > 0) {
-            return `<div>• ${statNameLabels[k]}: +${curVal}% <span style="color: #ef4444; font-weight: 700;">(+${diff}% → +${targetVal}%)</span></div>`;
+            return `<div>• ${statNameLabels[k]}: +${curVal}% <span style="color: #ef4444; font-weight: 700;">(증가: +${diff}% → 적용 후: +${targetVal}%)</span></div>`;
           } else {
             return `<div>• ${statNameLabels[k]}: +${targetVal}%</div>`;
           }
