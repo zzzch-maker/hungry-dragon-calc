@@ -1015,7 +1015,7 @@
         </div>
       </div>
 
-      <!-- 출석 보상 패널 추가 -->
+      <!-- 출석 보상 패널 수정 (누적 보상 영역 제거됨) -->
       <div id="panel-attendance" class="mission-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <div>
@@ -1029,22 +1029,6 @@
         </div>
 
         <div class="mission-grid" id="attendance-grid"></div>
-
-        <!-- 출석 누적 포인트 진행바 영역 -->
-        <div class="point-progress-card">
-          <div class="progress-header" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-            <div style="display: flex; justify-content: space-between; width: 100%;">
-              <strong style="font-size: 14px; color: var(--text-main);">🎯 재료 주머니 출석 누적 보상 (3일 주기)</strong>
-              <span id="attendance-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 15 P</span>
-            </div>
-            <div style="font-size: 11px; color: var(--text-sub);">💡 재료 주머니 출석 체크 3회(3일)마다 보상을 획득할 수 있습니다.</div>
-          </div>
-          <div class="progress-bar-bg" style="margin-top: 8px;">
-            <div class="progress-bar-fill" id="attendance-progress-fill"></div>
-          </div>
-
-          <div class="point-milestones" id="attendance-milestones"></div>
-        </div>
 
         <div class="mission-summary-card">
           <div class="mission-summary-title">📊 출석 보상 1일 획득 결과</div>
@@ -1710,52 +1694,34 @@
       }
     ];
 
-  const attendanceKeysStandard = [
-        { keyType: 'gold', name: '골드던전 열쇠', count: 3, color: 'var(--key-gold)' },
-        { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
-        { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' },
-        { keyType: 'heart', name: '하트던전 열쇠', count: 3, color: 'var(--key-heart)' }
-      ];
-  
-  const attendanceMilestonesData = [
-        { pts: 3, days: 3, items: attendanceKeysStandard },
-        { pts: 6, days: 6, items: attendanceKeysStandard },
-        { pts: 9, days: 9, items: attendanceKeysStandard },
-        { pts: 12, days: 12, items: attendanceKeysStandard },
-        { pts: 15, days: 15, items: attendanceKeysStandard }
-      ];
-  
-      const attendanceData = [
-        { id: 'att1', name: '1. 다이아 출석부', dia: 10000, pts: 0, items: [] },
-        { 
-          id: 'att2', 
-          name: '2. 티켓 출석부', 
-          dia: 0, 
-          pts: 0,
-          items: [
-            { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
-            { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' }
-          ] 
-        },
-        { 
-          id: 'att3', 
-          name: '3. 재료 주머니 출석부', 
-          dia: 0, 
-          pts: 3, // 체크 시 포인트 3점 획득
-          items: [
-            { keyType: 'material', name: '재료던전 열쇠', count: 5, color: 'var(--key-material)' }
-          ] 
-        },
-        { 
-          id: 'att4', 
-          name: '4. 가속권(1분) 출석부', 
-          dia: 0, 
-          pts: 0,
-          items: [
-            { keyType: 'ticket', name: '가속권(1분)', count: 100, color: 'var(--key-ticket)' }
-          ] 
-        }
-      ];
+    const attendanceData = [
+      { id: 'att1', name: '1. 다이아 출석부', dia: 10000, items: [] },
+      { 
+        id: 'att2', 
+        name: '2. 티켓 출석부', 
+        dia: 0, 
+        items: [
+          { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
+          { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' }
+        ] 
+      },
+      { 
+        id: 'att3', 
+        name: '3. 재료 주머니 출석부', 
+        dia: 0, 
+        items: [
+          { keyType: 'material', name: '재료던전 열쇠', count: 5, color: 'var(--key-material)' }
+        ] 
+      },
+      { 
+        id: 'att4', 
+        name: '4. 가속권(1분) 출석부', 
+        dia: 0, 
+        items: [
+          { keyType: 'ticket', name: '가속권(1분)', count: 100, color: 'var(--key-ticket)' }
+        ] 
+      }
+    ];
 
     /* ===== 레벨별 소환량 데이터 ===== */
     const equipPullsTable = [300, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000, 33000, 36000, 39000, 42000, 45000, 48000, 51000, 54000, 57000];
@@ -2030,75 +1996,63 @@
       `).join('');
     }
 
-  const attendanceMilestoneContainer = document.getElementById('attendance-milestones');
-        if (attendanceMilestoneContainer) {
-          attendanceMilestoneContainer.innerHTML = attendanceMilestonesData.map(ms => `
-            <div class="milestone-box" id="ms-attendance-${ms.pts}">
-              <div class="milestone-pts">${ms.days}일차 (${ms.pts} P)</div>
-              <div class="item-badge-list">
-                ${ms.items.map(it => `<span class="item-badge">${getKeySvg(it.color)} ${it.name} x${it.count}</span>`).join('')}
+    function renderSummonStats() {
+      const container = document.getElementById('summon-stat-container');
+      container.innerHTML = summonStats.map(s => `
+        <div class="stat-card ${s.type}">
+          <div class="card-header">
+            <span class="stat-title">${s.icon} ${s.name}</span>
+            <span class="stat-current-val">Max ${s.maxLv}렙</span>
+          </div>
+          
+          <div class="input-grid">
+            <div class="input-field">
+              <label>현재 소환 레벨</label>
+              <div class="input-box">
+                <input type="text" id="summon-${s.id}-lv" value="${s.defaultLv}" 
+                       oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();"
+                       onchange="validateSummonLevel('${s.id}', 'cur'); calcSummonStat('${s.id}'); handleInput();">
+                <span class="unit">Lv</span>
               </div>
             </div>
-          `).join('');
-        }
-
-        function renderSummonStats() {
-          const container = document.getElementById('summon-stat-container');
-          container.innerHTML = summonStats.map(s => `
-            <div class="stat-card ${s.type}">
-              <div class="card-header">
-                <span class="stat-title">${s.icon} ${s.name}</span>
-                <span class="stat-current-val">Max ${s.maxLv}렙</span>
-              </div>
-              
-              <div class="input-grid">
-                <div class="input-field">
-                  <label>현재 소환 레벨</label>
-                  <div class="input-box">
-                    <input type="text" id="summon-${s.id}-lv" value="${s.defaultLv}" 
-                           oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();"
-                           onchange="validateSummonLevel('${s.id}', 'cur'); calcSummonStat('${s.id}'); handleInput();">
-                    <span class="unit">Lv</span>
-                  </div>
-                </div>
-        
-                <div class="input-field">
-                  <label>목표 소환 레벨</label>
-                  <div class="input-box">
-                    <input type="text" id="summon-${s.id}-target-lv" value="${s.defaultTarget}" 
-                           oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();"
-                           onchange="validateSummonLevel('${s.id}', 'target'); calcSummonStat('${s.id}'); handleInput();">
-                    <span class="unit">Lv</span>
-                  </div>
-                </div>
-        
-                <div class="input-field">
-                  <label>현재 소환 누적 횟수</label>
-                  <div class="input-box">
-                    <input type="text" id="summon-${s.id}-current-cnt" value="0" placeholder="0" oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();">
-                    <span class="unit">회</span>
-                  </div>
-                </div>
-        
-                <div class="input-field">
-                  <label>목표까지 추가 소환 횟수</label>
-                  <div class="input-box readonly">
-                    <input type="text" id="summon-${s.id}-needed-cnt" value="0" readonly>
-                    <span class="unit">회</span>
-                  </div>
-                </div>
-        
-                <div class="input-field full-width">
-                  <label>필요 다이아 (자동계산)</label>
-                  <div class="input-box readonly">
-                    <input type="text" id="summon-${s.id}-dia" value="0" readonly style="color: #0284c7; font-weight: 800; font-size: 13px;">
-                    <span class="unit">💎</span>
-                  </div>
-                </div>
+    
+            <div class="input-field">
+              <label>목표 소환 레벨</label>
+              <div class="input-box">
+                <input type="text" id="summon-${s.id}-target-lv" value="${s.defaultTarget}" 
+                       oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();"
+                       onchange="validateSummonLevel('${s.id}', 'target'); calcSummonStat('${s.id}'); handleInput();">
+                <span class="unit">Lv</span>
               </div>
             </div>
-          `).join('');
-        }
+    
+            <div class="input-field">
+              <label>현재 소환 누적 횟수</label>
+              <div class="input-box">
+                <input type="text" id="summon-${s.id}-current-cnt" value="0" placeholder="0" oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();">
+                <span class="unit">회</span>
+              </div>
+            </div>
+    
+            <div class="input-field">
+              <label>목표까지 추가 소환 횟수</label>
+              <div class="input-box readonly">
+                <input type="text" id="summon-${s.id}-needed-cnt" value="0" readonly>
+                <span class="unit">회</span>
+              </div>
+            </div>
+    
+            <div class="input-field full-width">
+              <label>필요 다이아 (자동계산)</label>
+              <div class="input-box readonly">
+                <input type="text" id="summon-${s.id}-dia" value="0" readonly style="color: #0284c7; font-weight: 800; font-size: 13px;">
+                <span class="unit">💎</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
 
     // 스킬 등급 및 티어별 스킬 이름 매핑 데이터
     const skillNameMap = {
@@ -2458,57 +2412,39 @@
         }).join('');
       }
 
-  let attendanceDiaTotal = 0;
-        let attendancePtsTotal = 0;
-        let attendanceAcquiredItems = {};
-        
-        attendanceData.forEach(m => {
-          const chk = document.getElementById(`chk-attendance-${m.id}`);
-          const card = document.getElementById(`card-attendance-${m.id}`);
-          if (chk && chk.checked) {
-            attendanceDiaTotal += m.dia;
-            attendancePtsTotal += (m.pts || 0);
-            if (m.items) {
-              m.items.forEach(it => {
-                attendanceAcquiredItems[it.keyType] = { name: it.name, count: (attendanceAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
-              });
-            }
-            if (card) card.classList.add('checked');
-          } else {
-            if (card) card.classList.remove('checked');
-          }
-        });
-  attendanceMilestonesData.forEach(ms => {
-          const box = document.getElementById(`ms-attendance-${ms.pts}`);
-          if (attendancePtsTotal >= ms.pts) {
-            ms.items.forEach(it => {
+      let attendanceDiaTotal = 0;
+      let attendanceAcquiredItems = {};
+      
+      attendanceData.forEach(m => {
+        const chk = document.getElementById(`chk-attendance-${m.id}`);
+        const card = document.getElementById(`card-attendance-${m.id}`);
+        if (chk && chk.checked) {
+          attendanceDiaTotal += m.dia;
+          if (m.items) {
+            m.items.forEach(it => {
               attendanceAcquiredItems[it.keyType] = { name: it.name, count: (attendanceAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
             });
-            if (box) box.classList.add('achieved');
-          } else {
-            if (box) box.classList.remove('achieved');
           }
-        });
-  
-        const attPtsTextEl = document.getElementById('attendance-pts-text');
-        if (attPtsTextEl) attPtsTextEl.innerText = `${attendancePtsTotal} / 15 P`;
-        const attProgressFill = document.getElementById('attendance-progress-fill');
-        if (attProgressFill) attProgressFill.style.width = `${Math.min(100, (attendancePtsTotal / 15) * 100)}%`;
-  
-        document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
-  
-        const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
-        const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
-        if (attendanceItemKeys.length === 0) {
-          attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
+          if (card) card.classList.add('checked');
         } else {
-          attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
-            const it = attendanceAcquiredItems[kt];
-            return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-              ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${it.count}
-            </span>`;
-          }).join('');
+          if (card) card.classList.remove('checked');
         }
+      });
+
+      document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
+
+      const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
+      const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
+      if (attendanceItemKeys.length === 0) {
+        attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
+      } else {
+        attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
+          const it = attendanceAcquiredItems[kt];
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${it.count}
+          </span>`;
+        }).join('');
+      }
 
       const dailyPlusRepeatAndAdAndAttendanceDia = dailyMissionDia + repeat1DayDia + adDiaTotal + attendanceDiaTotal;
       const periodTotalDia = dailyPlusRepeatAndAdAndAttendanceDia * days;
