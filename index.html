@@ -2300,13 +2300,21 @@
       handleInput();
     }
 
+    // [찾을 위치] toggleAllAttendance 함수 정의 부분
     function toggleAllAttendance(check) {
       attendanceData.forEach(m => {
         const chk = document.getElementById(`chk-attendance-${m.id}`);
-        if (chk) chk.checked = check;
+        const card = document.getElementById(`card-attendance-${m.id}`);
+        if (chk) {
+          chk.checked = check;
+          if (card) {
+            if (check) card.classList.add('checked');
+            else card.classList.remove('checked');
+          }
+        }
       });
-      updateAllMissionCalculations();
-      handleInput();
+      updateAllMissionCalculations(); // 👈 실시간 계산 반영
+      handleInput();                  // 👈 로컬스토리지 저장 반영
     }
 
     function updateAllMissionCalculations() {
@@ -2463,68 +2471,69 @@
         }).join('');
       }
 
-        let attendanceDiaTotal = 0;
-        let attendanceAcquiredItems = {};
-        
-        // 1) [출석 보상 1일 획득 결과 카드용] 계산 기준 일수(days)와 무관하게 1일 기준 보상 산출
-        attendanceData.forEach(m => {
-          const chk = document.getElementById(`chk-attendance-${m.id}`);
-          const card = document.getElementById(`card-attendance-${m.id}`);
-          if (chk && chk.checked) {
-            attendanceDiaTotal += m.dia;
-            
-                  if (m.isCycle) {
-                  // 👇 [수정] 셀렉트박스 고정값이 아닌 날짜 경과에 따른 자동 순환 일차 적용
-                  const activeDay = getAutoTicketDay();
-                  const cycleList = [
-                    { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
-                    { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
-                    { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
-                    { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
-                  ];
-                  let item = cycleList[activeDay - 1];
-                  attendanceAcquiredItems[item.keyType] = {
-                    name: item.name,
-                    count: item.count,
-                    color: item.color
-                  };
-              } else {
-                if (m.items) {
-                  m.items.forEach(it => {
-                    attendanceAcquiredItems[it.keyType] = { 
-                      name: it.name, 
-                      count: it.count, 
-                      color: it.color 
-                    };
-                  });
-                }
-              }
-            if (card) card.classList.add('checked');
+// [찾을 위치] updateAllMissionCalculations() 함수 안의 출석부 계산부터 상단 기간 획득 아이템 렌더링 직전까지
+// 기존 출석부 관련 계산 코드를 아래 코드로 교체해 주세요.
+
+      let attendanceDiaTotal = 0;
+      let attendanceAcquiredItems = {};
+      
+      attendanceData.forEach(m => {
+        const chk = document.getElementById(`chk-attendance-${m.id}`);
+        const card = document.getElementById(`card-attendance-${m.id}`);
+        if (chk && chk.checked) {
+          attendanceDiaTotal += m.dia;
+          
+          if (m.isCycle) {
+            const activeDay = getAutoTicketDay();
+            const cycleList = [
+              { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
+              { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
+              { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
+              { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
+            ];
+            let item = cycleList[activeDay - 1];
+            attendanceAcquiredItems[item.keyType] = {
+              name: item.name,
+              count: item.count,
+              color: item.color
+            };
           } else {
-            if (card) card.classList.remove('checked');
+            if (m.items) {
+              m.items.forEach(it => {
+                attendanceAcquiredItems[it.keyType] = { 
+                  name: it.name, 
+                  count: it.count, 
+                  color: it.color 
+                };
+              });
+            }
           }
-        });
 
-    document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
-
-        const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
-        const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
-        if (attendanceItemKeys.length === 0) {
-          attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
+          if (card) card.classList.add('checked');
         } else {
-          attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
-            const it = attendanceAcquiredItems[kt];
-            let iconHtml = getTicketSvg(it.color);
-            if (kt === 'material_pocket') iconHtml = getBagSvg(it.color);
-            else if (kt === 'ticket') iconHtml = getTicketSvg(it.color);
-  
-            return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-              ${iconHtml} ${it.name} x${toCommaStr(it.count)}
-            </span>`;
-          }).join('');
+          if (card) card.classList.remove('checked');
         }
+      });
 
-      // 2) [상단 수급 합계 기간 총합용] 기간 일수(days)에 따른 순환 누적 계산
+      document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
+
+      const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
+      const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
+      if (attendanceItemKeys.length === 0) {
+        attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
+      } else {
+        attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
+          const it = attendanceAcquiredItems[kt];
+          let iconHtml = getTicketSvg(it.color);
+          if (kt === 'material_pocket') iconHtml = getBagSvg(it.color);
+          else if (kt === 'ticket') iconHtml = getTicketSvg(it.color);
+
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${iconHtml} ${it.name} x${toCommaStr(it.count)}
+          </span>`;
+        }).join('');
+      }
+
       let attendancePeriodDiaTotal = 0;
       let attendancePeriodAcquiredItems = {};
       attendanceData.forEach(m => {
@@ -2569,19 +2578,16 @@
       const topPeriodKeysEl = document.getElementById('top-total-period-keys');
       let combinedPeriodItems = {};
       
-      // 1) 일일 마일스톤 아이템 추가
       dailyKeysList.forEach(kt => {
         const cfg = dailyMilestonesData.find(x => x.keyType === kt);
         combinedPeriodItems[kt] = { name: cfg.name, count: dailyAcquiredKeys[kt] * days, color: cfg.color };
       });
       
-      // 2) 광고 보상 아이템 추가
       adItemKeys.forEach(kt => {
         const it = adAcquiredItems[kt];
         combinedPeriodItems[kt] = { name: it.name, count: (it.count * days), color: it.color };
       });
       
-      // 3) 출석 보상 아이템 추가 (keyType이 다르면 절대 합쳐지지 않고 개별 유지됨)
       Object.keys(attendancePeriodAcquiredItems).forEach(kt => {
         const it = attendancePeriodAcquiredItems[kt];
         if (combinedPeriodItems[kt]) {
@@ -2598,12 +2604,11 @@
         topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
           const it = combinedPeriodItems[kt];
           
-          // 아이템 종류별 전용 아이콘 매칭 (식재료 주머니는 주머니 아이콘 고정)
           let iconHtml = getTicketSvg(it.color);
           if (kt === 'material_pocket') {
-            iconHtml = getBagSvg(it.color); // 식재료 주머니 전용 아이콘
+            iconHtml = getBagSvg(it.color);
           } else if (kt === 'material' || kt === 'gold' || kt === 'equip' || kt === 'skill' || kt === 'heart' || kt === 'core' || kt === 'labyrinth' || kt === 'weekday' || kt === 'spirit') {
-            iconHtml = getKeySvg(it.color); // 각종 던전 열쇠 아이콘
+            iconHtml = getKeySvg(it.color);
           }
 
           return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
