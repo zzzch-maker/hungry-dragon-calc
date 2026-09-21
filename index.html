@@ -2488,17 +2488,7 @@
                     count: item.count,
                     color: item.color
                   };
-            } else {
-              if (m.items) {
-                m.items.forEach(it => {
-                  attendanceAcquiredItems[it.keyType] = { 
-                    name: it.name, 
-                    count: it.count, 
-                    color: it.color 
-                  };
-                });
-              }
-            }
+                  }
   
             if (card) card.classList.add('checked');
           } else {
