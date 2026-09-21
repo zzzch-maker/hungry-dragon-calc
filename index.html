@@ -2581,7 +2581,7 @@
         combinedPeriodItems[kt] = { name: it.name, count: (it.count * days), color: it.color };
       });
       
-      // 3) 출석 보상 아이템 추가 (식재료 주머니와 재료던전 열쇠가 절대 합산되지 않고 각각 독립된 키로 유지됨)
+      // 3) 출석 보상 아이템 추가 (keyType이 다르면 절대 합쳐지지 않고 개별 유지됨)
       Object.keys(attendancePeriodAcquiredItems).forEach(kt => {
         const it = attendancePeriodAcquiredItems[kt];
         if (combinedPeriodItems[kt]) {
@@ -2598,10 +2598,10 @@
         topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
           const it = combinedPeriodItems[kt];
           
-          // 아이템 종류별 전용 아이콘 매칭 (식재료 주머니는 주머니 아이콘, 열쇠는 열쇠 아이콘 고정)
+          // 아이템 종류별 전용 아이콘 매칭 (식재료 주머니는 주머니 아이콘 고정)
           let iconHtml = getTicketSvg(it.color);
           if (kt === 'material_pocket') {
-            iconHtml = getBagSvg(it.color); // 식재료 주머니 전용 주머니 아이콘
+            iconHtml = getBagSvg(it.color); // 식재료 주머니 전용 아이콘
           } else if (kt === 'material' || kt === 'gold' || kt === 'equip' || kt === 'skill' || kt === 'heart' || kt === 'core' || kt === 'labyrinth' || kt === 'weekday' || kt === 'spirit') {
             iconHtml = getKeySvg(it.color); // 각종 던전 열쇠 아이콘
           }
