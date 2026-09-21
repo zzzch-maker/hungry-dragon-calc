@@ -1745,7 +1745,7 @@
       },
       { 
         id: 'att3', 
-        name: '재료 주머니 출석부', 
+        name: '식재료 주머니 출석부', 
         dia: 0, 
         items: [
           { keyType: 'material', name: '식재료 주머니', count: 30, color: 'var(--key-material)' }
@@ -2488,8 +2488,17 @@
                     count: item.count,
                     color: item.color
                   };
-                  }
-  
+              } else {
+                if (m.items) {
+                  m.items.forEach(it => {
+                    attendanceAcquiredItems[it.keyType] = { 
+                      name: it.name, 
+                      count: it.count, 
+                      color: it.color 
+                    };
+                  });
+                }
+              }
             if (card) card.classList.add('checked');
           } else {
             if (card) card.classList.remove('checked');
@@ -2498,18 +2507,22 @@
 
     document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
 
-      const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
-      const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
-      if (attendanceItemKeys.length === 0) {
-        attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
-      } else {
-        attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
-          const it = attendanceAcquiredItems[kt];
-          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-            ${getTicketSvg(it.color)} ${it.name} x${toCommaStr(it.count)}
-          </span>`;
-        }).join('');
-      }
+        const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
+        const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
+        if (attendanceItemKeys.length === 0) {
+          attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
+        } else {
+          attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
+            const it = attendanceAcquiredItems[kt];
+            let iconHtml = getTicketSvg(it.color);
+            if (kt === 'material_pocket') iconHtml = getBagSvg(it.color);
+            else if (kt === 'ticket') iconHtml = getTicketSvg(it.color);
+  
+            return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+              ${iconHtml} ${it.name} x${toCommaStr(it.count)}
+            </span>`;
+          }).join('');
+        }
 
       // 2) [상단 수급 합계 기간 총합용] 기간 일수(days)에 따른 순환 누적 계산
       let attendancePeriodDiaTotal = 0;
@@ -2563,9 +2576,15 @@
         const it = adAcquiredItems[kt];
         combinedPeriodItems[kt] = { name: it.name, count: (it.count * days), color: it.color };
       });
+      
+      // 💡 [수정] 텍스트가 덮어씌워지지 않고 개수만 안전하게 합산되도록 처리
       Object.keys(attendancePeriodAcquiredItems).forEach(kt => {
         const it = attendancePeriodAcquiredItems[kt];
-        combinedPeriodItems[kt] = { name: it.name, count: (combinedPeriodItems[kt]?.count || 0) + it.count, color: it.color };
+        if (combinedPeriodItems[kt]) {
+          combinedPeriodItems[kt].count += it.count;
+        } else {
+          combinedPeriodItems[kt] = { name: it.name, count: it.count, color: it.color };
+        }
       });
 
       const combinedPeriodKeysList = Object.keys(combinedPeriodItems);
@@ -2574,8 +2593,12 @@
       } else {
         topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
           const it = combinedPeriodItems[kt];
+          let iconHtml = getTicketSvg(it.color);
+          if (kt === 'material_pocket') iconHtml = getBagSvg(it.color);
+          else if (kt === 'material') iconHtml = getKeySvg(it.color);
+
           return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-            ${kt === 'ticket' ? getTicketSvg(it.color) : (kt === 'material_pocket' ? getBagSvg(it.color) : getTicketSvg(it.color))} ${it.name} x${toCommaStr(it.count)}
+            ${iconHtml} ${it.name} x${toCommaStr(it.count)}
           </span>`;
         }).join('');
       }
