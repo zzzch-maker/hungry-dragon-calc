@@ -1568,6 +1568,41 @@
   </div>
 
   <script>
+    // [찾을 위치] <script> 태그 내부의 하단 함수들 근처에 아래 함수들을 추가해 주세요.
+    
+    function onTicketStartDayChange() {
+      // 사용자가 셀렉트박스를 직접 바꿨을 때 오늘 날짜를 기준(베이스)으로 저장합니다.
+      const todayStr = new Date().toISOString().split('T')[0];
+      localStorage.setItem('att2-base-date', todayStr);
+      updateAllMissionCalculations();
+      handleInput();
+    }
+    
+    function getAutoTicketDay() {
+      const selectEl = document.getElementById('att2-start-day');
+      if (!selectEl) return 1;
+      
+      let baseDay = parseNumber(selectEl.value) || 1;
+      let baseDateStr = localStorage.getItem('att2-base-date');
+      const todayStr = new Date().toISOString().split('T')[0];
+      
+      // 저장된 기준일이 없다면 오늘을 기준일로 설정합니다.
+      if (!baseDateStr) {
+        baseDateStr = todayStr;
+        localStorage.setItem('att2-base-date', baseDateStr);
+      }
+      
+      // 기준일로부터 오늘까지 경과한 일수 계산
+      const baseDate = new Date(baseDateStr);
+      const today = new Date(todayStr);
+      const diffTime = today - baseDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      // 4일 주기로 자동 순환 (1~4 반복)
+      let currentDay = ((baseDay - 1 + diffDays) % 4 + 4) % 4 + 1;
+      return currentDay;
+    }
+    
     function switchMainTab(mainTabId, btnEl) {
       document.querySelectorAll('.main-nav-btn').forEach(btn => btn.classList.remove('active'));
       btnEl.classList.add('active');
@@ -1991,12 +2026,12 @@
     ${m.isCycle ? `
           <div style="margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 6px; display: flex; align-items: center; justify-content: space-between;">
             <span style="font-size: 11px; font-weight: 700; color: var(--text-sub);">오늘(시작일) 순서 선택:</span>
-            <select id="att2-start-day" class="unit-select" style="width: 155px; font-size: 11px; padding: 3px 6px; background: white;" onchange="updateAllMissionCalculations(); handleInput();">
-              <option value="1">1일차 (무기 100장부터)</option>
-              <option value="2">2일차 (갑옷 100장부터)</option>
-              <option value="3">3일차 (투구 100장부터)</option>
-              <option value="4">4일차 (스킬 10장부터)</option>
-            </select>
+          <select id="att2-start-day" class="unit-select" style="width: 155px; font-size: 11px; padding: 3px 6px; background: white;" onchange="onTicketStartDayChange();">
+            <option value="1">1일차 (무기 100장부터)</option>
+            <option value="2">2일차 (갑옷 100장부터)</option>
+            <option value="3">3일차 (투구 100장부터)</option>
+            <option value="4">4일차 (스킬 10장부터)</option>
+          </select>
           </div>
         ` : ''}
               
@@ -2438,21 +2473,22 @@
           if (chk && chk.checked) {
             attendanceDiaTotal += m.dia;
             
-            if (m.isCycle) {
-              const startDay = parseNumber(document.getElementById('att2-start-day')?.value) || 1;
-              const cycleList = [
-                { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
-                { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
-                { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
-                { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
-              ];
-              // 4일 주기 중 선택된 시작일의 1개 보상만 매일 바뀌는 형식으로 출력
-              let item = cycleList[startDay - 1];
-              attendanceAcquiredItems[item.keyType] = {
-                name: item.name,
-                count: item.count,
-                color: item.color
-              };
+                  if (m.isCycle) {
+                  // 👇 [수정] 셀렉트박스 고정값이 아닌 날짜 경과에 따른 자동 순환 일차 적용
+                  const activeDay = getAutoTicketDay();
+                  const cycleList = [
+                    { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
+                    { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
+                    { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
+                    { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
+                  ];
+                  let item = cycleList[activeDay - 1];
+                  attendanceAcquiredItems[item.keyType] = {
+                    name: item.name,
+                    count: item.count,
+                    color: item.color
+                  };
+                }
             } else {
               if (m.items) {
                 m.items.forEach(it => {
