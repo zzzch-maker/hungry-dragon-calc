@@ -1487,59 +1487,63 @@
       `).join('');
     }
 
-    function renderSummonStats() {
-      const container = document.getElementById('summon-stat-container');
-      container.innerHTML = summonStats.map(s => `
-        <div class="stat-card ${s.type}">
-          <div class="card-header">
-            <span class="stat-title">${s.icon} ${s.name}</span>
-            <span class="stat-current-val">Max ${s.maxLv}렙</span>
-          </div>
-          
-          <div class="input-grid">
-            <div class="input-field">
-              <label>현재 소환 레벨</label>
-              <div class="input-box">
-                <input type="text" id="summon-${s.id}-lv" value="${s.defaultLv}" oninput="validateSummonLevel('${s.id}', 'cur'); calcSummonStat('${s.id}'); handleInput();">
-                <span class="unit">Lv</span>
+        function renderSummonStats() {
+          const container = document.getElementById('summon-stat-container');
+          container.innerHTML = summonStats.map(s => `
+            <div class="stat-card ${s.type}">
+              <div class="card-header">
+                <span class="stat-title">${s.icon} ${s.name}</span>
+                <span class="stat-current-val">Max ${s.maxLv}렙</span>
+              </div>
+              
+              <div class="input-grid">
+                <div class="input-field">
+                  <label>현재 소환 레벨</label>
+                  <div class="input-box">
+                    <input type="text" id="summon-${s.id}-lv" value="${s.defaultLv}" 
+                           oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();"
+                           onchange="validateSummonLevel('${s.id}', 'cur'); calcSummonStat('${s.id}'); handleInput();">
+                    <span class="unit">Lv</span>
+                  </div>
+                </div>
+        
+                <div class="input-field">
+                  <label>목표 소환 레벨</label>
+                  <div class="input-box">
+                    <input type="text" id="summon-${s.id}-target-lv" value="${s.defaultTarget}" 
+                           oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();"
+                           onchange="validateSummonLevel('${s.id}', 'target'); calcSummonStat('${s.id}'); handleInput();">
+                    <span class="unit">Lv</span>
+                  </div>
+                </div>
+        
+                <div class="input-field">
+                  <label>현재 소환 누적 횟수</label>
+                  <div class="input-box">
+                    <input type="text" id="summon-${s.id}-current-cnt" value="0" placeholder="0" oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();">
+                    <span class="unit">회</span>
+                  </div>
+                </div>
+        
+                <div class="input-field">
+                  <label>목표까지 추가 소환 횟수</label>
+                  <div class="input-box readonly">
+                    <input type="text" id="summon-${s.id}-needed-cnt" value="0" readonly>
+                    <span class="unit">회</span>
+                  </div>
+                </div>
+        
+                <div class="input-field full-width">
+                  <label>필요 다이아 (자동계산)</label>
+                  <div class="input-box readonly">
+                    <input type="text" id="summon-${s.id}-dia" value="0" readonly style="color: #0284c7; font-weight: 800; font-size: 13px;">
+                    <span class="unit">💎</span>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div class="input-field">
-              <label>목표 소환 레벨</label>
-              <div class="input-box">
-                <input type="text" id="summon-${s.id}-target-lv" value="${s.defaultTarget}" oninput="validateSummonLevel('${s.id}', 'target'); calcSummonStat('${s.id}'); handleInput();">
-                <span class="unit">Lv</span>
-              </div>
-            </div>
-
-            <div class="input-field">
-              <label>현재 소환 누적 횟수</label>
-              <div class="input-box">
-                <input type="text" id="summon-${s.id}-current-cnt" value="0" placeholder="0" oninput="formatLevelWithComma(this); calcSummonStat('${s.id}'); handleInput();">
-                <span class="unit">회</span>
-              </div>
-            </div>
-
-            <div class="input-field">
-              <label>목표까지 추가 소환 횟수</label>
-              <div class="input-box readonly">
-                <input type="text" id="summon-${s.id}-needed-cnt" value="0" readonly>
-                <span class="unit">회</span>
-              </div>
-            </div>
-
-            <div class="input-field full-width">
-              <label>필요 다이아 (자동계산)</label>
-              <div class="input-box readonly">
-                <input type="text" id="summon-${s.id}-dia" value="0" readonly style="color: #0284c7; font-weight: 800; font-size: 13px;">
-                <span class="unit">💎</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
+          `).join('');
+        }
 
     function onTargetProbTypeChange() {
       const typeSelect = document.getElementById('target-prob-type');
@@ -1903,37 +1907,33 @@
       const s = summonStats.find(x => x.id === id);
       const lvEl = document.getElementById(`summon-${id}-lv`);
       const targetLvEl = document.getElementById(`summon-${id}-target-lv`);
-
+    
       if (!lvEl || !targetLvEl) return;
-
-      formatLevelWithComma(lvEl);
-      formatLevelWithComma(targetLvEl);
-
+    
       let curLv = parseNumber(lvEl.value);
       let targetLv = parseNumber(targetLvEl.value);
-
+    
+      // 기본 레벨 범위(1 ~ maxLv) 보정
+      if (curLv < 1) curLv = 1;
+      if (curLv > s.maxLv) curLv = s.maxLv;
+    
+      if (targetLv < 1) targetLv = 1;
+      if (targetLv > s.maxLv) targetLv = s.maxLv;
+    
       if (source === 'cur') {
-        if (lvEl.value !== '') {
-          if (curLv < 1) curLv = 1;
-          if (curLv > s.maxLv) curLv = s.maxLv;
-
-          // 현재 레벨을 목표 레벨보다 높게 적을 수 없도록 제약 (목표 레벨 초과 시 목표 레벨로 보정)
-          if (targetLvEl.value !== '' && curLv > targetLv) {
-            curLv = targetLv;
-          }
-          lvEl.value = toCommaStr(curLv);
+        // 현재 레벨 변경 시: 현재 레벨이 목표 레벨보다 높아지면 목표 레벨을 현재 레벨로 자동 상향
+        if (curLv > targetLv) {
+          targetLv = curLv;
         }
       } else if (source === 'target') {
-        if (targetLvEl.value !== '') {
-          if (targetLv > s.maxLv) targetLv = s.maxLv;
-
-          // 목표 레벨을 현재 레벨보다 낮게 적을 수 없도록 제약 (현재 레벨 미만 시 현재 레벨로 보정)
-          if (lvEl.value !== '' && targetLv < curLv) {
-            targetLv = curLv;
-          }
-          targetLvEl.value = toCommaStr(targetLv);
+        // 목표 레벨 변경 시: 목표 레벨이 현재 레벨보다 낮아지면 목표 레벨을 현재 레벨로 자동 보정
+        if (targetLv < curLv) {
+          targetLv = curLv;
         }
       }
+    
+      lvEl.value = toCommaStr(curLv);
+      targetLvEl.value = toCommaStr(targetLv);
     }
 
     function calcSummonStat(id) {
@@ -1943,26 +1943,28 @@
       const currentCntEl = document.getElementById(`summon-${id}-current-cnt`);
       const neededCntEl = document.getElementById(`summon-${id}-needed-cnt`);
       const diaEl = document.getElementById(`summon-${id}-dia`);
-
+    
       let curLv = lvEl.value === '' ? 1 : Math.max(1, Math.min(s.maxLv, parseNumber(lvEl.value)));
-      let targetLv = targetLvEl.value === '' ? curLv : Math.max(curLv, Math.min(s.maxLv, parseNumber(targetLvEl.value)));
+      let rawTarget = targetLvEl.value === '' ? curLv : parseNumber(targetLvEl.value);
+      // 타이핑 중간 단계에서도 계산이 튕기지 않도록 내부 수치를 최소 현재 레벨 이상으로 안전하게 처리
+      let targetLv = Math.max(curLv, Math.min(s.maxLv, rawTarget));
       let currentCnt = parseNumber(currentCntEl.value) || 0;
-
+    
       let totalPullsNeeded = 0;
       if (targetLv > curLv) {
         let currentLevelMaxPull = s.pullsTable[curLv - 1] || 0;
         totalPullsNeeded += Math.max(0, currentLevelMaxPull - currentCnt);
-
+    
         for (let l = curLv + 1; l < targetLv; l++) {
           totalPullsNeeded += (s.pullsTable[l - 1] || 0);
         }
       }
-
+    
       const requiredDia = totalPullsNeeded * s.costPerPull;
-
+    
       neededCntEl.value = toCommaStr(totalPullsNeeded);
       diaEl.value = toCommaStr(requiredDia);
-
+    
       calcTotalSummonSummary();
       calcTargetGradeExpectation();
     }
