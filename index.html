@@ -3500,30 +3500,50 @@
       document.getElementById('guild-ability-expected-rolls').innerText = `${toCommaStr(expectedRolls)} 회`;
       document.getElementById('guild-ability-expected-dice').innerText = `${toCommaStr(totalDice)} 개`;
     }
+
+    /* ===== 던전별 열쇠 색상 매핑 (요청 색상 100% 적용) ===== */
+    const dungeonKeyColors = {
+      gold: '#eab308',    // 1. 골드던전 (노란색)
+      equip: '#6b7280',   // 2. 장비던전 (회색)
+      skill: '#22c55e',   // 3. 스킬던전 (녹색)
+      heart: '#ef4444',   // 4. 하트던전 (빨강)
+      mat: '#1f2937',     // 5. 재료던전 (검정)
+      core: '#3b82f6',    // 6. 코어던전 (파랑)
+      maze: '#a855f7',    // 7. 미궁던전 (보라)
+      day: '#15803d',     // 8. 요일던전 (진녹색)
+      spirit: '#ec4899'   // 9. 정령던전 (핑크)
+    };
     
-    /* ===== 4. 던전별 열쇠 아이콘 및 고유 색상 매핑 데이터 ===== */
+    // 열쇠 벡터 아이콘 생성 함수 (브라우저 이모지 색상 고정 문제 완전 해결)
+    function renderKeyIcon(color) {
+      return `<svg width="15" height="15" viewBox="0 0 24 24" fill="${color}" style="vertical-align: -2px; display: inline-block; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.15));">
+        <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+      </svg>`;
+    }
+    
+    /* ===== 상점 데이터 ===== */
     const guildCoinShopItems = [
-      { id: 'gshop1',  icon: '🗝️', color: '#f59e0b', name: '골드던전 열쇠 1개', max: 3, price: 150, unit: '🪙' },
-      { id: 'gshop2',  icon: '🗝️', color: '#ef4444', name: '장비던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
-      { id: 'gshop3',  icon: '🗝️', color: '#8b5cf6', name: '스킬던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
-      { id: 'gshop4',  icon: '🗝️', color: '#ec4899', name: '하트던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
-      { id: 'gshop5',  icon: '🗝️', color: '#d97706', name: '재료던전 열쇠 1개', max: 3, price: 300, unit: '🪙' },
-      { id: 'gshop6',  icon: '🗝️', color: '#06b6d4', name: '코어던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
-      { id: 'gshop7',  icon: '🗝️', color: '#6366f1', name: '미궁던전 열쇠 1개', max: 3, price: 400, unit: '🪙' },
-      { id: 'gshop8',  icon: '🗝️', color: '#10b981', name: '요일던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
-      { id: 'gshop9',  icon: '🗝️', color: '#14b8a6', name: '정령던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
-      { id: 'gshop10', icon: '⚡', color: '#eab308', name: '가속권(1분) 10개', max: null, price: 100, unit: '🪙' }
+      { id: 'gshop1',  keyType: 'gold',   name: '골드던전 열쇠 1개', max: 3, price: 150, unit: '🪙' },
+      { id: 'gshop2',  keyType: 'equip',  name: '장비던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
+      { id: 'gshop3',  keyType: 'skill',  name: '스킬던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
+      { id: 'gshop4',  keyType: 'heart',  name: '하트던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
+      { id: 'gshop5',  keyType: 'mat',    name: '재료던전 열쇠 1개', max: 3, price: 300, unit: '🪙' },
+      { id: 'gshop6',  keyType: 'core',   name: '코어던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
+      { id: 'gshop7',  keyType: 'maze',   name: '미궁던전 열쇠 1개', max: 3, price: 400, unit: '🪙' },
+      { id: 'gshop8',  keyType: 'day',    name: '요일던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
+      { id: 'gshop9',  keyType: 'spirit', name: '정령던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
+      { id: 'gshop10', isSpeedup: true,   name: '가속권(1분) 10개', max: null, price: 100, unit: '🪙' }
     ];
     
     const tavernCoinShopItems = [
-      { id: 'tshop1', icon: '🗝️', color: '#f59e0b', name: '골드던전 열쇠 1개', max: 3, price: 30, unit: '🍺' },
-      { id: 'tshop2', icon: '🗝️', color: '#ef4444', name: '장비던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
-      { id: 'tshop3', icon: '🗝️', color: '#8b5cf6', name: '스킬던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
-      { id: 'tshop4', icon: '🗝️', color: '#ec4899', name: '하트던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
-      { id: 'tshop5', icon: '🗝️', color: '#06b6d4', name: '코어던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
-      { id: 'tshop6', icon: '🗝️', color: '#6366f1', name: '미궁던전 열쇠 1개', max: 3, price: 80, unit: '🍺' },
-      { id: 'tshop7', icon: '🗝️', color: '#10b981', name: '요일던전 열쇠 1개', max: 3, price: 140, unit: '🍺' },
-      { id: 'tshop8', icon: '🗝️', color: '#14b8a6', name: '정령던전 열쇠 1개', max: 3, price: 120, unit: '🍺' }
+      { id: 'tshop1', keyType: 'gold',   name: '골드던전 열쇠 1개', max: 3, price: 30, unit: '🍺' },
+      { id: 'tshop2', keyType: 'equip',  name: '장비던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
+      { id: 'tshop3', keyType: 'skill',  name: '스킬던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
+      { id: 'tshop4', keyType: 'heart',  name: '하트던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
+      { id: 'tshop5', keyType: 'core',   name: '코어던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
+      { id: 'tshop6', keyType: 'maze',   name: '미궁던전 열쇠 1개', max: 3, price: 80, unit: '🍺' },
+      { id: 'tshop7', keyType: 'day',    name: '요일던전 열쇠 1개', max: 3, price: 140, unit: '🍺' },
+      { id: 'tshop8', keyType: 'spirit', name: '정령던전 열쇠 1개', max: 3, price: 120, unit: '🍺' }
     ];
     
     /* ===== 상점 수량 입력 제한 검증 함수 ===== */
@@ -3537,15 +3557,20 @@
       }
     }
     
-    /* ===== 길드 상점 렌더링 함수 (던전별 고유 색상 및 아이콘 적용) ===== */
+    /* ===== 길드 상점 렌더링 함수 ===== */
     function renderGuildShopItems() {
       const coinListEl = document.getElementById('guild-shop-coin-list');
       if (coinListEl) {
-        coinListEl.innerHTML = guildCoinShopItems.map(item => `
+        coinListEl.innerHTML = guildCoinShopItems.map(item => {
+          const iconHtml = item.isSpeedup 
+            ? `<span style="font-size: 15px;">⚡</span>` 
+            : renderKeyIcon(dungeonKeyColors[item.keyType]);
+    
+          return `
           <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;">
             <div style="display: flex; flex-direction: column; gap: 3px;">
               <div style="font-size: 13px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                <span style="font-size: 16px; color: ${item.color}; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.15));">${item.icon}</span> ${item.name}
+                ${iconHtml} ${item.name}
               </div>
               <div style="font-size: 11px; display: flex; align-items: center; gap: 6px;">
                 <span style="color: #d97706; font-weight: 700;">${toCommaStr(item.price)} ${item.unit}</span>
@@ -3559,16 +3584,20 @@
               <span class="unit" style="font-size: 11px; color: #64748b;">개</span>
             </div>
           </div>
-        `).join('');
+        `;
+        }).join('');
       }
     
     const tavernListEl = document.getElementById('guild-shop-tavern-list');
       if (tavernListEl) {
-        tavernListEl.innerHTML = tavernCoinShopItems.map(item => `
+        tavernListEl.innerHTML = tavernCoinShopItems.map(item => {
+          const iconHtml = renderKeyIcon(dungeonKeyColors[item.keyType]);
+    
+          return `
           <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px;">
             <div style="display: flex; flex-direction: column; gap: 3px;">
               <div style="font-size: 13px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                <span style="font-size: 16px; color: ${item.color}; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.15));">${item.icon}</span> ${item.name}
+                ${iconHtml} ${item.name}
               </div>
               <div style="font-size: 11px; display: flex; align-items: center; gap: 6px;">
                 <span style="color: #0284c7; font-weight: 700;">${toCommaStr(item.price)} ${item.unit}</span>
@@ -3582,7 +3611,8 @@
               <span class="unit" style="font-size: 11px; color: #64748b;">개</span>
             </div>
           </div>
-        `).join('');
+        `;
+        }).join('');
       }
     }
     
