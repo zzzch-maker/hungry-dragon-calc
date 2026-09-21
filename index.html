@@ -851,7 +851,6 @@
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-repeat', this)">🔄 반복미션</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-free-dia', this)">💎 주간상점 무료다이아</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-ad-reward', this)">📺 광고보상</button>
-        <button class="mission-tab-btn" onclick="switchMissionPanel('panel-attendance', this)">📅 출석 보상</button>
       </div>
 
       <div id="panel-daily" class="mission-panel active">
@@ -1612,14 +1611,6 @@
       { pts: 3500, keyType: 'material', name: '재료던전 열쇠', count: 1, color: 'var(--key-material)' }
     ];
 
-    // 기존 attendanceMissionData 부분을 아래 코드로 교체
-    const attendanceMissionData = [
-      { id: 'att1', name: '1. 다이아 출석부 (1일 1회)', rewardText: '+10,000 💎', dia: 10000 },
-      { id: 'att2', name: '2. 티켓 출석부 (1일 1회)', rewardText: '무기 / 갑옷 / 투구 / 스킬 티켓 순환 지급' },
-      { id: 'att3', name: '3. 재료 주머니 출석부 (1일 1회)', rewardText: '재료 주머니 지급 (누적 포인트 +1P)', pts: 1 },
-      { id: 'att4', name: '4. 가속권 출석부 (1일 1회)', rewardText: '가속권 지급' }
-    ];
-        
     const weeklyMissionData = [
       { id: 'w1', name: '로그인 1회', dia: 10000, pts: 500 },
       { id: 'w2', name: '게임플레이 타임 (1800초)', dia: 10000, pts: 500 },
@@ -2195,275 +2186,210 @@
       handleInput();
     }
 
-  function updateAllMissionCalculations() {
-        const days = Math.max(1, parseNumber(document.getElementById('mission-days')?.value) || 1);
-        document.getElementById('days-label-text').innerText = `${toCommaStr(days)}일`;
-  
-        let dailyPts = 0;
-        let dailyMissionDia = 0;
-  
-        dailyMissionData.forEach(m => {
-          const chk = document.getElementById(`chk-daily-${m.id}`);
-          const card = document.getElementById(`card-daily-${m.id}`);
-          if (chk && chk.checked) {
-            dailyPts += m.pts;
-            dailyMissionDia += m.dia;
-            if (card) card.classList.add('checked');
-          } else {
-            if (card) card.classList.remove('checked');
-          }
-        });
-  
-        // --- 출석부 계산 로직 (4가지 항목 반영) ---
-        const chkAtt1 = document.getElementById('chk-att-att1')?.checked || false;
-        const chkAtt3 = document.getElementById('chk-att-att3')?.checked || false;
-  
-        attendanceMissionData.forEach(m => {
-          const chk = document.getElementById(`chk-att-${m.id}`);
-          const card = document.getElementById(`card-att-${m.id}`);
-          if (chk && chk.checked) {
-            if (card) card.classList.add('checked');
-          } else {
-            if (card) card.classList.remove('checked');
-          }
-        });
-  
-        let attDia = chkAtt1 ? 10000 : 0;
-        dailyMissionDia += attDia;
-  
-        let attPts = chkAtt3 ? 1 : 0;
-        const totalPts = days * attPts;
-        // ---------------------------------------------
-  
-        attendanceMilestonesData.forEach(ms => {
-          const box = document.getElementById(`ms-att-${ms.pts}`);
-          if (box) {
-            if (totalPts >= ms.pts) box.classList.add('achieved');
-            else box.classList.remove('achieved');
-          }
-        });
-  
-        const ptsText = document.getElementById('attendance-pts-text');
-        if (ptsText) ptsText.innerText = `${toCommaStr(totalPts % 15 || (totalPts > 0 ? 15 : 0))} / 15 P (총 ${toCommaStr(totalPts)}P)`;
-        const progressFill = document.getElementById('attendance-progress-fill');
-        if (progressFill) progressFill.style.width = `${Math.min(100, ((totalPts % 15 || (totalPts > 0 ? 15 : 0)) / 15) * 100)}%`;
-  
-        const accumCardEl = document.getElementById('attendance-accum-reward-card');
-        if (accumCardEl) {
-          if (!chkAtt3) {
-            accumCardEl.innerHTML = '<span style="color: #94a3b8;">재료 주머니 출석부를 체크하면 3일 주기 누적 보상 계산이 활성화됩니다.</span>';
-          } else {
-            const fullCycles = Math.floor(totalPts / 15);
-            const remainderPts = totalPts % 15;
-            let keyCounts = {};
-            attendanceMilestonesData.forEach(ms => {
-              let times = fullCycles;
-              if (remainderPts >= ms.pts) times += 1;
-              if (times > 0) {
-                keyCounts[ms.keyType] = { name: ms.name, count: times * ms.count, color: ms.color };
-              }
-            });
-  
-            const keysList = Object.keys(keyCounts);
-            if (keysList.length === 0) {
-              accumCardEl.innerHTML = `<span style="color: #94a3b8;">${toCommaStr(days)}일간 달성되는 3일 주기 누적 보상이 없습니다 (최소 3일 이상 필요).</span>`;
-            } else {
-              let badgeHtml = keysList.map(kt => {
-                const it = keyCounts[kt];
-                return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-                  ${getKeySvg(it.color)} ${it.name} x${toCommaStr(it.count)}
-                </span>`;
-              }).join('');
-              accumCardEl.innerHTML = `<div style="line-height:1.6; margin-bottom:4px;"><strong>${toCommaStr(days)}일간 출석부 누적 획득 보상 (3일 주기):</strong></div><div class="item-badge-list" style="justify-content: flex-start; margin-top:4px;">${badgeHtml}</div>`;
-            }
-          }
-        }
-  
-        let dailyAcquiredKeys = {};
-        dailyMilestonesData.forEach(ms => {
-          const box = document.getElementById(`ms-daily-${ms.pts}`);
-          if (dailyPts >= ms.pts) {
-            dailyAcquiredKeys[ms.keyType] = (dailyAcquiredKeys[ms.keyType] || 0) + ms.count;
-            if (box) box.classList.add('achieved');
-          } else {
-            if (box) box.classList.remove('achieved');
-          }
-        });
-  
-        document.getElementById('daily-pts-text').innerText = `${toCommaStr(dailyPts)} / 3,500 P`;
-        document.getElementById('daily-progress-fill').style.width = `${Math.min(100, (dailyPts / 3500) * 100)}%`;
-  
-        document.getElementById('sum-daily-pts').innerText = `${toCommaStr(dailyPts)} P`;
-        document.getElementById('sum-daily-mission-dia').innerText = `${toCommaStr(dailyMissionDia)} 💎`;
-        document.getElementById('sum-daily-total-dia').innerText = `${toCommaStr(dailyMissionDia)} 💎`;
-  
-        const dailyItemSummaryEl = document.getElementById('sum-daily-items');
-        const dailyKeysList = Object.keys(dailyAcquiredKeys);
-        if (dailyKeysList.length === 0) {
-          dailyItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
+    function updateAllMissionCalculations() {
+      const days = Math.max(1, parseNumber(document.getElementById('mission-days')?.value) || 1);
+      document.getElementById('days-label-text').innerText = `${toCommaStr(days)}일`;
+
+      let dailyPts = 0;
+      let dailyMissionDia = 0;
+
+      dailyMissionData.forEach(m => {
+        const chk = document.getElementById(`chk-daily-${m.id}`);
+        const card = document.getElementById(`card-daily-${m.id}`);
+        if (chk && chk.checked) {
+          dailyPts += m.pts;
+          dailyMissionDia += m.dia;
+          if (card) card.classList.add('checked');
         } else {
-          dailyItemSummaryEl.innerHTML = dailyKeysList.map(kt => {
-            const cfg = dailyMilestonesData.find(x => x.keyType === kt);
-            return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-              ${getKeySvg(cfg.color)} ${cfg.name} x${dailyAcquiredKeys[kt]}
-            </span>`;
-          }).join('');
+          if (card) card.classList.remove('checked');
         }
-  
-        let weeklyPts = 0;
-        let weeklyTotalDia = 0;
-  
-        weeklyMissionData.forEach(m => {
-          const chk = document.getElementById(`chk-weekly-${m.id}`);
-          const card = document.getElementById(`card-weekly-${m.id}`);
-          if (chk && chk.checked) {
-            weeklyPts += m.pts;
-            weeklyTotalDia += m.dia;
-            if (card) card.classList.add('checked');
-          } else {
-            if (card) card.classList.remove('checked');
-          }
-        });
-  
-        let weeklyAcquiredKeys = {};
-        weeklyMilestonesData.forEach(ms => {
-          const box = document.getElementById(`ms-weekly-${ms.pts}`);
-          if (weeklyPts >= ms.pts) {
-            ms.items.forEach(it => {
-              weeklyAcquiredKeys[it.keyType] = (weeklyAcquiredKeys[it.keyType] || 0) + it.count;
-            });
-            if (box) box.classList.add('achieved');
-          } else {
-            if (box) box.classList.remove('achieved');
-          }
-        });
-  
-        const weeklyDailyAvgDia = Math.floor(weeklyTotalDia / 7);
-  
-        document.getElementById('weekly-pts-text').innerText = `${toCommaStr(weeklyPts)} / 4,000 P`;
-        document.getElementById('weekly-progress-fill').style.width = `${Math.min(100, (weeklyPts / 4000) * 100)}%`;
-  
-        document.getElementById('sum-weekly-pts').innerText = `${toCommaStr(weeklyPts)} P`;
-        document.getElementById('sum-weekly-total-dia').innerText = `${toCommaStr(weeklyTotalDia)} 💎`;
-        document.getElementById('sum-weekly-daily-avg-dia').innerText = `${toCommaStr(weeklyDailyAvgDia)} 💎/일`;
-  
-        const weeklyItemSummaryEl = document.getElementById('sum-weekly-items');
-        const weeklyKeysList = Object.keys(weeklyAcquiredKeys);
-        if (weeklyKeysList.length === 0) {
-          weeklyItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
+      });
+
+      let dailyAcquiredKeys = {};
+      dailyMilestonesData.forEach(ms => {
+        const box = document.getElementById(`ms-daily-${ms.pts}`);
+        if (dailyPts >= ms.pts) {
+          dailyAcquiredKeys[ms.keyType] = (dailyAcquiredKeys[ms.keyType] || 0) + ms.count;
+          if (box) box.classList.add('achieved');
         } else {
-          weeklyItemSummaryEl.innerHTML = weeklyKeysList.map(kt => {
-            const cfg = dailyMilestonesData.find(x => x.keyType === kt);
-            return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-              ${getKeySvg(cfg.color)} ${cfg.name} x${weeklyAcquiredKeys[kt]}
-            </span>`;
-          }).join('');
+          if (box) box.classList.remove('achieved');
         }
-  
-        let repeat1DayDia = 0;
-        repeatMissionData.forEach(m => {
-          const cntVal = parseNumber(document.getElementById(`input-repeat-cnt-${m.id}`)?.value) || 0;
-          const completedTimes = Math.floor(cntVal / m.targetPerCount);
-          repeat1DayDia += completedTimes * m.diaPerCount;
-        });
-  
-        document.getElementById('sum-repeat-total-dia').innerText = `${toCommaStr(repeat1DayDia)} 💎`;
-  
-        let freeDiaTotal = 0;
-        freeDiaData.forEach(m => {
-          const chk = document.getElementById(`chk-freedia-${m.id}`);
-          const card = document.getElementById(`card-freedia-${m.id}`);
-          if (chk && chk.checked) {
-            freeDiaTotal += m.dia;
-            if (card) card.classList.add('checked');
-          } else {
-            if (card) card.classList.remove('checked');
-          }
-        });
-        document.getElementById('sum-free-dia-total').innerText = `${toCommaStr(freeDiaTotal)} 💎`;
-  
-        let adDiaTotal = 0;
-        let adAcquiredItems = {};
-        adRewardData.forEach(m => {
-          const chk = document.getElementById(`chk-ad-${m.id}`);
-          const card = document.getElementById(`card-ad-${m.id}`);
-          if (chk && chk.checked) {
-            adDiaTotal += m.dia;
-            if (m.items) {
-              m.items.forEach(it => {
-                adAcquiredItems[it.keyType] = { name: it.name, count: (adAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
-              });
-            }
-            if (card) card.classList.add('checked');
-          } else {
-            if (card) card.classList.remove('checked');
-          }
-        });
-        document.getElementById('sum-ad-dia-total').innerText = `${toCommaStr(adDiaTotal)} 💎`;
-  
-        const adItemSummaryEl = document.getElementById('sum-ad-items');
-        const adItemKeys = Object.keys(adAcquiredItems);
-        if (adItemKeys.length === 0) {
-          adItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 광고보상 아이템 없음</span>`;
-        } else {
-          adItemSummaryEl.innerHTML = adItemKeys.map(kt => {
-            const it = adAcquiredItems[kt];
-            return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-              ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${it.count}
-            </span>`;
-          }).join('');
-        }
-  
-        const dailyPlusRepeatAndAdDia = dailyMissionDia + repeat1DayDia + adDiaTotal;
-        const periodTotalDia = dailyPlusRepeatAndAdDia * days;
-        document.getElementById('top-total-period-dia').innerText = `${toCommaStr(periodTotalDia)} 💎`;
-  
-        const topPeriodKeysEl = document.getElementById('top-total-period-keys');
-        let combinedPeriodItems = {};
-        dailyKeysList.forEach(kt => {
+      });
+
+      document.getElementById('daily-pts-text').innerText = `${toCommaStr(dailyPts)} / 3,500 P`;
+      document.getElementById('daily-progress-fill').style.width = `${Math.min(100, (dailyPts / 3500) * 100)}%`;
+
+      document.getElementById('sum-daily-pts').innerText = `${toCommaStr(dailyPts)} P`;
+      document.getElementById('sum-daily-mission-dia').innerText = `${toCommaStr(dailyMissionDia)} 💎`;
+      document.getElementById('sum-daily-total-dia').innerText = `${toCommaStr(dailyMissionDia)} 💎`;
+
+      const dailyItemSummaryEl = document.getElementById('sum-daily-items');
+      const dailyKeysList = Object.keys(dailyAcquiredKeys);
+      if (dailyKeysList.length === 0) {
+        dailyItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
+      } else {
+        dailyItemSummaryEl.innerHTML = dailyKeysList.map(kt => {
           const cfg = dailyMilestonesData.find(x => x.keyType === kt);
-          combinedPeriodItems[kt] = { name: cfg.name, count: dailyAcquiredKeys[kt] * days, color: cfg.color };
-        });
-        adItemKeys.forEach(kt => {
-          const it = adAcquiredItems[kt];
-          combinedPeriodItems[kt] = { name: it.name, count: (combinedPeriodItems[kt]?.count || 0) + (it.count * days), color: it.color };
-        });
-  
-        const combinedPeriodKeysList = Object.keys(combinedPeriodItems);
-        if (combinedPeriodKeysList.length === 0) {
-          topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 아이템 없음</span>`;
-        } else {
-          topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
-            const it = combinedPeriodItems[kt];
-            return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-              ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${toCommaStr(it.count)}
-            </span>`;
-          }).join('');
-        }
-  
-        const totalWeeklyExtraDia = weeklyTotalDia + freeDiaTotal;
-        document.getElementById('top-weekly-extra-dia').innerText = `${toCommaStr(totalWeeklyExtraDia)} 💎`;
-  
-        let combinedWeeklyItems = {};
-        weeklyKeysList.forEach(kt => {
-          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
-          combinedWeeklyItems[kt] = { name: cfg.name, count: weeklyAcquiredKeys[kt], color: cfg.color };
-        });
-  
-        const topWeeklyKeysEl = document.getElementById('top-weekly-extra-keys');
-        const combinedWeeklyKeysList = Object.keys(combinedWeeklyItems);
-        if (combinedWeeklyKeysList.length === 0 && freeDiaTotal === 0) {
-          topWeeklyKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">주간 추가 보상 없음</span>`;
-        } else {
-          let badgeHtml = combinedWeeklyKeysList.map(kt => {
-            const it = combinedWeeklyItems[kt];
-            return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-              ${getKeySvg(it.color)} ${it.name} x${it.count}
-            </span>`;
-          }).join('');
-          topWeeklyKeysEl.innerHTML = badgeHtml;
-        }
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${getKeySvg(cfg.color)} ${cfg.name} x${dailyAcquiredKeys[kt]}
+          </span>`;
+        }).join('');
       }
+
+      let weeklyPts = 0;
+      let weeklyTotalDia = 0;
+
+      weeklyMissionData.forEach(m => {
+        const chk = document.getElementById(`chk-weekly-${m.id}`);
+        const card = document.getElementById(`card-weekly-${m.id}`);
+        if (chk && chk.checked) {
+          weeklyPts += m.pts;
+          weeklyTotalDia += m.dia;
+          if (card) card.classList.add('checked');
+        } else {
+          if (card) card.classList.remove('checked');
+        }
+      });
+
+      let weeklyAcquiredKeys = {};
+      weeklyMilestonesData.forEach(ms => {
+        const box = document.getElementById(`ms-weekly-${ms.pts}`);
+        if (weeklyPts >= ms.pts) {
+          ms.items.forEach(it => {
+            weeklyAcquiredKeys[it.keyType] = (weeklyAcquiredKeys[it.keyType] || 0) + it.count;
+          });
+          if (box) box.classList.add('achieved');
+        } else {
+          if (box) box.classList.remove('achieved');
+        }
+      });
+
+      const weeklyDailyAvgDia = Math.floor(weeklyTotalDia / 7);
+
+      document.getElementById('weekly-pts-text').innerText = `${toCommaStr(weeklyPts)} / 4,000 P`;
+      document.getElementById('weekly-progress-fill').style.width = `${Math.min(100, (weeklyPts / 4000) * 100)}%`;
+
+      document.getElementById('sum-weekly-pts').innerText = `${toCommaStr(weeklyPts)} P`;
+      document.getElementById('sum-weekly-total-dia').innerText = `${toCommaStr(weeklyTotalDia)} 💎`;
+      document.getElementById('sum-weekly-daily-avg-dia').innerText = `${toCommaStr(weeklyDailyAvgDia)} 💎/일`;
+
+      const weeklyItemSummaryEl = document.getElementById('sum-weekly-items');
+      const weeklyKeysList = Object.keys(weeklyAcquiredKeys);
+      if (weeklyKeysList.length === 0) {
+        weeklyItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">포인트 달성 보상 없음</span>`;
+      } else {
+        weeklyItemSummaryEl.innerHTML = weeklyKeysList.map(kt => {
+          const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${getKeySvg(cfg.color)} ${cfg.name} x${weeklyAcquiredKeys[kt]}
+          </span>`;
+        }).join('');
+      }
+
+      let repeat1DayDia = 0;
+      repeatMissionData.forEach(m => {
+        const cntVal = parseNumber(document.getElementById(`input-repeat-cnt-${m.id}`)?.value) || 0;
+        const completedTimes = Math.floor(cntVal / m.targetPerCount);
+        repeat1DayDia += completedTimes * m.diaPerCount;
+      });
+
+      document.getElementById('sum-repeat-total-dia').innerText = `${toCommaStr(repeat1DayDia)} 💎`;
+
+      let freeDiaTotal = 0;
+      freeDiaData.forEach(m => {
+        const chk = document.getElementById(`chk-freedia-${m.id}`);
+        const card = document.getElementById(`card-freedia-${m.id}`);
+        if (chk && chk.checked) {
+          freeDiaTotal += m.dia;
+          if (card) card.classList.add('checked');
+        } else {
+          if (card) card.classList.remove('checked');
+        }
+      });
+      document.getElementById('sum-free-dia-total').innerText = `${toCommaStr(freeDiaTotal)} 💎`;
+
+      let adDiaTotal = 0;
+      let adAcquiredItems = {};
+      adRewardData.forEach(m => {
+        const chk = document.getElementById(`chk-ad-${m.id}`);
+        const card = document.getElementById(`card-ad-${m.id}`);
+        if (chk && chk.checked) {
+          adDiaTotal += m.dia;
+          if (m.items) {
+            m.items.forEach(it => {
+              adAcquiredItems[it.keyType] = { name: it.name, count: (adAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
+            });
+          }
+          if (card) card.classList.add('checked');
+        } else {
+          if (card) card.classList.remove('checked');
+        }
+      });
+      document.getElementById('sum-ad-dia-total').innerText = `${toCommaStr(adDiaTotal)} 💎`;
+
+      const adItemSummaryEl = document.getElementById('sum-ad-items');
+      const adItemKeys = Object.keys(adAcquiredItems);
+      if (adItemKeys.length === 0) {
+        adItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 광고보상 아이템 없음</span>`;
+      } else {
+        adItemSummaryEl.innerHTML = adItemKeys.map(kt => {
+          const it = adAcquiredItems[kt];
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${it.count}
+          </span>`;
+        }).join('');
+      }
+
+      const dailyPlusRepeatAndAdDia = dailyMissionDia + repeat1DayDia + adDiaTotal;
+      const periodTotalDia = dailyPlusRepeatAndAdDia * days;
+      document.getElementById('top-total-period-dia').innerText = `${toCommaStr(periodTotalDia)} 💎`;
+
+      const topPeriodKeysEl = document.getElementById('top-total-period-keys');
+      let combinedPeriodItems = {};
+      dailyKeysList.forEach(kt => {
+        const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+        combinedPeriodItems[kt] = { name: cfg.name, count: dailyAcquiredKeys[kt] * days, color: cfg.color };
+      });
+      adItemKeys.forEach(kt => {
+        const it = adAcquiredItems[kt];
+        combinedPeriodItems[kt] = { name: it.name, count: (combinedPeriodItems[kt]?.count || 0) + (it.count * days), color: it.color };
+      });
+
+      const combinedPeriodKeysList = Object.keys(combinedPeriodItems);
+      if (combinedPeriodKeysList.length === 0) {
+        topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 아이템 없음</span>`;
+      } else {
+        topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
+          const it = combinedPeriodItems[kt];
+          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
+            ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${toCommaStr(it.count)}
+          </span>`;
+        }).join('');
+      }
+
+      const totalWeeklyExtraDia = weeklyTotalDia + freeDiaTotal;
+      document.getElementById('top-weekly-extra-dia').innerText = `${toCommaStr(totalWeeklyExtraDia)} 💎`;
+
+      let combinedWeeklyItems = {};
+      weeklyKeysList.forEach(kt => {
+        const cfg = dailyMilestonesData.find(x => x.keyType === kt);
+        combinedWeeklyItems[kt] = { name: cfg.name, count: weeklyAcquiredKeys[kt], color: cfg.color };
+      });
+
+      const topWeeklyKeysEl = document.getElementById('top-weekly-extra-keys');
+      const combinedWeeklyKeysList = Object.keys(combinedWeeklyItems);
+      if (combinedWeeklyKeysList.length === 0 && freeDiaTotal === 0) {
+        topWeeklyKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">주간 추가 보상 없음</span>`;
+      } else {
+        let badgeHtml = combinedWeeklyKeysList.map(kt => {
+          const it = combinedWeeklyItems[kt];
+          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
+            ${getKeySvg(it.color)} ${it.name} x${it.count}
+          </span>`;
+        }).join('');
+        topWeeklyKeysEl.innerHTML = badgeHtml;
+      }
+    }
 
     /* ===== 소환 레벨 상호 제약 검증 함수 (수정 반영) ===== */
     function validateSummonLevel(id, source = 'cur') {
