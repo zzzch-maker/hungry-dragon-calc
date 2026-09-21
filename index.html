@@ -1694,9 +1694,34 @@
       }
     ];
 
-    const attendanceData = [
-      { id: 'att1', name: '일일 출석 보상', dia: 5000, items: [] }
-    ];
+  const attendanceData = [
+        { id: 'att1', name: '1. 다이아 출석부', dia: 10000, items: [] },
+        { 
+          id: 'att2', 
+          name: '2. 티켓 출석부', 
+          dia: 0, 
+          items: [
+            { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
+            { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' }
+          ] 
+        },
+        { 
+          id: 'att3', 
+          name: '3. 재료 주머니 출석부', 
+          dia: 0, 
+          items: [
+            { keyType: 'material', name: '재료던전 열쇠', count: 5, color: 'var(--key-material)' }
+          ] 
+        },
+        { 
+          id: 'att4', 
+          name: '4. 가속권(1분) 출석부', 
+          dia: 0, 
+          items: [
+            { keyType: 'ticket', name: '가속권(1분)', count: 100, color: 'var(--key-ticket)' }
+          ] 
+        }
+      ];
 
     /* ===== 레벨별 소환량 데이터 ===== */
     const equipPullsTable = [300, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000, 33000, 36000, 39000, 42000, 45000, 48000, 51000, 54000, 57000];
