@@ -836,16 +836,6 @@
           <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 6px;">
             🎁 [주 1회 추가 획득 가능 항목] (주간미션 완료 보상 + 주간 상점 무료 다이아)
           </div>
-                <!-- [3일 1회 추가 획득 가능 항목] 블록 추가 -->
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #475569; margin-top: 8px;">
-          <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 6px;">
-            🎁 [3일 1회 추가 획득 가능 항목] (재료 주머니 출석부 누적 보상)
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
-            획득 항목: <div class="item-badge-list" id="top-attendance-extra-keys" style="margin-top: 0;"></div>
-          </div>
-        </div>
-          
           <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center; font-size: 13px;">
             <div>총 다이아: <strong style="color: #38bdf8;" id="top-weekly-extra-dia">0 💎</strong></div>
             <div style="display: flex; align-items: center; gap: 6px;">
@@ -854,7 +844,6 @@
           </div>
         </div>
       </div>
-
 
       <div class="mission-sub-nav">
         <button class="mission-tab-btn active" onclick="switchMissionPanel('panel-daily', this)">☀️ 일일미션</button>
@@ -1040,6 +1029,22 @@
         </div>
 
         <div class="mission-grid" id="attendance-grid"></div>
+
+        <!-- 출석 누적 포인트 진행바 영역 -->
+        <div class="point-progress-card">
+          <div class="progress-header" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <strong style="font-size: 14px; color: var(--text-main);">🎯 재료 주머니 출석 누적 보상 (3일 주기)</strong>
+              <span id="attendance-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 15 P</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-sub);">💡 재료 주머니 출석 체크 3회(3일)마다 보상을 획득할 수 있습니다.</div>
+          </div>
+          <div class="progress-bar-bg" style="margin-top: 8px;">
+            <div class="progress-bar-fill" id="attendance-progress-fill"></div>
+          </div>
+
+          <div class="point-milestones" id="attendance-milestones"></div>
+        </div>
 
         <div class="mission-summary-card">
           <div class="mission-summary-title">📊 출석 보상 1일 획득 결과</div>
@@ -1720,45 +1725,37 @@
         { pts: 15, days: 15, items: attendanceKeysStandard }
       ];
   
-const attendanceKeysStandard = [
-      { keyType: 'gold', name: '골드던전 열쇠', count: 3, color: 'var(--key-gold)' },
-      { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
-      { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' },
-      { keyType: 'heart', name: '하트던전 열쇠', count: 3, color: 'var(--key-heart)' }
-    ];
-
-    const attendanceData = [
-      { id: 'att1', name: '1. 다이아 출석부', dia: 10000, pts: 0, items: [] },
-      { 
-        id: 'att2', 
-        name: '2. 티켓 출석부', 
-        dia: 0, 
-        pts: 0,
-        items: [
-          { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
-          { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' }
-        ] 
-      },
-      { 
-        id: 'att3', 
-        name: '3. 재료 주머니 출석부', 
-        dia: 0, 
-        pts: 1, // 1일 체크당 1점 (3일 체크 시 3점 도달)
-        note: '3일 1회 누적보상 별도 지급',
-        items: [
-          { keyType: 'material', name: '재료던전 열쇠', count: 5, color: 'var(--key-material)' }
-        ] 
-      },
-      { 
-        id: 'att4', 
-        name: '4. 가속권(1분) 출석부', 
-        dia: 0, 
-        pts: 0,
-        items: [
-          { keyType: 'ticket', name: '가속권(1분)', count: 100, color: 'var(--key-ticket)' }
-        ] 
-      }
-    ];
+      const attendanceData = [
+        { id: 'att1', name: '1. 다이아 출석부', dia: 10000, pts: 0, items: [] },
+        { 
+          id: 'att2', 
+          name: '2. 티켓 출석부', 
+          dia: 0, 
+          pts: 0,
+          items: [
+            { keyType: 'equip', name: '장비던전 열쇠', count: 3, color: 'var(--key-equip)' },
+            { keyType: 'skill', name: '스킬던전 열쇠', count: 3, color: 'var(--key-skill)' }
+          ] 
+        },
+        { 
+          id: 'att3', 
+          name: '3. 재료 주머니 출석부', 
+          dia: 0, 
+          pts: 3, // 체크 시 포인트 3점 획득
+          items: [
+            { keyType: 'material', name: '재료던전 열쇠', count: 5, color: 'var(--key-material)' }
+          ] 
+        },
+        { 
+          id: 'att4', 
+          name: '4. 가속권(1분) 출석부', 
+          dia: 0, 
+          pts: 0,
+          items: [
+            { keyType: 'ticket', name: '가속권(1분)', count: 100, color: 'var(--key-ticket)' }
+          ] 
+        }
+      ];
 
     /* ===== 레벨별 소환량 데이터 ===== */
     const equipPullsTable = [300, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000, 33000, 36000, 39000, 42000, 45000, 48000, 51000, 54000, 57000];
@@ -2008,9 +2005,8 @@ const attendanceKeysStandard = [
           ` : ''}
         </div>
       `).join('');
-      }
 
-const attendanceGrid = document.getElementById('attendance-grid');
+      const attendanceGrid = document.getElementById('attendance-grid');
       attendanceGrid.innerHTML = attendanceData.map(m => `
         <div class="mission-card" id="card-attendance-${m.id}" style="flex-direction: column; align-items: stretch; justify-content: space-between;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -2023,16 +2019,16 @@ const attendanceGrid = document.getElementById('attendance-grid');
             <input type="checkbox" id="chk-attendance-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllMissionCalculations(); handleInput();">
           </div>
           ${m.items && m.items.length > 0 ? `
-            <div style="margin-top: 6px; border-top: 1px dashed var(--border); padding-top: 6px;">
+            <div style="margin-top: 6px; border-top: 1px dashed var(--border); pt-2;">
               <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 4px;">포함 아이템:</div>
               <div class="item-badge-list" style="justify-content: flex-start;">
                 ${m.items.map(it => `<span class="item-badge">${getKeySvg(it.color)} ${it.name} x${it.count}</span>`).join('')}
               </div>
             </div>
           ` : ''}
-          ${m.note ? `<div style="font-size: 11px; color: #ef4444; font-weight: 700; margin-top: 6px;">* ${m.note}</div>` : ''}
         </div>
       `).join('');
+    }
 
   const attendanceMilestoneContainer = document.getElementById('attendance-milestones');
         if (attendanceMilestoneContainer) {
@@ -2462,61 +2458,57 @@ const attendanceGrid = document.getElementById('attendance-grid');
         }).join('');
       }
 
-      let attendanceDiaTotal = 0;
-      let attendancePtsTotal1Day = 0;
-      let attendanceAcquiredItems = {};
-      
-      attendanceData.forEach(m => {
-        const chk = document.getElementById(`chk-attendance-${m.id}`);
-        const card = document.getElementById(`card-attendance-${m.id}`);
-        if (chk && chk.checked) {
-          attendanceDiaTotal += m.dia;
-          attendancePtsTotal1Day += (m.pts || 0);
-          if (m.items) {
-            m.items.forEach(it => {
+  let attendanceDiaTotal = 0;
+        let attendancePtsTotal = 0;
+        let attendanceAcquiredItems = {};
+        
+        attendanceData.forEach(m => {
+          const chk = document.getElementById(`chk-attendance-${m.id}`);
+          const card = document.getElementById(`card-attendance-${m.id}`);
+          if (chk && chk.checked) {
+            attendanceDiaTotal += m.dia;
+            attendancePtsTotal += (m.pts || 0);
+            if (m.items) {
+              m.items.forEach(it => {
+                attendanceAcquiredItems[it.keyType] = { name: it.name, count: (attendanceAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
+              });
+            }
+            if (card) card.classList.add('checked');
+          } else {
+            if (card) card.classList.remove('checked');
+          }
+        });
+  attendanceMilestonesData.forEach(ms => {
+          const box = document.getElementById(`ms-attendance-${ms.pts}`);
+          if (attendancePtsTotal >= ms.pts) {
+            ms.items.forEach(it => {
               attendanceAcquiredItems[it.keyType] = { name: it.name, count: (attendanceAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
             });
+            if (box) box.classList.add('achieved');
+          } else {
+            if (box) box.classList.remove('achieved');
           }
-          if (card) card.classList.add('checked');
-        } else {
-          if (card) card.classList.remove('checked');
-        }
-      });
-
-      const sumAttDiaEl = document.getElementById('sum-attendance-dia-total');
-      if (sumAttDiaEl) sumAttDiaEl.innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
-
-      const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
-      const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
-      if (attendanceItemSummaryEl) {
+        });
+  
+        const attPtsTextEl = document.getElementById('attendance-pts-text');
+        if (attPtsTextEl) attPtsTextEl.innerText = `${attendancePtsTotal} / 15 P`;
+        const attProgressFill = document.getElementById('attendance-progress-fill');
+        if (attProgressFill) attProgressFill.style.width = `${Math.min(100, (attendancePtsTotal / 15) * 100)}%`;
+  
+        document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
+  
+        const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
+        const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
         if (attendanceItemKeys.length === 0) {
           attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
         } else {
           attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
             const it = attendanceAcquiredItems[kt];
             return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-              ${getKeySvg(it.color)} ${it.name} x${it.count}
+              ${kt === 'ticket' ? getTicketSvg(it.color) : getKeySvg(it.color)} ${it.name} x${it.count}
             </span>`;
           }).join('');
         }
-      }
-
-      // 3일 1회 누적 보상 계산 및 안전 반영
-      const totalAttPts = attendancePtsTotal1Day * days;
-      const attendanceCycles = Math.floor(totalAttPts / 3);
-      
-      let topAttendanceExtraEl = document.getElementById('top-attendance-extra-keys');
-      if (topAttendanceExtraEl) {
-        if (attendanceCycles <= 0) {
-          topAttendanceExtraEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">재료 주머니 출석부 미체크 또는 기간 부족</span>`;
-        } else {
-          topAttendanceExtraEl.innerHTML = attendanceKeysStandard.map(it => `
-            <span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-              ${getKeySvg(it.color)} ${it.name} x${it.count * attendanceCycles}
-            </span>
-          `).join('');
-        }
-      }
 
       const dailyPlusRepeatAndAdAndAttendanceDia = dailyMissionDia + repeat1DayDia + adDiaTotal + attendanceDiaTotal;
       const periodTotalDia = dailyPlusRepeatAndAdAndAttendanceDia * days;
