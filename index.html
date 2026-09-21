@@ -817,7 +817,7 @@
             </div>
           </div>
           <div style="font-size: 12px; color: #94a3b8; margin-top: 16px;">
-            * 아래 체크/입력된 일일·반복·광고보상 등을 <span id="days-label-text" style="color: #38bdf8; font-weight: 700;">1일</span> 동안 수행했을 때의 종합입니다.
+            * 아래 체크/입력된 일일·반복·광고·출석보상 등을 <span id="days-label-text" style="color: #38bdf8; font-weight: 700;">1일</span> 동안 수행했을 때의 종합입니다.
           </div>
         </div>
 
@@ -851,6 +851,7 @@
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-repeat', this)">🔄 반복미션</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-free-dia', this)">💎 주간상점 무료다이아</button>
         <button class="mission-tab-btn" onclick="switchMissionPanel('panel-ad-reward', this)">📺 광고보상</button>
+        <button class="mission-tab-btn" onclick="switchMissionPanel('panel-attendance', this)">🗓️ 출석 보상</button>
       </div>
 
       <div id="panel-daily" class="mission-panel active">
@@ -1010,6 +1011,36 @@
           <div>
             <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">🎁 획득 아이템 목록 (던전 열쇠 및 가속권):</div>
             <div class="item-badge-list" id="sum-ad-items" style="justify-content: flex-start;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 출석 보상 패널 추가 -->
+      <div id="panel-attendance" class="mission-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div>
+            <strong style="font-size: 15px;">🗓️ 출석 보상 항목 (1일 기준)</strong>
+            <p style="font-size: 12px; color: var(--text-sub); margin-top: 4px;">* 게임 접속 시 획득 가능한 일일 출석 보상입니다.</p>
+          </div>
+          <div>
+            <button onclick="toggleAllAttendance(true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
+            <button onclick="toggleAllAttendance(false)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 해제</button>
+          </div>
+        </div>
+
+        <div class="mission-grid" id="attendance-grid"></div>
+
+        <div class="mission-summary-card">
+          <div class="mission-summary-title">📊 출석 보상 1일 획득 결과</div>
+          <div class="summary-grid-3">
+            <div class="summary-item">
+              <div class="summary-item-label">출석보상 총 다이아</div>
+              <div class="summary-item-val" id="sum-attendance-dia-total" style="color: #38bdf8;">0 💎</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">🎁 획득 아이템 목록:</div>
+            <div class="item-badge-list" id="sum-attendance-items" style="justify-content: flex-start;"></div>
           </div>
         </div>
       </div>
@@ -1185,7 +1216,7 @@
     
         <div class="mission-grid" id="guild-daily-activity-grid"></div>
     
-        <!-- 일일 길드 활동 보상 결과 (용사의 주점 코인 삭제, 길드EXP/소모 다이아 적용) -->
+        <!-- 일일 길드 활동 보상 결과 -->
         <div class="mission-summary-card">
           <div class="mission-summary-title">📊 일일 길드 활동 결과 (1일 기준)</div>
           <div class="summary-grid-3">
@@ -1205,7 +1236,7 @@
         </div>
       </div>
     
-    <!-- Panel 2) 길드 미션 (요청 내용 반영) -->
+    <!-- Panel 2) 길드 미션 -->
       <div id="guild-panel-mission" class="guild-panel" style="display:none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <strong style="font-size: 15px;">📜 길드 미션 목록 (1일 기준)</strong>
@@ -1215,10 +1246,8 @@
           </div>
         </div>
     
-        <!-- 미션 리스트 영역 -->
         <div class="mission-grid" id="guild-mission-list-grid"></div>
     
-        <!-- 누적 포인트 진행바 카드 -->
         <div class="point-progress-card">
           <div class="progress-header">
             <strong style="font-size: 14px; color: var(--text-main);">🎯 길드 미션 누적 포인트 보상</strong>
@@ -1228,11 +1257,9 @@
             <div class="progress-bar-fill" id="guild-mission-progress-fill"></div>
           </div>
     
-          <!-- 마일스톤 5단계 출력 영역 -->
           <div class="point-milestones" id="guild-mission-milestones"></div>
         </div>
     
-        <!-- 미션 종합 결과 요약 -->
         <div class="mission-summary-card">
           <div class="mission-summary-title">📊 길드 미션 보상 계산 결과 (1일 기준)</div>
           <div class="summary-grid-3" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
@@ -1303,7 +1330,6 @@
             </div>
           </div>
     
-          <!-- 길드 렙업 수치 종합 현황 -->
           <div class="category-summary-grid" style="margin-bottom: 16px;">
             <div class="cat-summary-card">
               <div class="cat-summary-title">현재 최대 인원 제한</div>
@@ -1323,7 +1349,6 @@
             </div>
           </div>
     
-          <!-- 레벨별 적용 버프 능력치 비교 (현재 vs 목표 + 상승폭 표시) -->
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
             <div style="background: #f8fafc; border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
               <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
@@ -1407,12 +1432,11 @@
         </div>
       </div>
     
-    <!-- Panel 5) 길드 상점 (가독성 개편) -->
+    <!-- Panel 5) 길드 상점 -->
       <div id="guild-panel-shop" class="guild-panel" style="display:none;">
         <div class="invest-card">
           <div class="invest-title">🛒 길드 상점 구매 계산기</div>
     
-    <!-- 길드 코인 상점 -->
           <div style="margin-bottom: 20px;">
             <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">
               🪙 길드 코인 상점 아이템
@@ -1420,7 +1444,6 @@
             <div id="guild-shop-coin-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;"></div>
           </div>
     
-          <!-- 용사의 주점 코인 상점 -->
           <div style="margin-bottom: 20px;">
             <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px;">
               🍺 용사의 주점 코인 상점 아이템
@@ -1428,7 +1451,6 @@
             <div id="guild-shop-tavern-list" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;"></div>
           </div>
     
-    <!-- 상점 구매 총 필요 코인 요약 -->
           <div class="category-summary-grid">
             <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
               <div class="cat-summary-title" style="color: #94a3b8;">구매에 필요한 총 길드 코인</div>
@@ -1672,6 +1694,10 @@
       }
     ];
 
+    const attendanceData = [
+      { id: 'att1', name: '일일 출석 보상', dia: 5000, items: [] }
+    ];
+
     /* ===== 레벨별 소환량 데이터 ===== */
     const equipPullsTable = [300, 3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000, 33000, 36000, 39000, 42000, 45000, 48000, 51000, 54000, 57000];
     const skillPullsTable = [1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500];
@@ -1749,9 +1775,9 @@
       "A-T1": [0, 0.2500, 0.3750, 0.6250, 0.7500, 0.8750, 1.0000, 1.1250, 1.2500, 1.3750],
 
       "S-T4": [0, 0, 0.0750, 0.1000, 0.1250, 0.1500, 0.1750, 0.2000, 0.2250, 0.2500],
-      "S-T3": [0, 0, 0.0750, 0.1000, 0.1250, 0.1500, 0.1750, 0.2000, 0.2250, 0.2500],
-      "S-T2": [0, 0, 0.0750, 0.1000, 0.1250, 0.1500, 0.1750, 0.2000, 0.2250, 0.2500],
-      "S-T1": [0, 0, 0.0750, 0.1000, 0.1250, 0.1500, 0.1750, 0.2000, 0.2250, 0.2500],
+      "S-T3": [0, 0, 0, 0.0750, 0.1000, 0.1250, 0.1500, 0.1750, 0.2000, 0.2250, 0.2500],
+      "S-T2": [0, 0, 0, 0.0750, 0.1000, 0.1250, 0.1500, 0.1750, 0.2000, 0.2250, 0.2500],
+      "S-T1": [0, 0, 0, 0.0750, 0.1000, 0.1250, 0.1500, 0.1750, 0.2000, 0.2250, 0.2500],
 
       "SS-T4": [0, 0, 0, 0.0250, 0.0375, 0.0500, 0.0625, 0.0750, 0.0875, 0.1000],
       "SS-T3": [0, 0, 0, 0.0250, 0.0375, 0.0500, 0.0625, 0.0750, 0.0875, 0.1000],
@@ -1920,6 +1946,29 @@
           ` : ''}
         </div>
       `).join('');
+
+      const attendanceGrid = document.getElementById('attendance-grid');
+      attendanceGrid.innerHTML = attendanceData.map(m => `
+        <div class="mission-card" id="card-attendance-${m.id}" style="flex-direction: column; align-items: stretch; justify-content: space-between;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="mission-info">
+              <span class="mission-name">${m.name}</span>
+              <div class="mission-rewards">
+                ${m.dia > 0 ? `다이아: <span>💎 ${toCommaStr(m.dia)}</span>` : ''}
+              </div>
+            </div>
+            <input type="checkbox" id="chk-attendance-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllMissionCalculations(); handleInput();">
+          </div>
+          ${m.items && m.items.length > 0 ? `
+            <div style="margin-top: 6px; border-top: 1px dashed var(--border); pt-2;">
+              <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 4px;">포함 아이템:</div>
+              <div class="item-badge-list" style="justify-content: flex-start;">
+                ${m.items.map(it => `<span class="item-badge">${getKeySvg(it.color)} ${it.name} x${it.count}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
     }
 
         function renderSummonStats() {
@@ -1980,7 +2029,7 @@
           `).join('');
         }
 
-    // 스킬 등급 및 티어별 스킬 이름 매핑 데이터 (사진 내용 반영)
+    // 스킬 등급 및 티어별 스킬 이름 매핑 데이터
     const skillNameMap = {
       'C':  [ { value: 'T4', text: '강타' }, { value: 'T3', text: '참격' }, { value: 'T2', text: '창병' }, { value: 'T1', text: '점멸 베기' } ],
       'B':  [ { value: 'T4', text: '화염 기둥' }, { value: 'T3', text: '칼날 소용돌이' }, { value: 'T2', text: '천둥 가르기' }, { value: 'T1', text: '화염 고리' } ],
@@ -1989,15 +2038,12 @@
       'SS': [ { value: 'T4', text: '사슬 회오리' }, { value: 'T3', text: '회전 망치' }, { value: 'T2', text: '차원 절개' }, { value: 'T1', text: '용의 분노' } ]
     };
     
-    // 소환 종류(장비/스킬) 변경 시 호출되는 함수
     function onTargetProbTypeChange() {
       const typeSelect = document.getElementById('target-prob-type');
       const gradeSelect = document.getElementById('target-prob-grade');
       if (!typeSelect || !gradeSelect) return;
     
       const isSkill = typeSelect.value === 'skill';
-    
-      // 등급 목록 설정 (스킬: C~SS / 장비: D~USS)
       const grades = isSkill ? ['C', 'B', 'A', 'S', 'SS'] : ['D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'US', 'USS'];
       const curSelectedGrade = gradeSelect.value;
       gradeSelect.innerHTML = grades.map(g => `<option value="${g}">${g} 등급</option>`).join('');
@@ -2007,17 +2053,13 @@
       } else {
         gradeSelect.value = isSkill ? 'SS' : 'USS';
       }
-    
-      // 티어 목록 업데이트 실행
       updateTierOptions();
     }
     
-    // 등급 선택 변경 시 호출되는 함수
     function onTargetGradeChange() {
       updateTierOptions();
     }
     
-    // 현재 선택된 소환 종류 및 등급에 맞춰 티어 목록을 동적으로 업데이트하는 함수
     function updateTierOptions() {
       const typeSelect = document.getElementById('target-prob-type');
       const gradeSelect = document.getElementById('target-prob-grade');
@@ -2029,12 +2071,9 @@
       const curSelectedTier = tierSelect.value;
     
       let activeTiers = [];
-    
       if (isSkill) {
-        // 스킬 항목 선택 시: 해당 등급에 맞는 스킬 이름 목록 적용
         activeTiers = skillNameMap[curGrade] || skillNameMap['C'];
       } else {
-        // 장비 항목 선택 시: T4 ~ T1 기본 표기 적용
         activeTiers = [
           { value: 'T4', text: 'T4' },
           { value: 'T3', text: 'T3' },
@@ -2044,14 +2083,13 @@
       }
     
       tierSelect.innerHTML = activeTiers.map(t => `<option value="${t.value}">${t.text}</option>`).join('');
-    
-      // 기존 선택했던 티어값이 유지 가능하면 유지, 없으면 첫번째 티어로 자동 선택
       if (activeTiers.some(t => t.value === curSelectedTier)) {
         tierSelect.value = curSelectedTier;
       } else {
         tierSelect.value = activeTiers[0].value;
       }
     }
+
     function calcTargetGradeExpectation() {
       const typeSelect = document.getElementById('target-prob-type');
       const gradeSelect = document.getElementById('target-prob-grade');
@@ -2180,6 +2218,15 @@
     function toggleAllAdRewards(check) {
       adRewardData.forEach(m => {
         const chk = document.getElementById(`chk-ad-${m.id}`);
+        if (chk) chk.checked = check;
+      });
+      updateAllMissionCalculations();
+      handleInput();
+    }
+
+    function toggleAllAttendance(check) {
+      attendanceData.forEach(m => {
+        const chk = document.getElementById(`chk-attendance-${m.id}`);
         if (chk) chk.checked = check;
       });
       updateAllMissionCalculations();
@@ -2340,8 +2387,40 @@
         }).join('');
       }
 
-      const dailyPlusRepeatAndAdDia = dailyMissionDia + repeat1DayDia + adDiaTotal;
-      const periodTotalDia = dailyPlusRepeatAndAdDia * days;
+      let attendanceDiaTotal = 0;
+      let attendanceAcquiredItems = {};
+      attendanceData.forEach(m => {
+        const chk = document.getElementById(`chk-attendance-${m.id}`);
+        const card = document.getElementById(`card-attendance-${m.id}`);
+        if (chk && chk.checked) {
+          attendanceDiaTotal += m.dia;
+          if (m.items) {
+            m.items.forEach(it => {
+              attendanceAcquiredItems[it.keyType] = { name: it.name, count: (attendanceAcquiredItems[it.keyType]?.count || 0) + it.count, color: it.color };
+            });
+          }
+          if (card) card.classList.add('checked');
+        } else {
+          if (card) card.classList.remove('checked');
+        }
+      });
+      document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
+
+      const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
+      const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
+      if (attendanceItemKeys.length === 0) {
+        attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
+      } else {
+        attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
+          const it = attendanceAcquiredItems[kt];
+          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+            ${getKeySvg(it.color)} ${it.name} x${it.count}
+          </span>`;
+        }).join('');
+      }
+
+      const dailyPlusRepeatAndAdAndAttendanceDia = dailyMissionDia + repeat1DayDia + adDiaTotal + attendanceDiaTotal;
+      const periodTotalDia = dailyPlusRepeatAndAdAndAttendanceDia * days;
       document.getElementById('top-total-period-dia').innerText = `${toCommaStr(periodTotalDia)} 💎`;
 
       const topPeriodKeysEl = document.getElementById('top-total-period-keys');
@@ -2352,6 +2431,10 @@
       });
       adItemKeys.forEach(kt => {
         const it = adAcquiredItems[kt];
+        combinedPeriodItems[kt] = { name: it.name, count: (combinedPeriodItems[kt]?.count || 0) + (it.count * days), color: it.color };
+      });
+      attendanceItemKeys.forEach(kt => {
+        const it = attendanceAcquiredItems[kt];
         combinedPeriodItems[kt] = { name: it.name, count: (combinedPeriodItems[kt]?.count || 0) + (it.count * days), color: it.color };
       });
 
@@ -2391,7 +2474,6 @@
       }
     }
 
-    /* ===== 소환 레벨 상호 제약 검증 함수 (수정 반영) ===== */
     function validateSummonLevel(id, source = 'cur') {
       const s = summonStats.find(x => x.id === id);
       const lvEl = document.getElementById(`summon-${id}-lv`);
@@ -2402,7 +2484,6 @@
       let curLv = parseNumber(lvEl.value);
       let targetLv = parseNumber(targetLvEl.value);
     
-      // 기본 레벨 범위(1 ~ maxLv) 보정
       if (curLv < 1) curLv = 1;
       if (curLv > s.maxLv) curLv = s.maxLv;
     
@@ -2410,12 +2491,10 @@
       if (targetLv > s.maxLv) targetLv = s.maxLv;
     
       if (source === 'cur') {
-        // 현재 레벨 변경 시: 현재 레벨이 목표 레벨보다 높아지면 목표 레벨을 현재 레벨로 자동 상향
         if (curLv > targetLv) {
           targetLv = curLv;
         }
       } else if (source === 'target') {
-        // 목표 레벨 변경 시: 목표 레벨이 현재 레벨보다 낮아지면 목표 레벨을 현재 레벨로 자동 보정
         if (targetLv < curLv) {
           targetLv = curLv;
         }
@@ -2435,7 +2514,6 @@
     
       let curLv = lvEl.value === '' ? 1 : Math.max(1, Math.min(s.maxLv, parseNumber(lvEl.value)));
       let rawTarget = targetLvEl.value === '' ? curLv : parseNumber(targetLvEl.value);
-      // 타이핑 중간 단계에서도 계산이 튕기지 않도록 내부 수치를 최소 현재 레벨 이상으로 안전하게 처리
       let targetLv = Math.max(curLv, Math.min(s.maxLv, rawTarget));
       let currentCnt = parseNumber(currentCntEl.value) || 0;
     
@@ -2478,7 +2556,6 @@
       document.getElementById('summary-skill-dia').innerText = `${toCommaStr(skillDia)} 💎`;
     }
 
-    /* ===== 기존 골드 및 레벨 스탯 계산 로직 ===== */
     const goldStats = [
       { id: 'atk', name: '공격력', icon: '⚔️', type: 'atk', category: 'atk', unit: '', defaultLv: 146400, defaultTarget: 150000, maxLv: 300000 },
       { id: 'hp', name: '생명력', icon: '❤️', type: 'def', category: 'def', unit: '', defaultLv: 100000, defaultTarget: 110000, maxLv: 300000 },
@@ -3144,6 +3221,9 @@
       adRewardData.forEach(m => {
         saveData[`chk-ad-${m.id}`] = document.getElementById(`chk-ad-${m.id}`)?.checked;
       });
+      attendanceData.forEach(m => {
+        saveData[`chk-attendance-${m.id}`] = document.getElementById(`chk-attendance-${m.id}`)?.checked;
+      });
 
       saveData['target-prob-type'] = document.getElementById('target-prob-type')?.value;
       saveData['target-prob-grade'] = document.getElementById('target-prob-grade')?.value;
@@ -3176,51 +3256,47 @@
       if (activePanel) activePanel.style.display = 'block';
     }
     
-    /* ===== 1. 일일 길드 활동 데이터 (삭제 항목 반영: 기부 3종만 유지) ===== */
     const guildDailyActivityData = [
       { id: 'gact1', name: '길드 무료 기부 (1회)', costText: '무료', dia: 0, coin: 500, exp: 50 },
       { id: 'gact2', name: '길드 다이아 기부 (2회)', costText: '5,000 💎', dia: 5000, coin: 500, exp: 50 },
       { id: 'gact3', name: '길드 다이아 기부 (3회)', costText: '10,000 💎', dia: 10000, coin: 500, exp: 50 }
     ];
     
-      /* ===== 2. 길드 미션 데이터 & 마일스톤 (요청 내용 반영) ===== */
-      const guildMissionData = [
-        { id: 'gm1', name: '길드 출석하기 (1회)', pts: 100, coin: 100 },
-        { id: 'gm2', name: '게임 플레이 시간 (600초)', pts: 100, coin: 100 },
-        { id: 'gm3', name: '길드 컨텐츠 플레이 (3회)', pts: 100, coin: 100 },
-        { id: 'gm4', name: '길드 주점 기부 (1회)', pts: 100, coin: 100 },
-        { id: 'gm5', name: '장비 소환 (1,500회)', pts: 100, coin: 100 },
-        { id: 'gm6', name: '요리 제작 (300회)', pts: 100, coin: 100 },
-        { id: 'gm7', name: '요리 먹기 (300회)', pts: 100, coin: 100 },
-        { id: 'gm8', name: '길드 어빌리티 사용 (100회)', pts: 100, coin: 100 }
-      ];
+    const guildMissionData = [
+      { id: 'gm1', name: '길드 출석하기 (1회)', pts: 100, coin: 100 },
+      { id: 'gm2', name: '게임 플레이 시간 (600초)', pts: 100, coin: 100 },
+      { id: 'gm3', name: '길드 컨텐츠 플레이 (3회)', pts: 100, coin: 100 },
+      { id: 'gm4', name: '길드 주점 기부 (1회)', pts: 100, coin: 100 },
+      { id: 'gm5', name: '장비 소환 (1,500회)', pts: 100, coin: 100 },
+      { id: 'gm6', name: '요리 제작 (300회)', pts: 100, coin: 100 },
+      { id: 'gm7', name: '요리 먹기 (300회)', pts: 100, coin: 100 },
+      { id: 'gm8', name: '길드 어빌리티 사용 (100회)', pts: 100, coin: 100 }
+    ];
       
-      const guildMilestonesData = [
-        { pts: 160, guildTavern: 6000, heroTavern: 180 },
-        { pts: 320, guildTavern: 6000, heroTavern: 180 },
-        { pts: 480, guildTavern: 6000, heroTavern: 180 },
-        { pts: 640, guildTavern: 6000, heroTavern: 180 },
-        { pts: 800, guildTavern: 6000, heroTavern: 180 }
-      ];
+    const guildMilestonesData = [
+      { pts: 160, guildTavern: 6000, heroTavern: 180 },
+      { pts: 320, guildTavern: 6000, heroTavern: 180 },
+      { pts: 480, guildTavern: 6000, heroTavern: 180 },
+      { pts: 640, guildTavern: 6000, heroTavern: 180 },
+      { pts: 800, guildTavern: 6000, heroTavern: 180 }
+    ];
     
-      /* ===== 일일 활동 렌더링 ===== */
-      function renderGuildDailyActivities() {
-        const grid = document.getElementById('guild-daily-activity-grid');
-        if (!grid) return;
-        grid.innerHTML = guildDailyActivityData.map(m => `
-          <div class="mission-card" id="card-gact-${m.id}" style="flex-direction: row; align-items: center; justify-content: space-between;">
-            <div class="mission-info">
-              <span class="mission-name">${m.name}</span>
-              <div class="mission-rewards">
-                소모: <span style="color:#ef4444;">${m.costText}</span> | 보상: <span>+${toCommaStr(m.coin)}🪙</span> / <span>+${toCommaStr(m.exp)}EXP</span>
-              </div>
+    function renderGuildDailyActivities() {
+      const grid = document.getElementById('guild-daily-activity-grid');
+      if (!grid) return;
+      grid.innerHTML = guildDailyActivityData.map(m => `
+        <div class="mission-card" id="card-gact-${m.id}" style="flex-direction: row; align-items: center; justify-content: space-between;">
+          <div class="mission-info">
+            <span class="mission-name">${m.name}</span>
+            <div class="mission-rewards">
+              소모: <span style="color:#ef4444;">${m.costText}</span> | 보상: <span>+${toCommaStr(m.coin)}🪙</span> / <span>+${toCommaStr(m.exp)}EXP</span>
             </div>
-            <input type="checkbox" id="chk-gact-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllGuildCalculations(); handleInput();">
           </div>
-        `).join('');
-      }
+          <input type="checkbox" id="chk-gact-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllGuildCalculations(); handleInput();">
+        </div>
+      `).join('');
+    }
     
-    /* ===== 길드 미션 렌더링 ===== */
     function renderGuildMissions() {
       const gridEl = document.getElementById('guild-mission-list-grid');
       if (gridEl) {
@@ -3250,7 +3326,6 @@
       }
     }
     
-    /* ===== 전체 선택 / 전체 해제 함수 ===== */
     function toggleAllGuildDaily(check) {
       guildDailyActivityData.forEach(m => {
         const chk = document.getElementById(`chk-gact-${m.id}`);
@@ -3269,13 +3344,11 @@
       handleInput();
     }
     
-    /* ===== 전체 계산 및 대시보드 업데이트 ===== */
     function updateAllGuildCalculations() {
       const days = Math.max(1, parseNumber(document.getElementById('guild-days')?.value) || 1);
       const daysLabel = document.getElementById('guild-days-label-text');
       if (daysLabel) daysLabel.innerText = `${toCommaStr(days)}일간`;
     
-      // 1. 일일 길드 활동 계산
       let dailyActCoin = 0;
       let dailyActExp = 0;
       let dailyActDia = 0;
@@ -3301,7 +3374,6 @@
       if (sumExpEl) sumExpEl.innerText = `${toCommaStr(dailyActExp)} EXP`;
       if (sumDiaEl) sumDiaEl.innerText = `${toCommaStr(dailyActDia)} 💎`;
     
-      // 2. 길드 미션 & 누적 마일스톤 계산
       let missionPts = 0;
       let missionCoin = 0;
       let milestoneGuildTavern = 0;
@@ -3330,7 +3402,6 @@
         }
       });
     
-      // 미션 패널 UI 업데이트
       const ptsTextEl = document.getElementById('guild-mission-pts-text');
       if (ptsTextEl) ptsTextEl.innerText = `${toCommaStr(missionPts)} / 800 P`;
       
@@ -3347,37 +3418,30 @@
       if (sumGuildTavernEl) sumGuildTavernEl.innerText = `${toCommaStr(milestoneGuildTavern)} 🍺`;
       if (sumHeroTavernEl) sumHeroTavernEl.innerText = `${toCommaStr(milestoneHeroTavern)} 🍺`;
     
-      // 3. 최상단 대시보드 5종 수급 항목 집계
       const dGuildCoin = dailyActCoin + missionCoin;
       const dGuildExp = dailyActExp;
-      const dPersonalTavern = 0; // 개인 주점 코인 수급 항목 추가 시 자동 반영
+      const dPersonalTavern = 0;
       const dGuildTavern = milestoneGuildTavern;
       const dHeroTavern = milestoneHeroTavern;
     
-      // 1) 길드 코인 (일일 / 누적)
       document.getElementById('top-daily-guild-coin').innerText = `${toCommaStr(dGuildCoin)} 🪙`;
       document.getElementById('top-accum-guild-coin').innerText = `${toCommaStr(dGuildCoin * days)} 🪙`;
     
-      // 2) 길드 경험치 (일일 / 누적)
       document.getElementById('top-daily-guild-exp').innerText = `${toCommaStr(dGuildExp)} EXP`;
       document.getElementById('top-accum-guild-exp').innerText = `${toCommaStr(dGuildExp * days)} EXP`;
     
-      // 3) 개인 주점 코인 (일일 / 누적)
       document.getElementById('top-daily-personal-tavern').innerText = `${toCommaStr(dPersonalTavern)} 🍺`;
       document.getElementById('top-accum-personal-tavern').innerText = `${toCommaStr(dPersonalTavern * days)} 🍺`;
     
-      // 4) 길드 주점 코인 (일일 / 누적)
       document.getElementById('top-daily-guild-tavern').innerText = `${toCommaStr(dGuildTavern)} 🍺`;
       document.getElementById('top-accum-guild-tavern').innerText = `${toCommaStr(dGuildTavern * days)} 🍺`;
     
-      // 5) 용사의 주점 코인 (일일 / 누적)
       document.getElementById('top-daily-hero-tavern').innerText = `${toCommaStr(dHeroTavern)} 🍺`;
       document.getElementById('top-accum-hero-tavern').innerText = `${toCommaStr(dHeroTavern * days)} 🍺`;
     
       calcTavernLevelUp();
     }
     
-    /* ===== 1. 길드 레벨 1~25 데이터 (이미지 표 스펙 및 경험치 규칙 완전 반영) ===== */
     const guildLevelExpTable = [
       { lv: 1,  maxMembers: 15, exp: 2250,  stats: {} },
       { lv: 2,  maxMembers: 15, exp: 4500,  stats: {} },
@@ -3416,7 +3480,6 @@
       drop: '아이템 드랍 확률'
     };
     
-    /* ===== 길드 레벨 계산 & 버프 수치 리스트 출력 함수 ===== */
     function calcGuildLevelInfo() {
       const curLv = Math.max(1, Math.min(25, parseNumber(document.getElementById('guild-info-cur-lv')?.value) || 1));
       const targetLv = Math.max(curLv, Math.min(25, parseNumber(document.getElementById('guild-info-target-lv')?.value) || curLv));
@@ -3429,7 +3492,6 @@
     
       document.getElementById('guild-info-max-members').innerText = `${curInfo.maxMembers} 명`;
     
-      // 목표까지 필요 경험치 계산
       let totalExpNeeded = 0;
       for (let l = curLv; l < targetLv; l++) {
         const info = guildLevelExpTable.find(x => x.lv === l);
@@ -3444,14 +3506,12 @@
       document.getElementById('guild-info-daily-total-exp').innerText = `${toCommaStr(dailyTotalExp)} EXP`;
       document.getElementById('guild-info-needed-days').innerText = `${toCommaStr(neededDays)} 일`;
     
-      // --- 버프 능력치 리스트 렌더링 ---
       document.getElementById('guild-buff-cur-lv-text').innerText = `Lv ${curLv}`;
       document.getElementById('guild-buff-target-lv-text').innerText = `Lv ${targetLv}`;
     
       const curStats = curInfo.stats || {};
       const targetStats = targetInfo.stats || {};
     
-      // 1. 현재 레벨 능력치 출력
       const curListEl = document.getElementById('guild-cur-buff-list');
       const curStatKeys = Object.keys(curStats);
       if (curStatKeys.length === 0) {
@@ -3462,7 +3522,6 @@
         `).join('');
       }
     
-      // 2. 목표 레벨 능력치 및 상승폭 (요청 양식 반영: 증가: +00% → 적용 후: +00%)
       const targetListEl = document.getElementById('guild-target-buff-list');
       const targetStatKeys = Object.keys(targetStats);
     
@@ -3483,7 +3542,6 @@
       }
     }
     
-    /* ===== 4. 길드 어빌리티 주사위 계산기 ===== */
     const guildAbilityProbTable = {
       'D': 50.0, 'C': 30.0, 'B': 12.0, 'A': 5.0, 'S': 2.0, 'SS': 0.8, 'SSS': 0.2
     };
@@ -3501,27 +3559,24 @@
       document.getElementById('guild-ability-expected-dice').innerText = `${toCommaStr(totalDice)} 개`;
     }
 
-    /* ===== 던전별 열쇠 색상 매핑 (요청 색상 100% 적용) ===== */
     const dungeonKeyColors = {
-      gold: '#eab308',    // 1. 골드던전 (노란색)
-      equip: '#6b7280',   // 2. 장비던전 (회색)
-      skill: '#22c55e',   // 3. 스킬던전 (녹색)
-      heart: '#ef4444',   // 4. 하트던전 (빨강)
-      mat: '#1f2937',     // 5. 재료던전 (검정)
-      core: '#3b82f6',    // 6. 코어던전 (파랑)
-      maze: '#a855f7',    // 7. 미궁던전 (보라)
-      day: '#15803d',     // 8. 요일던전 (진녹색)
-      spirit: '#ec4899'   // 9. 정령던전 (핑크)
+      gold: '#eab308',
+      equip: '#6b7280',
+      skill: '#22c55e',
+      heart: '#ef4444',
+      mat: '#1f2937',
+      core: '#3b82f6',
+      maze: '#a855f7',
+      day: '#15803d',
+      spirit: '#ec4899'
     };
     
-    // 열쇠 벡터 아이콘 생성 함수 (브라우저 이모지 색상 고정 문제 완전 해결)
     function renderKeyIcon(color) {
       return `<svg width="15" height="15" viewBox="0 0 24 24" fill="${color}" style="vertical-align: -2px; display: inline-block; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.15));">
         <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
       </svg>`;
     }
     
-    /* ===== 상점 데이터 ===== */
     const guildCoinShopItems = [
       { id: 'gshop1',  keyType: 'gold',   name: '골드던전 열쇠 1개', max: 3, price: 150, unit: '🪙' },
       { id: 'gshop2',  keyType: 'equip',  name: '장비던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
@@ -3546,7 +3601,6 @@
       { id: 'tshop8', keyType: 'spirit', name: '정령던전 열쇠 1개', max: 3, price: 120, unit: '🍺' }
     ];
     
-    /* ===== 상점 수량 입력 제한 검증 함수 ===== */
     function validateShopItemInput(inputEl, maxVal) {
       formatLevelWithComma(inputEl);
       if (maxVal !== null && maxVal !== undefined) {
@@ -3557,7 +3611,6 @@
       }
     }
     
-    /* ===== 길드 상점 렌더링 함수 ===== */
     function renderGuildShopItems() {
       const coinListEl = document.getElementById('guild-shop-coin-list');
       if (coinListEl) {
@@ -3588,7 +3641,7 @@
         }).join('');
       }
     
-    const tavernListEl = document.getElementById('guild-shop-tavern-list');
+      const tavernListEl = document.getElementById('guild-shop-tavern-list');
       if (tavernListEl) {
         tavernListEl.innerHTML = tavernCoinShopItems.map(item => {
           const iconHtml = renderKeyIcon(dungeonKeyColors[item.keyType]);
@@ -3616,7 +3669,6 @@
       }
     }
     
-    /* ===== 길드 상점 구매 합계 계산 함수 ===== */
     function calcGuildShopTotal() {
       let totalCoin = 0;
       guildCoinShopItems.forEach(item => {
@@ -3643,7 +3695,6 @@
       if (totalTavernEl) totalTavernEl.innerText = `${toCommaStr(totalTavern)} 🍺`;
     }
     
-    /* ===== 6. 길드 주점 레벨업 계산기 ===== */
     function calcTavernLevelUp() {
       const pCurLv = parseNumber(document.getElementById('tavern-personal-cur-lv')?.value) || 1;
       const pTargetLv = parseNumber(document.getElementById('tavern-personal-target-lv')?.value) || pCurLv;
@@ -3735,13 +3786,11 @@
       renderMissions();
       renderSummonStats();
     
-      // 길드 영역 초기 랜더링 추가
       renderGuildDailyActivities();
       renderGuildMissions();
       renderGuildShopItems();
     
       loadSavedData();
-      // loadSavedData() 마지막 줄에 추가
       calcGuildLevelInfo();
       calcGuildAbilityDice();
       calcGuildShopTotal();
