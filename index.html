@@ -1256,14 +1256,14 @@
         </div>
       </div>
     
-      <!-- Panel 3) 길드 레벨 & 정보 -->
+    <!-- Panel 3) 길드 레벨 & 정보 -->
       <div id="guild-panel-info" class="guild-panel" style="display:none;">
         <div class="invest-card">
           <div class="invest-title">🏛️ 길드 레벨 정보 & 렙업 일수 계산기</div>
           
           <div class="input-grid" style="margin-bottom: 14px;">
             <div class="input-field">
-              <label>현재 길드 레벨</label>
+              <label>현재 길드 레벨 (1~25)</label>
               <div class="input-box" style="background: white;">
                 <input type="text" id="guild-info-cur-lv" value="1" oninput="formatLevelWithComma(this); calcGuildLevelInfo(); handleInput();">
                 <span class="unit">Lv</span>
@@ -1271,9 +1271,9 @@
             </div>
     
             <div class="input-field">
-              <label>목표 길드 레벨</label>
+              <label>목표 길드 레벨 (1~25)</label>
               <div class="input-box" style="background: white;">
-                <input type="text" id="guild-info-target-lv" value="10" oninput="formatLevelWithComma(this); calcGuildLevelInfo(); handleInput();">
+                <input type="text" id="guild-info-target-lv" value="15" oninput="formatLevelWithComma(this); calcGuildLevelInfo(); handleInput();">
                 <span class="unit">Lv</span>
               </div>
             </div>
@@ -1303,7 +1303,8 @@
             </div>
           </div>
     
-          <div class="category-summary-grid">
+          <!-- 길드 렙업 수치 종합 현황 -->
+          <div class="category-summary-grid" style="margin-bottom: 16px;">
             <div class="cat-summary-card">
               <div class="cat-summary-title">현재 최대 인원 제한</div>
               <div class="cat-summary-cost" id="guild-info-max-members">15 명</div>
@@ -1321,6 +1322,28 @@
               <div class="cat-summary-cost" id="guild-info-needed-days" style="color: #ef4444;">0 일</div>
             </div>
           </div>
+    
+          <!-- 레벨별 적용 버프 능력치 비교 (현재 vs 목표 + 상승폭 표시) -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+            <div style="background: #f8fafc; border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
+              <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+                📊 현재 레벨 (<span id="guild-buff-cur-lv-text">Lv 1</span>) 적용 능력치
+              </strong>
+              <div id="guild-cur-buff-list" style="font-size: 12px; line-height: 1.8; color: #475569;">
+                적용 중인 능력치가 없습니다.
+              </div>
+            </div>
+    
+            <div style="background: #f8fafc; border: 1px solid var(--border); padding: 12px; border-radius: 8px;">
+              <strong style="font-size: 13px; color: var(--text-main); display: block; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px;">
+                🎯 목표 레벨 (<span id="guild-buff-target-lv-text">Lv 15</span>) 능력치 및 상승 폭
+              </strong>
+              <div id="guild-target-buff-list" style="font-size: 12px; line-height: 1.8; color: #475569;">
+                적용 중인 능력치가 없습니다.
+              </div>
+            </div>
+          </div>
+    
         </div>
       </div>
     
@@ -3347,30 +3370,59 @@
       calcTavernLevelUp();
     }
     
-    /* ===== 3. 길드 레벨 데이터 & 계산기 ===== */
+    /* ===== 1. 길드 레벨 1~25 데이터 (이미지 표 스펙 및 경험치 규칙 완전 반영) ===== */
     const guildLevelExpTable = [
-      { lv: 1, exp: 5000, maxMembers: 15 },
-      { lv: 2, exp: 12000, maxMembers: 17 },
-      { lv: 3, exp: 22000, maxMembers: 20 },
-      { lv: 4, exp: 35000, maxMembers: 22 },
-      { lv: 5, exp: 50000, maxMembers: 25 },
-      { lv: 6, exp: 70000, maxMembers: 27 },
-      { lv: 7, exp: 95000, maxMembers: 30 },
-      { lv: 8, exp: 125000, maxMembers: 32 },
-      { lv: 9, exp: 160000, maxMembers: 35 },
-      { lv: 10, exp: 200000, maxMembers: 40 }
+      { lv: 1,  maxMembers: 15, exp: 2250,  stats: {} },
+      { lv: 2,  maxMembers: 15, exp: 4500,  stats: {} },
+      { lv: 3,  maxMembers: 16, exp: 6750,  stats: {} },
+      { lv: 4,  maxMembers: 16, exp: 8500,  stats: {} },
+      { lv: 5,  maxMembers: 17, exp: 10000, stats: {} },
+      { lv: 6,  maxMembers: 17, exp: 11500, stats: {} },
+      { lv: 7,  maxMembers: 18, exp: 13000, stats: {} },
+      { lv: 8,  maxMembers: 18, exp: 14000, stats: {} },
+      { lv: 9,  maxMembers: 20, exp: 15000, stats: {} },
+      { lv: 10, maxMembers: 20, exp: 15000, stats: {} },
+      { lv: 11, maxMembers: 20, exp: 15000, stats: { atk: 20 } },
+      { lv: 12, maxMembers: 20, exp: 15000, stats: { atk: 20, hp: 20 } },
+      { lv: 13, maxMembers: 20, exp: 15000, stats: { atk: 20, hp: 20, def: 20 } },
+      { lv: 14, maxMembers: 20, exp: 15000, stats: { atk: 20, hp: 20, def: 20, pen: 20 } },
+      { lv: 15, maxMembers: 20, exp: 15000, stats: { atk: 20, hp: 20, def: 20, pen: 20, gold: 10 } },
+      { lv: 16, maxMembers: 20, exp: 15000, stats: { atk: 20, hp: 20, def: 20, pen: 20, gold: 10, exp: 10 } },
+      { lv: 17, maxMembers: 20, exp: 15000, stats: { atk: 20, hp: 20, def: 20, pen: 20, gold: 10, exp: 10, drop: 10 } },
+      { lv: 18, maxMembers: 20, exp: 15000, stats: { atk: 40, hp: 20, def: 20, pen: 20, gold: 10, exp: 10, drop: 10 } },
+      { lv: 19, maxMembers: 20, exp: 15000, stats: { atk: 40, hp: 40, def: 20, pen: 20, gold: 10, exp: 10, drop: 10 } },
+      { lv: 20, maxMembers: 20, exp: 15000, stats: { atk: 40, hp: 40, def: 40, pen: 20, gold: 10, exp: 10, drop: 10 } },
+      { lv: 21, maxMembers: 20, exp: 15000, stats: { atk: 40, hp: 40, def: 40, pen: 40, gold: 10, exp: 10, drop: 10 } },
+      { lv: 22, maxMembers: 20, exp: 15000, stats: { atk: 40, hp: 40, def: 40, pen: 40, gold: 20, exp: 10, drop: 10 } },
+      { lv: 23, maxMembers: 20, exp: 15000, stats: { atk: 40, hp: 40, def: 40, pen: 40, gold: 20, exp: 20, drop: 10 } },
+      { lv: 24, maxMembers: 20, exp: 15000, stats: { atk: 40, hp: 40, def: 40, pen: 40, gold: 20, exp: 20, drop: 20 } },
+      { lv: 25, maxMembers: 20, exp: 15000, stats: { atk: 70, hp: 40, def: 40, pen: 40, gold: 20, exp: 20, drop: 20 } }
     ];
     
+    const statNameLabels = {
+      atk: '길드 공격력',
+      hp: '길드 생명력',
+      def: '길드 방어력',
+      pen: '길드 관통력',
+      gold: '최종 골드 획득량',
+      exp: '경험치 획득량',
+      drop: '아이템 드랍 확률'
+    };
+    
+    /* ===== 길드 레벨 계산 & 버프 수치 리스트 출력 함수 ===== */
     function calcGuildLevelInfo() {
-      const curLv = Math.max(1, Math.min(10, parseNumber(document.getElementById('guild-info-cur-lv')?.value) || 1));
-      const targetLv = Math.max(curLv, Math.min(10, parseNumber(document.getElementById('guild-info-target-lv')?.value) || curLv));
+      const curLv = Math.max(1, Math.min(25, parseNumber(document.getElementById('guild-info-cur-lv')?.value) || 1));
+      const targetLv = Math.max(curLv, Math.min(25, parseNumber(document.getElementById('guild-info-target-lv')?.value) || curLv));
       const curExp = parseNumber(document.getElementById('guild-info-cur-exp')?.value) || 0;
       const members = parseNumber(document.getElementById('guild-info-member-cnt')?.value) || 0;
       const expPerMember = parseNumber(document.getElementById('guild-info-exp-per-member')?.value) || 0;
     
       const curInfo = guildLevelExpTable.find(x => x.lv === curLv) || guildLevelExpTable[0];
+      const targetInfo = guildLevelExpTable.find(x => x.lv === targetLv) || guildLevelExpTable[0];
+    
       document.getElementById('guild-info-max-members').innerText = `${curInfo.maxMembers} 명`;
     
+      // 목표까지 필요 경험치 계산 (현재 레벨부터 목표 레벨 직전까지의 경험치 합)
       let totalExpNeeded = 0;
       for (let l = curLv; l < targetLv; l++) {
         const info = guildLevelExpTable.find(x => x.lv === l);
@@ -3384,6 +3436,44 @@
       document.getElementById('guild-info-needed-exp').innerText = `${toCommaStr(totalExpNeeded)} EXP`;
       document.getElementById('guild-info-daily-total-exp').innerText = `${toCommaStr(dailyTotalExp)} EXP`;
       document.getElementById('guild-info-needed-days').innerText = `${toCommaStr(neededDays)} 일`;
+    
+      // --- 버프 능력치 리스트 렌더링 ---
+      document.getElementById('guild-buff-cur-lv-text').innerText = `Lv ${curLv}`;
+      document.getElementById('guild-buff-target-lv-text').innerText = `Lv ${targetLv}`;
+    
+      const curStats = curInfo.stats || {};
+      const targetStats = targetInfo.stats || {};
+    
+      // 1. 현재 레벨 능력치 출력
+      const curListEl = document.getElementById('guild-cur-buff-list');
+      const curStatKeys = Object.keys(curStats);
+      if (curStatKeys.length === 0) {
+        curListEl.innerHTML = '<span style="color:#94a3b8;">• 적용 중인 능력치가 없습니다.</span>';
+      } else {
+        curListEl.innerHTML = curStatKeys.map(k => `
+          <div>• ${statNameLabels[k]}: <strong>+${curStats[k]}%</strong></div>
+        `).join('');
+      }
+    
+      // 2. 목표 레벨 능력치 및 상승폭 (+상승 수치 및 최종 수치) 출력
+      const targetListEl = document.getElementById('guild-target-buff-list');
+      const targetStatKeys = Object.keys(targetStats);
+    
+      if (targetStatKeys.length === 0) {
+        targetListEl.innerHTML = '<span style="color:#94a3b8;">• 적용 중인 능력치가 없습니다.</span>';
+      } else {
+        targetListEl.innerHTML = targetStatKeys.map(k => {
+          const curVal = curStats[k] || 0;
+          const targetVal = targetStats[k] || 0;
+          const diff = targetVal - curVal;
+    
+          if (diff > 0) {
+            return `<div>• ${statNameLabels[k]}: +${curVal}% <span style="color: #ef4444; font-weight: 700;">(+${diff}% → +${targetVal}%)</span></div>`;
+          } else {
+            return `<div>• ${statNameLabels[k]}: +${targetVal}%</div>`;
+          }
+        }).join('');
+      }
     }
     
     /* ===== 4. 길드 어빌리티 주사위 계산기 ===== */
