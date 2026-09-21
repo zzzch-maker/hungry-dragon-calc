@@ -2568,16 +2568,20 @@
 
       const topPeriodKeysEl = document.getElementById('top-total-period-keys');
       let combinedPeriodItems = {};
+      
+      // 1) 일일 마일스톤 아이템 추가
       dailyKeysList.forEach(kt => {
         const cfg = dailyMilestonesData.find(x => x.keyType === kt);
         combinedPeriodItems[kt] = { name: cfg.name, count: dailyAcquiredKeys[kt] * days, color: cfg.color };
       });
+      
+      // 2) 광고 보상 아이템 추가
       adItemKeys.forEach(kt => {
         const it = adAcquiredItems[kt];
         combinedPeriodItems[kt] = { name: it.name, count: (it.count * days), color: it.color };
       });
       
-      // 💡 [수정] 텍스트가 덮어씌워지지 않고 개수만 안전하게 합산되도록 처리
+      // 3) 출석 보상 아이템 추가 (식재료 주머니와 재료던전 열쇠가 절대 합산되지 않고 각각 독립된 키로 유지됨)
       Object.keys(attendancePeriodAcquiredItems).forEach(kt => {
         const it = attendancePeriodAcquiredItems[kt];
         if (combinedPeriodItems[kt]) {
@@ -2593,9 +2597,14 @@
       } else {
         topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
           const it = combinedPeriodItems[kt];
+          
+          // 아이템 종류별 전용 아이콘 매칭 (식재료 주머니는 주머니 아이콘, 열쇠는 열쇠 아이콘 고정)
           let iconHtml = getTicketSvg(it.color);
-          if (kt === 'material_pocket') iconHtml = getBagSvg(it.color);
-          else if (kt === 'material') iconHtml = getKeySvg(it.color);
+          if (kt === 'material_pocket') {
+            iconHtml = getBagSvg(it.color); // 식재료 주머니 전용 주머니 아이콘
+          } else if (kt === 'material' || kt === 'gold' || kt === 'equip' || kt === 'skill' || kt === 'heart' || kt === 'core' || kt === 'labyrinth' || kt === 'weekday' || kt === 'spirit') {
+            iconHtml = getKeySvg(it.color); // 각종 던전 열쇠 아이콘
+          }
 
           return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
             ${iconHtml} ${it.name} x${toCommaStr(it.count)}
