@@ -1052,20 +1052,16 @@
                 <option value="skill">✨ 스킬 소환</option>
               </select>
             </div>
-
+        
             <div>
-              <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">목표 등급</label>
-              <select id="target-prob-grade" class="unit-select" style="background: #1e293b; color: white; border-color: #475569;" onchange="calcTargetGradeExpectation(); handleInput();">
+              <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">등급</label>
+              <select id="target-prob-grade" class="unit-select" style="background: #1e293b; color: white; border-color: #475569;" onchange="onTargetGradeChange(); calcTargetGradeExpectation(); handleInput();">
               </select>
             </div>
-
+        
             <div>
-              <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">목표 티어</label>
+              <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">티어</label>
               <select id="target-prob-tier" class="unit-select" style="background: #1e293b; color: white; border-color: #475569;" onchange="calcTargetGradeExpectation(); handleInput();">
-                <option value="T4">T4</option>
-                <option value="T3">T3</option>
-                <option value="T2">T2</option>
-                <option value="T1">T1</option>
               </select>
             </div>
           </div>
@@ -1545,24 +1541,78 @@
           `).join('');
         }
 
+    // 스킬 등급 및 티어별 스킬 이름 매핑 데이터 (사진 내용 반영)
+    const skillNameMap = {
+      'C':  [ { value: 'T4', text: '강타' }, { value: 'T3', text: '참격' }, { value: 'T2', text: '창병' }, { value: 'T1', text: '점멸 베기' } ],
+      'B':  [ { value: 'T4', text: '화염 기둥' }, { value: 'T3', text: '칼날 소용돌이' }, { value: 'T2', text: '천둥 가르기' }, { value: 'T1', text: '화염 고리' } ],
+      'A':  [ { value: 'T4', text: '폭탄' }, { value: 'T3', text: '냉기 폭발' }, { value: 'T2', text: '질풍 베기' }, { value: 'T1', text: '도약 강타' } ],
+      'S':  [ { value: 'T4', text: '저주받은 검' }, { value: 'T3', text: '화염 돌풍' }, { value: 'T2', text: '초강타' }, { value: 'T1', text: '용의 섬광' } ],
+      'SS': [ { value: 'T4', text: '사슬 회오리' }, { value: 'T3', text: '회전 망치' }, { value: 'T2', text: '차원 절개' }, { value: 'T1', text: '용의 분노' } ]
+    };
+    
+    // 소환 종류(장비/스킬) 변경 시 호출되는 함수
     function onTargetProbTypeChange() {
       const typeSelect = document.getElementById('target-prob-type');
       const gradeSelect = document.getElementById('target-prob-grade');
       if (!typeSelect || !gradeSelect) return;
-
+    
       const isSkill = typeSelect.value === 'skill';
+    
+      // 등급 목록 설정 (스킬: C~SS / 장비: D~USS)
       const grades = isSkill ? ['C', 'B', 'A', 'S', 'SS'] : ['D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'US', 'USS'];
-
-      const curSelected = gradeSelect.value;
+      const curSelectedGrade = gradeSelect.value;
       gradeSelect.innerHTML = grades.map(g => `<option value="${g}">${g} 등급</option>`).join('');
-
-      if (grades.includes(curSelected)) {
-        gradeSelect.value = curSelected;
+    
+      if (grades.includes(curSelectedGrade)) {
+        gradeSelect.value = curSelectedGrade;
       } else {
         gradeSelect.value = isSkill ? 'SS' : 'USS';
       }
+    
+      // 티어 목록 업데이트 실행
+      updateTierOptions();
     }
-
+    
+    // 등급 선택 변경 시 호출되는 함수
+    function onTargetGradeChange() {
+      updateTierOptions();
+    }
+    
+    // 현재 선택된 소환 종류 및 등급에 맞춰 티어 목록을 동적으로 업데이트하는 함수
+    function updateTierOptions() {
+      const typeSelect = document.getElementById('target-prob-type');
+      const gradeSelect = document.getElementById('target-prob-grade');
+      const tierSelect = document.getElementById('target-prob-tier');
+      if (!typeSelect || !gradeSelect || !tierSelect) return;
+    
+      const isSkill = typeSelect.value === 'skill';
+      const curGrade = gradeSelect.value;
+      const curSelectedTier = tierSelect.value;
+    
+      let activeTiers = [];
+    
+      if (isSkill) {
+        // 스킬 항목 선택 시: 해당 등급에 맞는 스킬 이름 목록 적용
+        activeTiers = skillNameMap[curGrade] || skillNameMap['C'];
+      } else {
+        // 장비 항목 선택 시: T4 ~ T1 기본 표기 적용
+        activeTiers = [
+          { value: 'T4', text: 'T4' },
+          { value: 'T3', text: 'T3' },
+          { value: 'T2', text: 'T2' },
+          { value: 'T1', text: 'T1' }
+        ];
+      }
+    
+      tierSelect.innerHTML = activeTiers.map(t => `<option value="${t.value}">${t.text}</option>`).join('');
+    
+      // 기존 선택했던 티어값이 유지 가능하면 유지, 없으면 첫번째 티어로 자동 선택
+      if (activeTiers.some(t => t.value === curSelectedTier)) {
+        tierSelect.value = curSelectedTier;
+      } else {
+        tierSelect.value = activeTiers[0].value;
+      }
+    }
     function calcTargetGradeExpectation() {
       const typeSelect = document.getElementById('target-prob-type');
       const gradeSelect = document.getElementById('target-prob-grade');
