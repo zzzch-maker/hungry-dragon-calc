@@ -3342,18 +3342,16 @@
       alert('계산된 효율적인 목표 레벨이 하단 스탯에 적용되었습니다!');
     }
 
-    function handleInput() {
+      function handleInput() {
       const saveData = {};
       goldStats.forEach(s => {
         ['lv', 'target-lv'].forEach(field => {
           const key = `gold-${s.id}-${field}`;
           const el = document.getElementById(key);
           if (el) saveData[key] = el.value;
-          // [찾을 위치] handleInput() 함수 내부 (데이터 저장 객체 만드는 곳)
-          // 아래 코드를 적절한 위치에 한 줄 추가해 주세요.
-          saveData['att2-start-day'] = document.getElementById('att2-start-day')?.value;
         });
       });
+      saveData['att2-start-day'] = document.getElementById('att2-start-day')?.value;
 
       levelStats.forEach(s => {
         ['lv', 'target-lv'].forEach(field => {
@@ -3371,24 +3369,18 @@
         });
       });
 
-      dailyMissionData.forEach(m => {
-        saveData[`chk-daily-${m.id}`] = document.getElementById(`chk-daily-${m.id}`)?.checked;
-      });
-      weeklyMissionData.forEach(m => {
-        saveData[`chk-weekly-${m.id}`] = document.getElementById(`chk-weekly-${m.id}`)?.checked;
-      });
-      repeatMissionData.forEach(m => {
-        saveData[`input-repeat-cnt-${m.id}`] = document.getElementById(`input-repeat-cnt-${m.id}`)?.value;
-      });
-      freeDiaData.forEach(m => {
-        saveData[`chk-freedia-${m.id}`] = document.getElementById(`chk-freedia-${m.id}`)?.checked;
-      });
-      adRewardData.forEach(m => {
-        saveData[`chk-ad-${m.id}`] = document.getElementById(`chk-ad-${m.id}`)?.checked;
-      });
-      attendanceData.forEach(m => {
-        saveData[`chk-attendance-${m.id}`] = document.getElementById(`chk-attendance-${m.id}`)?.checked;
-      });
+      dailyMissionData.forEach(m => { saveData[`chk-daily-${m.id}`] = document.getElementById(`chk-daily-${m.id}`)?.checked; });
+      weeklyMissionData.forEach(m => { saveData[`chk-weekly-${m.id}`] = document.getElementById(`chk-weekly-${m.id}`)?.checked; });
+      repeatMissionData.forEach(m => { saveData[`input-repeat-cnt-${m.id}`] = document.getElementById(`input-repeat-cnt-${m.id}`)?.value; });
+      freeDiaData.forEach(m => { saveData[`chk-freedia-${m.id}`] = document.getElementById(`chk-freedia-${m.id}`)?.checked; });
+      adRewardData.forEach(m => { saveData[`chk-ad-${m.id}`] = document.getElementById(`chk-ad-${m.id}`)?.checked; });
+      attendanceData.forEach(m => { saveData[`chk-attendance-${m.id}`] = document.getElementById(`chk-attendance-${m.id}`)?.checked; });
+
+      // ▼ 새로 추가된 길드 탭 관련 배열 데이터 저장 ▼
+      guildDailyActivityData.forEach(m => { saveData[`chk-gact-${m.id}`] = document.getElementById(`chk-gact-${m.id}`)?.checked; });
+      guildMissionData.forEach(m => { saveData[`chk-gmission-${m.id}`] = document.getElementById(`chk-gmission-${m.id}`)?.checked; });
+      guildCoinShopItems.forEach(item => { saveData[`input-gshop-${item.id}`] = document.getElementById(`input-gshop-${item.id}`)?.value; });
+      tavernCoinShopItems.forEach(item => { saveData[`input-tshop-${item.id}`] = document.getElementById(`input-tshop-${item.id}`)?.value; });
 
       saveData['target-prob-type'] = document.getElementById('target-prob-type')?.value;
       saveData['target-prob-grade'] = document.getElementById('target-prob-grade')?.value;
@@ -3405,6 +3397,20 @@
       saveData['invest-amount2'] = document.getElementById('invest-amount2')?.value;
       saveData['invest-unit2'] = document.getElementById('invest-unit2')?.value;
       saveData['invest-mode'] = currentInvestMode;
+
+      // ▼ 새로 추가된 길드 탭 관련 개별 입력값 저장 ▼
+      saveData['guild-days'] = document.getElementById('guild-days')?.value;
+      saveData['guild-info-cur-lv'] = document.getElementById('guild-info-cur-lv')?.value;
+      saveData['guild-info-target-lv'] = document.getElementById('guild-info-target-lv')?.value;
+      saveData['guild-info-cur-exp'] = document.getElementById('guild-info-cur-exp')?.value;
+      saveData['guild-info-member-cnt'] = document.getElementById('guild-info-member-cnt')?.value;
+      saveData['guild-info-exp-per-member'] = document.getElementById('guild-info-exp-per-member')?.value;
+      saveData['guild-ability-target-grade'] = document.getElementById('guild-ability-target-grade')?.value;
+      saveData['guild-ability-dice-per-roll'] = document.getElementById('guild-ability-dice-per-roll')?.value;
+      saveData['tavern-personal-cur-lv'] = document.getElementById('tavern-personal-cur-lv')?.value;
+      saveData['tavern-personal-target-lv'] = document.getElementById('tavern-personal-target-lv')?.value;
+      saveData['tavern-guild-cur-lv'] = document.getElementById('tavern-guild-cur-lv')?.value;
+      saveData['tavern-guild-target-lv'] = document.getElementById('tavern-guild-target-lv')?.value;
 
       localStorage.setItem('hungryDragonGoldV8Data', JSON.stringify(saveData));
     }
