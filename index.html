@@ -1643,9 +1643,9 @@
       </svg>`;
     }
 
-    function getBagSvg(colorHex) {
+    function getTicketSvg(colorHex) {
       return `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="${colorHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
       </svg>`;
     }
 
@@ -2466,45 +2466,44 @@
         let attendanceDiaTotal = 0;
         let attendanceAcquiredItems = {};
         
-// 1) [출석 보상 1일 획득 결과 카드용] 계산 기준 일수(days)와 무관하게 1일 기준 보상 산출
-      attendanceData.forEach(m => {
-        const chk = document.getElementById(`chk-attendance-${m.id}`);
-        const card = document.getElementById(`card-attendance-${m.id}`);
-        if (chk && chk.checked) {
-          attendanceDiaTotal += m.dia;
-
-          if (m.isCycle) {
-            const activeDay = getAutoTicketDay();
-            const cycleList = [
-              { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
-              { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
-              { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
-              { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
-            ];
-            let item = cycleList[activeDay - 1];
-            // ✅ 복수 선택 시 수량 누적 합산되도록 수정
-            attendanceAcquiredItems[item.keyType] = {
-              name: item.name,
-              count: (attendanceAcquiredItems[item.keyType]?.count || 0) + item.count,
-              color: item.color
-            };
+        // 1) [출석 보상 1일 획득 결과 카드용] 계산 기준 일수(days)와 무관하게 1일 기준 보상 산출
+        attendanceData.forEach(m => {
+          const chk = document.getElementById(`chk-attendance-${m.id}`);
+          const card = document.getElementById(`card-attendance-${m.id}`);
+          if (chk && chk.checked) {
+            attendanceDiaTotal += m.dia;
+            
+                  if (m.isCycle) {
+                  // 👇 [수정] 셀렉트박스 고정값이 아닌 날짜 경과에 따른 자동 순환 일차 적용
+                  const activeDay = getAutoTicketDay();
+                  const cycleList = [
+                    { keyType: 'weapon_ticket', name: '무기 소환권', count: 100, color: '#ef4444' },
+                    { keyType: 'armor_ticket', name: '갑옷 소환권', count: 100, color: '#3b82f6' },
+                    { keyType: 'helmet_ticket', name: '투구 소환권', count: 100, color: '#f59e0b' },
+                    { keyType: 'skill_ticket', name: '스킬 소환권', count: 10, color: '#22c55e' }
+                  ];
+                  let item = cycleList[activeDay - 1];
+                  attendanceAcquiredItems[item.keyType] = {
+                    name: item.name,
+                    count: item.count,
+                    color: item.color
+                  };
+              } else {
+                if (m.items) {
+                  m.items.forEach(it => {
+                    attendanceAcquiredItems[it.keyType] = { 
+                      name: it.name, 
+                      count: it.count, 
+                      color: it.color 
+                    };
+                  });
+                }
+              }
+            if (card) card.classList.add('checked');
           } else {
-            if (m.items) {
-              m.items.forEach(it => {
-                // ✅ 복수 선택 시 수량 누적 합산되도록 수정
-                attendanceAcquiredItems[it.keyType] = { 
-                  name: it.name, 
-                  count: (attendanceAcquiredItems[it.keyType]?.count || 0) + it.count, 
-                  color: it.color 
-                };
-              });
-            }
+            if (card) card.classList.remove('checked');
           }
-          if (card) card.classList.add('checked');
-        } else {
-          if (card) card.classList.remove('checked');
-        }
-      });
+        });
 
     document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
 
