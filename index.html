@@ -1029,13 +1029,17 @@
         </div>
 
         <div class="mission-grid" id="attendance-grid"></div>
+
         <!-- 출석 누적 포인트 진행바 영역 -->
         <div class="point-progress-card">
-          <div class="progress-header">
-            <strong style="font-size: 14px; color: var(--text-main);">🎯 재료 주머니 출석 누적 포인트 보상</strong>
-            <span id="attendance-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 15 P</span>
+          <div class="progress-header" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <strong style="font-size: 14px; color: var(--text-main);">🎯 재료 주머니 출석 누적 보상 (3일 주기)</strong>
+              <span id="attendance-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 15 P</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-sub);">💡 재료 주머니 출석 체크 3회(3일)마다 보상을 획득할 수 있습니다.</div>
           </div>
-          <div class="progress-bar-bg">
+          <div class="progress-bar-bg" style="margin-top: 8px;">
             <div class="progress-bar-fill" id="attendance-progress-fill"></div>
           </div>
 
@@ -1713,12 +1717,12 @@
         { keyType: 'heart', name: '하트던전 열쇠', count: 3, color: 'var(--key-heart)' }
       ];
   
-      const attendanceMilestonesData = [
-        { pts: 3, items: attendanceKeysStandard },
-        { pts: 6, items: attendanceKeysStandard },
-        { pts: 9, items: attendanceKeysStandard },
-        { pts: 12, items: attendanceKeysStandard },
-        { pts: 15, items: attendanceKeysStandard }
+  const attendanceMilestonesData = [
+        { pts: 3, days: 3, items: attendanceKeysStandard },
+        { pts: 6, days: 6, items: attendanceKeysStandard },
+        { pts: 9, days: 9, items: attendanceKeysStandard },
+        { pts: 12, days: 12, items: attendanceKeysStandard },
+        { pts: 15, days: 15, items: attendanceKeysStandard }
       ];
   
       const attendanceData = [
@@ -2026,11 +2030,11 @@
       `).join('');
     }
 
-      const attendanceMilestoneContainer = document.getElementById('attendance-milestones');
+  const attendanceMilestoneContainer = document.getElementById('attendance-milestones');
         if (attendanceMilestoneContainer) {
           attendanceMilestoneContainer.innerHTML = attendanceMilestonesData.map(ms => `
             <div class="milestone-box" id="ms-attendance-${ms.pts}">
-              <div class="milestone-pts">${ms.pts} P 달성</div>
+              <div class="milestone-pts">${ms.days}일차 (${ms.pts} P)</div>
               <div class="item-badge-list">
                 ${ms.items.map(it => `<span class="item-badge">${getKeySvg(it.color)} ${it.name} x${it.count}</span>`).join('')}
               </div>
