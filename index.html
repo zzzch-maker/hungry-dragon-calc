@@ -3494,41 +3494,66 @@
       document.getElementById('guild-ability-expected-dice').innerText = `${toCommaStr(totalDice)} 개`;
     }
     
-    /* ===== 5. 길드 상점 데이터 & 계산기 ===== */
+    /* ===== 4. 길드 상점 데이터 (요청 목록 및 최대 구매 수량 반영) ===== */
     const guildCoinShopItems = [
-      { id: 'gshop1', name: '던전 열쇠 선택권', price: 500, unit: '🪙' },
-      { id: 'gshop2', name: '장비 소환권 (10회)', price: 1000, unit: '🪙' },
-      { id: 'gshop3', name: '스킬 소환권 (10회)', price: 1200, unit: '🪙' },
-      { id: 'gshop4', name: '어빌리티 주사위 x50', price: 800, unit: '🪙' }
+      { id: 'gshop1',  name: '🔑 골드던전 열쇠 1개', max: 3, price: 150, unit: '🪙' },
+      { id: 'gshop2',  name: '🔑 장비던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
+      { id: 'gshop3',  name: '🔑 스킬던전 열쇠 1개', max: 3, price: 200, unit: '🪙' },
+      { id: 'gshop4',  name: '🔑 하트던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
+      { id: 'gshop5',  name: '🔑 재료던전 열쇠 1개', max: 3, price: 300, unit: '🪙' },
+      { id: 'gshop6',  name: '🔑 코어던전 열쇠 1개', max: 3, price: 250, unit: '🪙' },
+      { id: 'gshop7',  name: '🔑 미궁던전 열쇠 1개', max: 3, price: 400, unit: '🪙' },
+      { id: 'gshop8',  name: '🔑 요일던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
+      { id: 'gshop9',  name: '🔑 정령던전 열쇠 1개', max: 3, price: 600, unit: '🪙' },
+      { id: 'gshop10', name: '⚡ 가속권(1분) 10개', max: null, price: 100, unit: '🪙' }
     ];
     
     const tavernCoinShopItems = [
-      { id: 'tshop1', name: '주점 가속권 (30분)', price: 300, unit: '🍺' },
-      { id: 'tshop2', name: '영웅의 영혼석 x10', price: 600, unit: '🍺' },
-      { id: 'tshop3', name: '코스튬 제작 재료', price: 1000, unit: '🍺' }
+      { id: 'tshop1', name: '🔑 골드던전 열쇠 1개', max: 3, price: 30, unit: '🍺' },
+      { id: 'tshop2', name: '🔑 장비던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
+      { id: 'tshop3', name: '🔑 스킬던전 열쇠 1개', max: 3, price: 40, unit: '🍺' },
+      { id: 'tshop4', name: '🔑 하트던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
+      { id: 'tshop5', name: '🔑 코어던전 열쇠 1개', max: 3, price: 50, unit: '🍺' },
+      { id: 'tshop6', name: '🔑 미궁던전 열쇠 1개', max: 3, price: 80, unit: '🍺' },
+      { id: 'tshop7', name: '🔑 요일던전 열쇠 1개', max: 3, price: 140, unit: '🍺' },
+      { id: 'tshop8', name: '🔑 정령던전 열쇠 1개', max: 3, price: 120, unit: '🍺' }
     ];
+
+    /* ===== 상점 수량 입력 제한 검증 함수 ===== */
+    function validateShopItemInput(inputEl, maxVal) {
+      formatLevelWithComma(inputEl);
+      if (maxVal !== null && maxVal !== undefined) {
+        let val = parseNumber(inputEl.value);
+        if (val > maxVal) {
+          inputEl.value = toCommaStr(maxVal);
+        }
+      }
+    }
     
+    /* ===== 길드 상점 랜더링 함수 ===== */
     function renderGuildShopItems() {
       const coinListEl = document.getElementById('guild-shop-coin-list');
       if (coinListEl) {
         coinListEl.innerHTML = guildCoinShopItems.map(item => `
           <div class="gain-item">
-            <span class="gain-item-name">${item.name} (${item.price}${item.unit})</span>
+            <span class="gain-item-name">${item.name} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
             <div class="input-box" style="width: 110px; background: white;">
-              <input type="text" id="input-gshop-${item.id}" value="0" placeholder="수량" oninput="formatLevelWithComma(this); calcGuildShopTotal(); handleInput();">
+              <input type="text" id="input-gshop-${item.id}" value="0" placeholder="수량" 
+                     oninput="validateShopItemInput(this, ${item.max}); calcGuildShopTotal(); handleInput();">
               <span class="unit">개</span>
             </div>
           </div>
         `).join('');
       }
     
-      const tavernListEl = document.getElementById('guild-shop-tavern-list');
+    const tavernListEl = document.getElementById('guild-shop-tavern-list');
       if (tavernListEl) {
         tavernListEl.innerHTML = tavernCoinShopItems.map(item => `
           <div class="gain-item">
-            <span class="gain-item-name">${item.name} (${item.price}${item.unit})</span>
+            <span class="gain-item-name">${item.name} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
             <div class="input-box" style="width: 110px; background: white;">
-              <input type="text" id="input-tshop-${item.id}" value="0" placeholder="수량" oninput="formatLevelWithComma(this); calcGuildShopTotal(); handleInput();">
+              <input type="text" id="input-tshop-${item.id}" value="0" placeholder="수량" 
+                     oninput="validateShopItemInput(this, ${item.max}); calcGuildShopTotal(); handleInput();">
               <span class="unit">개</span>
             </div>
           </div>
@@ -3536,21 +3561,31 @@
       }
     }
     
+    /* ===== 길드 상점 구매 합계 계산 함수 ===== */
     function calcGuildShopTotal() {
       let totalCoin = 0;
       guildCoinShopItems.forEach(item => {
-        const qty = parseNumber(document.getElementById(`input-gshop-${item.id}`)?.value) || 0;
-        totalCoin += qty * item.price;
+        const el = document.getElementById(`input-gshop-${item.id}`);
+        if (el) {
+          const qty = parseNumber(el.value) || 0;
+          totalCoin += qty * item.price;
+        }
       });
     
       let totalTavern = 0;
       tavernCoinShopItems.forEach(item => {
-        const qty = parseNumber(document.getElementById(`input-tshop-${item.id}`)?.value) || 0;
-        totalTavern += qty * item.price;
+        const el = document.getElementById(`input-tshop-${item.id}`);
+        if (el) {
+          const qty = parseNumber(el.value) || 0;
+          totalTavern += qty * item.price;
+        }
       });
     
-      document.getElementById('guild-shop-total-coin').innerText = `${toCommaStr(totalCoin)} 🪙`;
-      document.getElementById('guild-shop-total-tavern').innerText = `${toCommaStr(totalTavern)} 🍺`;
+      const totalCoinEl = document.getElementById('guild-shop-total-coin');
+      const totalTavernEl = document.getElementById('guild-shop-total-tavern');
+    
+      if (totalCoinEl) totalCoinEl.innerText = `${toCommaStr(totalCoin)} 🪙`;
+      if (totalTavernEl) totalTavernEl.innerText = `${toCommaStr(totalTavern)} 🍺`;
     }
     
     /* ===== 6. 길드 주점 레벨업 계산기 ===== */
