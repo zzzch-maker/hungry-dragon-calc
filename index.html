@@ -3530,13 +3530,16 @@
       }
     }
     
-    /* ===== 길드 상점 랜더링 함수 ===== */
+    /* ===== 길드 상점 랜더링 함수 (열쇠 아이콘 색상 연동) ===== */
     function renderGuildShopItems() {
+      // 미션/소환 항목의 열쇠 색상(#f59e0b)과 동일하게 스타일을 입혀주는 헬퍼 함수
+      const formatItemName = (name) => name.replace('🔑', '<span style="color: #f59e0b; font-weight: bold;">🔑</span>');
+    
       const coinListEl = document.getElementById('guild-shop-coin-list');
       if (coinListEl) {
         coinListEl.innerHTML = guildCoinShopItems.map(item => `
           <div class="gain-item">
-            <span class="gain-item-name">${item.name} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
+            <span class="gain-item-name">${formatItemName(item.name)} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
             <div class="input-box" style="width: 110px; background: white;">
               <input type="text" id="input-gshop-${item.id}" value="0" placeholder="수량" 
                      oninput="validateShopItemInput(this, ${item.max}); calcGuildShopTotal(); handleInput();">
@@ -3550,7 +3553,7 @@
       if (tavernListEl) {
         tavernListEl.innerHTML = tavernCoinShopItems.map(item => `
           <div class="gain-item">
-            <span class="gain-item-name">${item.name} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
+            <span class="gain-item-name">${formatItemName(item.name)} <small style="color: #94a3b8;">(${toCommaStr(item.price)}${item.unit}${item.max ? ' / 최대 ' + item.max + '회' : ''})</small></span>
             <div class="input-box" style="width: 110px; background: white;">
               <input type="text" id="input-tshop-${item.id}" value="0" placeholder="수량" 
                      oninput="validateShopItemInput(this, ${item.max}); calcGuildShopTotal(); handleInput();">
