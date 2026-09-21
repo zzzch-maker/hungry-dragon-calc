@@ -2462,7 +2462,7 @@ const attendanceGrid = document.getElementById('attendance-grid');
         }).join('');
       }
 
-let attendanceDiaTotal = 0;
+      let attendanceDiaTotal = 0;
       let attendancePtsTotal1Day = 0;
       let attendanceAcquiredItems = {};
       
@@ -2483,22 +2483,25 @@ let attendanceDiaTotal = 0;
         }
       });
 
-      document.getElementById('sum-attendance-dia-total').innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
+      const sumAttDiaEl = document.getElementById('sum-attendance-dia-total');
+      if (sumAttDiaEl) sumAttDiaEl.innerText = `${toCommaStr(attendanceDiaTotal)} 💎`;
 
       const attendanceItemSummaryEl = document.getElementById('sum-attendance-items');
       const attendanceItemKeys = Object.keys(attendanceAcquiredItems);
-      if (attendanceItemKeys.length === 0) {
-        attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
-      } else {
-        attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
-          const it = attendanceAcquiredItems[kt];
-          return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
-            ${getKeySvg(it.color)} ${it.name} x${it.count}
-          </span>`;
-        }).join('');
+      if (attendanceItemSummaryEl) {
+        if (attendanceItemKeys.length === 0) {
+          attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
+        } else {
+          attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
+            const it = attendanceAcquiredItems[kt];
+            return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
+              ${getKeySvg(it.color)} ${it.name} x${it.count}
+            </span>`;
+          }).join('');
+        }
       }
 
-      // 3일 1회 누적 보상 계산 (기준 일수 동안 총 획득 가능한 3일 주기 횟수 계산)
+      // 3일 1회 누적 보상 계산 및 안전 반영
       const totalAttPts = attendancePtsTotal1Day * days;
       const attendanceCycles = Math.floor(totalAttPts / 3);
       
