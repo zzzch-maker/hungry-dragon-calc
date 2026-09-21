@@ -1091,20 +1091,129 @@
     </div>
 
         <!-- 4. 콘텐츠 - 길드 탭 -->
-    <div id="tab-guild" class="tab-content">
+       <div id="tab-guild" class="tab-content">
       
-      <!-- 길드 전용 서브 탭 내비게이션 -->
-      <div class="mission-sub-nav">
-        <button class="mission-tab-btn active" onclick="switchGuildPanel('guild-panel-info', this)">🏛️ 길드 정보 & 렙업</button>
-        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-daily-coin', this)">🪙 일일 코인 수급</button>
-        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-ability', this)">🎯 길드 어빌리티</button>
-        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-shop', this)">🛒 길드 상점</button>
-        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-mission', this)">📜 길드 미션 보상</button>
-        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-tavern', this)">🍺 길드 주점 레벨업</button>
+      <!-- 1. 최상단 길드 통합 대시보드 -->
+      <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none; margin-bottom: 20px;">
+        <div class="invest-title" style="color: #38bdf8; margin-bottom: 8px;">
+          🏛️ 길드 보상 총 수급합계 계산기
+        </div>
+    
+        <div class="invest-input-row" style="margin-bottom: 14px; align-items: center;">
+          <div class="input-field" style="flex: 1; max-width: 200px;">
+            <label style="color: #94a3b8;">계산 기준 일수 (일)</label>
+            <div class="input-box" style="background: #334155; border-color: #475569;">
+              <input type="text" id="guild-days" value="1" style="color: white; font-size: 14px;" oninput="formatLevelWithComma(this); updateAllGuildCalculations(); handleInput();">
+              <span class="unit" style="color: #cbd5e1;">일간</span>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 16px;">
+            * 아래 선택된 길드 활동 및 미션을 <span id="guild-days-label-text" style="color: #38bdf8; font-weight: 700;">1일</span> 동안 수행했을 때의 총 누적 보상 계산입니다.
+          </div>
+        </div>
+    
+        <div class="category-summary-grid">
+          <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
+            <div class="cat-summary-title" style="color: #94a3b8;">1일 기준 총 획득 길드 코인</div>
+            <div class="cat-summary-cost" id="top-guild-daily-coin" style="color: #f59e0b; font-size: 18px;">0 🪙</div>
+          </div>
+          <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
+            <div class="cat-summary-title" style="color: #94a3b8;">1일 기준 총 획득 주점 코인</div>
+            <div class="cat-summary-cost" id="top-guild-daily-tavern" style="color: #38bdf8; font-size: 18px;">0 🍺</div>
+          </div>
+          <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
+            <div class="cat-summary-title" style="color: #94a3b8;"><span id="top-guild-days-text">1일간</span> 총 누적 길드 코인</div>
+            <div class="cat-summary-cost" id="top-guild-accum-coin" style="color: #f59e0b; font-size: 18px;">0 🪙</div>
+          </div>
+          <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
+            <div class="cat-summary-title" style="color: #94a3b8;"><span id="top-tavern-days-text">1일간</span> 총 누적 주점 코인</div>
+            <div class="cat-summary-cost" id="top-guild-accum-tavern" style="color: #38bdf8; font-size: 18px;">0 🍺</div>
+          </div>
+        </div>
       </div>
     
-      <!-- 1) 길드 정보 & 렙업 계산기 -->
-      <div id="guild-panel-info" class="guild-panel active">
+      <!-- 2. 하위 메뉴 서브 탭 내비게이션 -->
+      <div class="mission-sub-nav">
+        <button class="mission-tab-btn active" onclick="switchGuildPanel('guild-panel-daily', this)">☀️ 일일 길드 활동</button>
+        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-mission', this)">📜 길드 미션</button>
+        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-info', this)">🏛️ 길드 레벨 & 정보</button>
+        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-ability', this)">🎯 길드 어빌리티</button>
+        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-shop', this)">🛒 길드 상점</button>
+        <button class="mission-tab-btn" onclick="switchGuildPanel('guild-panel-tavern', this)">🍺 길드 주점</button>
+      </div>
+    
+      <!-- Panel 1) 일일 길드 활동 (전체 선택/해제) -->
+      <div id="guild-panel-daily" class="guild-panel active">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <strong style="font-size: 15px;">☀️ 일일 길드 활동 항목 (1일 기준)</strong>
+          <div>
+            <button onclick="toggleAllGuildDaily(true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
+            <button onclick="toggleAllGuildDaily(false)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 해제</button>
+          </div>
+        </div>
+    
+        <div class="mission-grid" id="guild-daily-activity-grid"></div>
+    
+        <div class="mission-summary-card">
+          <div class="mission-summary-title">📊 일일 길드 활동 보상 결과 (1일)</div>
+          <div class="summary-grid-3">
+            <div class="summary-item">
+              <div class="summary-item-label">획득 길드 코인</div>
+              <div class="summary-item-val" id="sum-gdaily-coin" style="color: #f59e0b;">0 🪙</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">획득 용사의 주점 코인</div>
+              <div class="summary-item-val" id="sum-gdaily-tavern" style="color: #38bdf8;">0 🍺</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Panel 2) 길드 미션 (전체 선택/해제 + 누적 포인트) -->
+      <div id="guild-panel-mission" class="guild-panel" style="display:none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <strong style="font-size: 15px;">📜 길드 미션 목록 (1일 기준)</strong>
+          <div>
+            <button onclick="toggleAllGuildMissions(true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
+            <button onclick="toggleAllGuildMissions(false)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 해제</button>
+          </div>
+        </div>
+    
+        <div class="mission-grid" id="guild-mission-list-grid"></div>
+    
+        <div class="point-progress-card">
+          <div class="progress-header">
+            <strong style="font-size: 14px; color: var(--text-main);">🎯 길드 미션 누적 포인트 보상</strong>
+            <span id="guild-mission-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 1,000 P</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="guild-mission-progress-fill"></div>
+          </div>
+    
+          <div class="point-milestones" id="guild-mission-milestones"></div>
+        </div>
+    
+        <div class="mission-summary-card">
+          <div class="mission-summary-title">📊 길드 미션 보상 계산 결과</div>
+          <div class="summary-grid-3">
+            <div class="summary-item">
+              <div class="summary-item-label">달성 미션 포인트</div>
+              <div class="summary-item-val" id="sum-gmission-pts">0 P</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">획득 길드 코인</div>
+              <div class="summary-item-val" id="sum-gmission-coins" style="color: #f59e0b;">0 🪙</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">획득 용사의 주점 코인</div>
+              <div class="summary-item-val" id="sum-gmission-tavern" style="color: #38bdf8;">0 🍺</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Panel 3) 길드 레벨 & 정보 -->
+      <div id="guild-panel-info" class="guild-panel" style="display:none;">
         <div class="invest-card">
           <div class="invest-title">🏛️ 길드 레벨 정보 & 렙업 일수 계산기</div>
           
@@ -1171,53 +1280,7 @@
         </div>
       </div>
     
-      <!-- 2) 일일 길드코인 & 용사의 주점 코인 획득 수량 계산기 -->
-      <div id="guild-panel-daily-coin" class="guild-panel" style="display:none;">
-        <div class="invest-card">
-          <div class="invest-title">🪙 일일 코인 수급 종합 계산기</div>
-          
-          <div class="stat-grid" style="margin-bottom: 16px;">
-            <div class="stat-card atk">
-              <div class="card-header"><span class="stat-title">📌 길드 출석 & 기부</span></div>
-              <div class="input-field" style="margin-bottom: 8px;">
-                <label>길드 출석 완료</label>
-                <input type="checkbox" id="chk-guild-coin-att" checked onchange="calcGuildDailyCoin(); handleInput();">
-              </div>
-              <div class="input-field">
-                <label>일반/다이아 기부 횟수</label>
-                <div class="input-box" style="background: white;">
-                  <input type="text" id="guild-coin-donate-cnt" value="3" oninput="formatLevelWithComma(this); calcGuildDailyCoin(); handleInput();">
-                  <span class="unit">회</span>
-                </div>
-              </div>
-            </div>
-    
-            <div class="stat-card def">
-              <div class="card-header"><span class="stat-title">⚔️ 길드 보스 / 토벌</span></div>
-              <div class="input-field">
-                <label>길드 보스 일일 참여 횟수</label>
-                <div class="input-box" style="background: white;">
-                  <input type="text" id="guild-coin-boss-cnt" value="2" oninput="formatLevelWithComma(this); calcGuildDailyCoin(); handleInput();">
-                  <span class="unit">회</span>
-                </div>
-              </div>
-            </div>
-          </div>
-    
-          <div class="category-summary-grid">
-            <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
-              <div class="cat-summary-title" style="color: #94a3b8;">일일 총 획득 길드 코인</div>
-              <div class="cat-summary-cost" id="guild-daily-total-guild-coin" style="color: #f59e0b; font-size: 18px;">0 🪙</div>
-            </div>
-            <div class="cat-summary-card" style="background: #1e293b; border-color: #334155;">
-              <div class="cat-summary-title" style="color: #94a3b8;">일일 총 획득 용사의 주점 코인</div>
-              <div class="cat-summary-cost" id="guild-daily-total-tavern-coin" style="color: #38bdf8; font-size: 18px;">0 🍺</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    
-      <!-- 3) 길드 어빌리티 레벨별 리스트 & 소모 주사위 기댓값 -->
+      <!-- Panel 4) 길드 어빌리티 -->
       <div id="guild-panel-ability" class="guild-panel" style="display:none;">
         <div class="invest-card">
           <div class="invest-title">🎯 길드 어빌리티 해금 정보 & 주사위 기댓값 계산기</div>
@@ -1277,10 +1340,10 @@
         </div>
       </div>
     
-      <!-- 4) 길드 상점 구매 계산기 -->
+      <!-- Panel 5) 길드 상점 -->
       <div id="guild-panel-shop" class="guild-panel" style="display:none;">
         <div class="invest-card">
-          <div class="invest-title">🛒 길드 상점 (길드 코인 / 용사의 주점 코인) 구매 계산기</div>
+          <div class="invest-title">🛒 길드 상점 구매 계산기</div>
     
           <div style="margin-bottom: 16px;">
             <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 8px;">🪙 길드 코인 상점 아이템 구매</strong>
@@ -1305,52 +1368,12 @@
         </div>
       </div>
     
-      <!-- 5) 길드 미션별 누적 포인트 보상 계산기 -->
-      <div id="guild-panel-mission" class="guild-panel" style="display:none;">
-        <div class="invest-card">
-          <div class="invest-title">📜 길드 미션 수행 & 누적 포인트 보상 계산기</div>
-    
-          <div class="mission-grid" id="guild-mission-list-grid"></div>
-    
-          <div class="point-progress-card">
-            <div class="progress-header">
-              <strong style="font-size: 14px; color: var(--text-main);">🎯 길드 미션 누적 포인트 보상</strong>
-              <span id="guild-mission-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 1,000 P</span>
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" id="guild-mission-progress-fill"></div>
-            </div>
-    
-            <div class="point-milestones" id="guild-mission-milestones"></div>
-          </div>
-    
-          <div class="mission-summary-card">
-            <div class="mission-summary-title">📊 길드 미션 종합 획득 결과</div>
-            <div class="summary-grid-3">
-              <div class="summary-item">
-                <div class="summary-item-label">달성 미션 포인트</div>
-                <div class="summary-item-val" id="sum-guild-mission-pts">0 P</div>
-              </div>
-              <div class="summary-item">
-                <div class="summary-item-label">획득 길드 코인</div>
-                <div class="summary-item-val" id="sum-guild-mission-coins" style="color: #f59e0b;">0 🪙</div>
-              </div>
-              <div class="summary-item">
-                <div class="summary-item-label">획득 용사의 주점 코인</div>
-                <div class="summary-item-val" id="sum-guild-mission-tavern" style="color: #38bdf8;">0 🍺</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    
-      <!-- 6) 길드 주점 레벨업 계산기 -->
+      <!-- Panel 6) 길드 주점 -->
       <div id="guild-panel-tavern" class="guild-panel" style="display:none;">
         <div class="invest-card">
-          <div class="invest-title">🍺 주점(개인 주점 / 길드 주점) 레벨업 & 능력치 계산기</div>
+          <div class="invest-title">🍺 주점 레벨업 & 능력치 계산기</div>
     
           <div class="stat-grid" style="margin-bottom: 16px;">
-            <!-- 개인 주점 -->
             <div class="stat-card atk">
               <div class="card-header"><span class="stat-title">👤 개인 주점 레벨업</span></div>
               <div class="input-grid">
@@ -1384,7 +1407,6 @@
               </div>
             </div>
     
-            <!-- 길드 주점 -->
             <div class="stat-card def">
               <div class="card-header"><span class="stat-title">🏛️ 길드 주점 레벨업</span></div>
               <div class="input-grid">
@@ -1425,7 +1447,7 @@
               <div class="cat-summary-cost" id="tavern-total-needed-coins" style="color: #38bdf8;">0 🍺</div>
             </div>
             <div class="cat-summary-card">
-              <div class="cat-summary-title">일일 코인 수급 기준 달성 예상 일수</div>
+              <div class="cat-summary-title">일일 수급 기준 목표 달성 예상 일수</div>
               <div class="cat-summary-cost" id="tavern-needed-days" style="color: #ef4444;">0 일</div>
             </div>
           </div>
@@ -3068,7 +3090,7 @@
       localStorage.setItem('hungryDragonGoldV8Data', JSON.stringify(saveData));
     }
 
-        /* ===== 길드 서브 패널 전환 함수 ===== */
+    /* ===== 길드 서브 패널 전환 함수 ===== */
     function switchGuildPanel(panelId, btnEl) {
       const container = document.getElementById('tab-guild');
       if (!container) return;
@@ -3080,7 +3102,178 @@
       if (activePanel) activePanel.style.display = 'block';
     }
     
-    /* ===== 1. 길드 레벨 데이터 & 계산기 ===== */
+    /* ===== 1. 일일 길드 활동 데이터 ===== */
+    const guildDailyActivityData = [
+      { id: 'gact1', name: '길드 출석 완료', coin: 500, tavern: 100 },
+      { id: 'gact2', name: '길드 일반 기부 (1회)', coin: 300, tavern: 80 },
+      { id: 'gact3', name: '길드 다이아 기부 (1회)', coin: 300, tavern: 80 },
+      { id: 'gact4', name: '길드 다이아 기부 (2회)', coin: 300, tavern: 80 },
+      { id: 'gact5', name: '길드 보스 1회 참여', coin: 400, tavern: 150 },
+      { id: 'gact6', name: '길드 보스 2회 참여', coin: 400, tavern: 150 },
+      { id: 'gact7', name: '길드 주점 맥주 제공', coin: 300, tavern: 100 }
+    ];
+    
+    /* ===== 2. 길드 미션 데이터 & 마일스톤 ===== */
+    const guildMissionData = [
+      { id: 'gm1', name: '길드 출석 완료하기', pts: 100, coin: 200, tavern: 50 },
+      { id: 'gm2', name: '길드 기부 3회 완료하기', pts: 150, coin: 300, tavern: 100 },
+      { id: 'gm3', name: '길드 보스 2회 도전하기', pts: 200, coin: 400, tavern: 150 },
+      { id: 'gm4', name: '길드 어빌리티 1회 리롤하기', pts: 100, coin: 200, tavern: 50 },
+      { id: 'gm5', name: '주점 맥주 제공 3회 하기', pts: 150, coin: 300, tavern: 100 }
+    ];
+    
+    const guildMilestonesData = [
+      { pts: 200, coin: 300, tavern: 100 },
+      { pts: 400, coin: 500, tavern: 200 },
+      { pts: 600, coin: 800, tavern: 300 },
+      { pts: 800, coin: 1000, tavern: 400 },
+      { pts: 1000, coin: 1500, tavern: 500 }
+    ];
+    
+    /* ===== 일일 활동 / 미션 렌더링 ===== */
+    function renderGuildDailyActivities() {
+      const grid = document.getElementById('guild-daily-activity-grid');
+      if (!grid) return;
+      grid.innerHTML = guildDailyActivityData.map(m => `
+        <div class="mission-card" id="card-gact-${m.id}" style="flex-direction: row; align-items: center; justify-content: space-between;">
+          <div class="mission-info">
+            <span class="mission-name">${m.name}</span>
+            <div class="mission-rewards">
+              길드코인: <span>+${toCommaStr(m.coin)}🪙</span> | 주점코인: <span>+${toCommaStr(m.tavern)}🍺</span>
+            </div>
+          </div>
+          <input type="checkbox" id="chk-gact-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllGuildCalculations(); handleInput();">
+        </div>
+      `).join('');
+    }
+    
+    function renderGuildMissions() {
+      const gridEl = document.getElementById('guild-mission-list-grid');
+      if (gridEl) {
+        gridEl.innerHTML = guildMissionData.map(m => `
+          <div class="mission-card" id="card-gmission-${m.id}" style="flex-direction: row; align-items: center; justify-content: space-between;">
+            <div class="mission-info">
+              <span class="mission-name">${m.name}</span>
+              <div class="mission-rewards">
+                포인트: <span>+${m.pts}P</span> | 길드코인: <span>+${m.coin}🪙</span> | 주점코인: <span>+${m.tavern}🍺</span>
+              </div>
+            </div>
+            <input type="checkbox" id="chk-gmission-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllGuildCalculations(); handleInput();">
+          </div>
+        `).join('');
+      }
+    
+      const milestonesEl = document.getElementById('guild-mission-milestones');
+      if (milestonesEl) {
+        milestonesEl.innerHTML = guildMilestonesData.map(ms => `
+          <div class="milestone-box" id="ms-gmission-${ms.pts}">
+            <div class="milestone-pts">${toCommaStr(ms.pts)} P 달성</div>
+            <div class="item-badge-list">
+              <span class="item-badge">+${ms.coin}🪙 / +${ms.tavern}🍺</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+    
+    /* ===== 전체 선택 / 전체 해제 함수 ===== */
+    function toggleAllGuildDaily(check) {
+      guildDailyActivityData.forEach(m => {
+        const chk = document.getElementById(`chk-gact-${m.id}`);
+        if (chk) chk.checked = check;
+      });
+      updateAllGuildCalculations();
+      handleInput();
+    }
+    
+    function toggleAllGuildMissions(check) {
+      guildMissionData.forEach(m => {
+        const chk = document.getElementById(`chk-gmission-${m.id}`);
+        if (chk) chk.checked = check;
+      });
+      updateAllGuildCalculations();
+      handleInput();
+    }
+    
+    /* ===== 통합 메인 계산 함수 (대시보드 + 일일활동 + 미션 연동) ===== */
+    function updateAllGuildCalculations() {
+      const days = Math.max(1, parseNumber(document.getElementById('guild-days')?.value) || 1);
+      document.getElementById('guild-days-label-text').innerText = `${toCommaStr(days)}일`;
+      document.getElementById('top-guild-days-text').innerText = `${toCommaStr(days)}일간`;
+      document.getElementById('top-tavern-days-text').innerText = `${toCommaStr(days)}일간`;
+    
+      // 1. 일일 활동 계산
+      let dailyActCoin = 0;
+      let dailyActTavern = 0;
+    
+      guildDailyActivityData.forEach(m => {
+        const chk = document.getElementById(`chk-gact-${m.id}`);
+        const card = document.getElementById(`card-gact-${m.id}`);
+        if (chk && chk.checked) {
+          dailyActCoin += m.coin;
+          dailyActTavern += m.tavern;
+          if (card) card.classList.add('checked');
+        } else {
+          if (card) card.classList.remove('checked');
+        }
+      });
+    
+      document.getElementById('sum-gdaily-coin').innerText = `${toCommaStr(dailyActCoin)} 🪙`;
+      document.getElementById('sum-gdaily-tavern').innerText = `${toCommaStr(dailyActTavern)} 🍺`;
+    
+      // 2. 길드 미션 & 누적 보상 계산
+      let missionPts = 0;
+      let missionCoin = 0;
+      let missionTavern = 0;
+    
+      guildMissionData.forEach(m => {
+        const chk = document.getElementById(`chk-gmission-${m.id}`);
+        const card = document.getElementById(`card-gmission-${m.id}`);
+        if (chk && chk.checked) {
+          missionPts += m.pts;
+          missionCoin += m.coin;
+          missionTavern += m.tavern;
+          if (card) card.classList.add('checked');
+        } else {
+          if (card) card.classList.remove('checked');
+        }
+      });
+    
+      guildMilestonesData.forEach(ms => {
+        const box = document.getElementById(`ms-gmission-${ms.pts}`);
+        if (missionPts >= ms.pts) {
+          missionCoin += ms.coin;
+          missionTavern += ms.tavern;
+          if (box) box.classList.add('achieved');
+        } else {
+          if (box) box.classList.remove('achieved');
+        }
+      });
+    
+      document.getElementById('guild-mission-pts-text').innerText = `${toCommaStr(missionPts)} / 1,000 P`;
+      document.getElementById('guild-mission-progress-fill').style.width = `${Math.min(100, (missionPts / 1000) * 100)}%`;
+    
+      document.getElementById('sum-gmission-pts').innerText = `${toCommaStr(missionPts)} P`;
+      document.getElementById('sum-gmission-coins').innerText = `${toCommaStr(missionCoin)} 🪙`;
+      document.getElementById('sum-gmission-tavern').innerText = `${toCommaStr(missionTavern)} 🍺`;
+    
+      // 3. 1일 총 합계 & N일 누적 수급량 대시보드 업데이트
+      const dailyTotalCoin = dailyActCoin + missionCoin;
+      const dailyTotalTavern = dailyActTavern + missionTavern;
+    
+      const accumTotalCoin = dailyTotalCoin * days;
+      const accumTotalTavern = dailyTotalTavern * days;
+    
+      document.getElementById('top-guild-daily-coin').innerText = `${toCommaStr(dailyTotalCoin)} 🪙`;
+      document.getElementById('top-guild-daily-tavern').innerText = `${toCommaStr(dailyTotalTavern)} 🍺`;
+      document.getElementById('top-guild-accum-coin').innerText = `${toCommaStr(accumTotalCoin)} 🪙`;
+      document.getElementById('top-guild-accum-tavern').innerText = `${toCommaStr(accumTotalTavern)} 🍺`;
+    
+      // 주점 렙업 필요 일수 자동 업데이트 연동
+      calcTavernLevelUp();
+    }
+    
+    /* ===== 3. 길드 레벨 데이터 & 계산기 ===== */
     const guildLevelExpTable = [
       { lv: 1, exp: 5000, maxMembers: 15 },
       { lv: 2, exp: 12000, maxMembers: 17 },
@@ -3119,31 +3312,7 @@
       document.getElementById('guild-info-needed-days').innerText = `${toCommaStr(neededDays)} 일`;
     }
     
-    /* ===== 2. 일일 코인 수급 계산기 ===== */
-    function calcGuildDailyCoin() {
-      const isAtt = document.getElementById('chk-guild-coin-att')?.checked || false;
-      const donateCnt = parseNumber(document.getElementById('guild-coin-donate-cnt')?.value) || 0;
-      const bossCnt = parseNumber(document.getElementById('guild-coin-boss-cnt')?.value) || 0;
-    
-      let dailyGuildCoin = 0;
-      let dailyTavernCoin = 0;
-    
-      if (isAtt) {
-        dailyGuildCoin += 500;
-        dailyTavernCoin += 100;
-      }
-    
-      dailyGuildCoin += donateCnt * 300;
-      dailyTavernCoin += donateCnt * 80;
-    
-      dailyGuildCoin += bossCnt * 400;
-      dailyTavernCoin += bossCnt * 150;
-    
-      document.getElementById('guild-daily-total-guild-coin').innerText = `${toCommaStr(dailyGuildCoin)} 🪙`;
-      document.getElementById('guild-daily-total-tavern-coin').innerText = `${toCommaStr(dailyTavernCoin)} 🍺`;
-    }
-    
-    /* ===== 3. 길드 어빌리티 주사위 계산기 ===== */
+    /* ===== 4. 길드 어빌리티 주사위 계산기 ===== */
     const guildAbilityProbTable = {
       'D': 50.0, 'C': 30.0, 'B': 12.0, 'A': 5.0, 'S': 2.0, 'SS': 0.8, 'SSS': 0.2
     };
@@ -3161,7 +3330,7 @@
       document.getElementById('guild-ability-expected-dice').innerText = `${toCommaStr(totalDice)} 개`;
     }
     
-    /* ===== 4. 길드 상점 데이터 & 계산기 ===== */
+    /* ===== 5. 길드 상점 데이터 & 계산기 ===== */
     const guildCoinShopItems = [
       { id: 'gshop1', name: '던전 열쇠 선택권', price: 500, unit: '🪙' },
       { id: 'gshop2', name: '장비 소환권 (10회)', price: 1000, unit: '🪙' },
@@ -3220,89 +3389,6 @@
       document.getElementById('guild-shop-total-tavern').innerText = `${toCommaStr(totalTavern)} 🍺`;
     }
     
-    /* ===== 5. 길드 미션 & 누적 보상 데이터 & 계산기 ===== */
-    const guildMissionData = [
-      { id: 'gm1', name: '길드 출석 완료', pts: 100, coin: 500, tavern: 100 },
-      { id: 'gm2', name: '길드 기부 3회 완료', pts: 150, coin: 800, tavern: 200 },
-      { id: 'gm3', name: '길드 보스 2회 도전', pts: 200, coin: 1000, tavern: 300 },
-      { id: 'gm4', name: '길드 어빌리티 1회 리롤', pts: 100, coin: 500, tavern: 100 },
-      { id: 'gm5', name: '주점 맥주 제공 3회', pts: 150, coin: 700, tavern: 200 }
-    ];
-    
-    const guildMilestonesData = [
-      { pts: 200, coin: 300, tavern: 100 },
-      { pts: 400, coin: 500, tavern: 200 },
-      { pts: 600, coin: 800, tavern: 300 },
-      { pts: 800, coin: 1000, tavern: 400 },
-      { pts: 1000, coin: 1500, tavern: 500 }
-    ];
-    
-    function renderGuildMissions() {
-      const gridEl = document.getElementById('guild-mission-list-grid');
-      if (gridEl) {
-        gridEl.innerHTML = guildMissionData.map(m => `
-          <div class="mission-card" id="card-gmission-${m.id}" style="flex-direction: row; align-items: center; justify-content: space-between;">
-            <div class="mission-info">
-              <span class="mission-name">${m.name}</span>
-              <div class="mission-rewards">
-                포인트: <span>+${m.pts}P</span> | 길드코인: <span>+${m.coin}🪙</span> | 주점코인: <span>+${m.tavern}🍺</span>
-              </div>
-            </div>
-            <input type="checkbox" id="chk-gmission-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="calcGuildMissionTotal(); handleInput();">
-          </div>
-        `).join('');
-      }
-    
-      const milestonesEl = document.getElementById('guild-mission-milestones');
-      if (milestonesEl) {
-        milestonesEl.innerHTML = guildMilestonesData.map(ms => `
-          <div class="milestone-box" id="ms-gmission-${ms.pts}">
-            <div class="milestone-pts">${toCommaStr(ms.pts)} P 달성</div>
-            <div class="item-badge-list">
-              <span class="item-badge">+${ms.coin}🪙 / +${ms.tavern}🍺</span>
-            </div>
-          </div>
-        `).join('');
-      }
-    }
-    
-    function calcGuildMissionTotal() {
-      let pts = 0;
-      let coins = 0;
-      let tavern = 0;
-    
-      guildMissionData.forEach(m => {
-        const chk = document.getElementById(`chk-gmission-${m.id}`);
-        const card = document.getElementById(`card-gmission-${m.id}`);
-        if (chk && chk.checked) {
-          pts += m.pts;
-          coins += m.coin;
-          tavern += m.tavern;
-          if (card) card.classList.add('checked');
-        } else {
-          if (card) card.classList.remove('checked');
-        }
-      });
-    
-      guildMilestonesData.forEach(ms => {
-        const box = document.getElementById(`ms-gmission-${ms.pts}`);
-        if (pts >= ms.pts) {
-          coins += ms.coin;
-          tavern += ms.tavern;
-          if (box) box.classList.add('achieved');
-        } else {
-          if (box) box.classList.remove('achieved');
-        }
-      });
-    
-      document.getElementById('guild-mission-pts-text').innerText = `${toCommaStr(pts)} / 1,000 P`;
-      document.getElementById('guild-mission-progress-fill').style.width = `${Math.min(100, (pts / 1000) * 100)}%`;
-    
-      document.getElementById('sum-guild-mission-pts').innerText = `${toCommaStr(pts)} P`;
-      document.getElementById('sum-guild-mission-coins').innerText = `${toCommaStr(coins)} 🪙`;
-      document.getElementById('sum-guild-mission-tavern').innerText = `${toCommaStr(tavern)} 🍺`;
-    }
-    
     /* ===== 6. 길드 주점 레벨업 계산기 ===== */
     function calcTavernLevelUp() {
       const pCurLv = parseNumber(document.getElementById('tavern-personal-cur-lv')?.value) || 1;
@@ -3311,14 +3397,12 @@
       const gCurLv = parseNumber(document.getElementById('tavern-guild-cur-lv')?.value) || 1;
       const gTargetLv = parseNumber(document.getElementById('tavern-guild-target-lv')?.value) || gCurLv;
     
-      // 레벨당 버프 계산 (개인: 레벨당 +1.0%, 길드: 레벨당 +0.5%)
       document.getElementById('tavern-personal-cur-buff').innerText = `공격력 +${(pCurLv * 1.0).toFixed(1)}%`;
       document.getElementById('tavern-personal-target-buff').innerText = `공격력 +${(pTargetLv * 1.0).toFixed(1)}%`;
     
       document.getElementById('tavern-guild-cur-buff').innerText = `최종 피해 +${(gCurLv * 0.5).toFixed(1)}%`;
       document.getElementById('tavern-guild-target-buff').innerText = `최종 피해 +${(gTargetLv * 0.5).toFixed(1)}%`;
     
-      // 레벨업 비용 계산 (레벨당 필요 코인 = 레벨 * 1,000)
       let pCost = 0;
       for (let l = pCurLv; l < pTargetLv; l++) pCost += l * 1000;
     
@@ -3331,8 +3415,8 @@
       const totalNeeded = pCost + gCost;
       document.getElementById('tavern-total-needed-coins').innerText = `${toCommaStr(totalNeeded)} 🍺`;
     
-      // 일일 수급 코인 기준 달성 일수 계산
-      const dailyTavernCoin = parseNumber(document.getElementById('guild-daily-total-tavern-coin')?.innerText) || 0;
+      const dailyTavernCoinText = document.getElementById('top-guild-daily-tavern')?.innerText || '0';
+      const dailyTavernCoin = parseNumber(dailyTavernCoinText);
       const days = dailyTavernCoin > 0 ? Math.ceil(totalNeeded / dailyTavernCoin) : 0;
       document.getElementById('tavern-needed-days').innerText = `${toCommaStr(days)} 일`;
     }
@@ -3397,18 +3481,17 @@
       renderMissions();
       renderSummonStats();
     
-      // 길드 관련 초기 랜더링 추가
-      renderGuildShopItems();
+      // 길드 영역 초기 랜더링 추가
+      renderGuildDailyActivities();
       renderGuildMissions();
+      renderGuildShopItems();
     
       loadSavedData();
-      // loadSavedData() 맨 밑부분에 아래 구문 추가
+      // loadSavedData() 마지막 줄에 추가
       calcGuildLevelInfo();
-      calcGuildDailyCoin();
       calcGuildAbilityDice();
       calcGuildShopTotal();
-      calcGuildMissionTotal();
-      calcTavernLevelUp();
+      updateAllGuildCalculations();
     });
   </script>
 </body>
