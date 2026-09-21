@@ -1205,7 +1205,7 @@
         </div>
       </div>
     
-      <!-- Panel 2) 길드 미션 (전체 선택/해제 + 누적 포인트) -->
+    <!-- Panel 2) 길드 미션 (요청 내용 반영) -->
       <div id="guild-panel-mission" class="guild-panel" style="display:none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <strong style="font-size: 15px;">📜 길드 미션 목록 (1일 기준)</strong>
@@ -1215,23 +1215,27 @@
           </div>
         </div>
     
+        <!-- 미션 리스트 영역 -->
         <div class="mission-grid" id="guild-mission-list-grid"></div>
     
+        <!-- 누적 포인트 진행바 카드 -->
         <div class="point-progress-card">
           <div class="progress-header">
             <strong style="font-size: 14px; color: var(--text-main);">🎯 길드 미션 누적 포인트 보상</strong>
-            <span id="guild-mission-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 1,000 P</span>
+            <span id="guild-mission-pts-text" style="font-size: 13px; font-weight: 800; color: var(--primary);">0 / 800 P</span>
           </div>
           <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="guild-mission-progress-fill"></div>
           </div>
     
+          <!-- 마일스톤 5단계 출력 영역 -->
           <div class="point-milestones" id="guild-mission-milestones"></div>
         </div>
     
+        <!-- 미션 종합 결과 요약 -->
         <div class="mission-summary-card">
-          <div class="mission-summary-title">📊 길드 미션 보상 계산 결과</div>
-          <div class="summary-grid-3">
+          <div class="mission-summary-title">📊 길드 미션 보상 계산 결과 (1일 기준)</div>
+          <div class="summary-grid-3" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
             <div class="summary-item">
               <div class="summary-item-label">달성 미션 포인트</div>
               <div class="summary-item-val" id="sum-gmission-pts">0 P</div>
@@ -1241,8 +1245,12 @@
               <div class="summary-item-val" id="sum-gmission-coins" style="color: #f59e0b;">0 🪙</div>
             </div>
             <div class="summary-item">
-              <div class="summary-item-label">획득 용사의 주점 코인</div>
-              <div class="summary-item-val" id="sum-gmission-tavern" style="color: #38bdf8;">0 🍺</div>
+              <div class="summary-item-label">획득 길드 주점 코인</div>
+              <div class="summary-item-val" id="sum-gmission-guild-tavern" style="color: #ec4899;">0 🍺</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-item-label">획득 용사 주점 코인</div>
+              <div class="summary-item-val" id="sum-gmission-hero-tavern" style="color: #a855f7;">0 🍺</div>
             </div>
           </div>
         </div>
@@ -3145,22 +3153,25 @@
       { id: 'gact3', name: '길드 다이아 기부 (3회)', costText: '10,000 💎', dia: 10000, coin: 500, exp: 50 }
     ];
     
-    /* ===== 2. 길드 미션 데이터 & 마일스톤 ===== */
-    const guildMissionData = [
-      { id: 'gm1', name: '길드 출석 완료하기', pts: 100, coin: 200, tavern: 50 },
-      { id: 'gm2', name: '길드 기부 3회 완료하기', pts: 150, coin: 300, tavern: 100 },
-      { id: 'gm3', name: '길드 보스 2회 도전하기', pts: 200, coin: 400, tavern: 150 },
-      { id: 'gm4', name: '길드 어빌리티 1회 리롤하기', pts: 100, coin: 200, tavern: 50 },
-      { id: 'gm5', name: '주점 맥주 제공 3회 하기', pts: 150, coin: 300, tavern: 100 }
-    ];
-    
-    const guildMilestonesData = [
-      { pts: 200, coin: 300, tavern: 100 },
-      { pts: 400, coin: 500, tavern: 200 },
-      { pts: 600, coin: 800, tavern: 300 },
-      { pts: 800, coin: 1000, tavern: 400 },
-      { pts: 1000, coin: 1500, tavern: 500 }
-    ];
+      /* ===== 2. 길드 미션 데이터 & 마일스톤 (요청 내용 반영) ===== */
+      const guildMissionData = [
+        { id: 'gm1', name: '길드 출석하기 (1회)', pts: 100, coin: 100 },
+        { id: 'gm2', name: '게임 플레이 시간 (600초)', pts: 100, coin: 100 },
+        { id: 'gm3', name: '길드 컨텐츠 플레이 (3회)', pts: 100, coin: 100 },
+        { id: 'gm4', name: '길드 주점 기부 (1회)', pts: 100, coin: 100 },
+        { id: 'gm5', name: '장비 소환 (1,500회)', pts: 100, coin: 100 },
+        { id: 'gm6', name: '요리 제작 (300회)', pts: 100, coin: 100 },
+        { id: 'gm7', name: '요리 먹기 (300회)', pts: 100, coin: 100 },
+        { id: 'gm8', name: '길드 어빌리티 사용 (100회)', pts: 100, coin: 100 }
+      ];
+      
+      const guildMilestonesData = [
+        { pts: 160, guildTavern: 6000, heroTavern: 180 },
+        { pts: 320, guildTavern: 6000, heroTavern: 180 },
+        { pts: 480, guildTavern: 6000, heroTavern: 180 },
+        { pts: 640, guildTavern: 6000, heroTavern: 180 },
+        { pts: 800, guildTavern: 6000, heroTavern: 180 }
+      ];
     
       /* ===== 일일 활동 렌더링 ===== */
       function renderGuildDailyActivities() {
@@ -3179,6 +3190,7 @@
         `).join('');
       }
     
+    /* ===== 길드 미션 렌더링 ===== */
     function renderGuildMissions() {
       const gridEl = document.getElementById('guild-mission-list-grid');
       if (gridEl) {
@@ -3187,7 +3199,7 @@
             <div class="mission-info">
               <span class="mission-name">${m.name}</span>
               <div class="mission-rewards">
-                포인트: <span>+${m.pts}P</span> | 길드코인: <span>+${m.coin}🪙</span> | 주점코인: <span>+${m.tavern}🍺</span>
+                보상: <span>+${toCommaStr(m.coin)}🪙</span> / <span>+${toCommaStr(m.pts)}P</span>
               </div>
             </div>
             <input type="checkbox" id="chk-gmission-${m.id}" style="width: 18px; height: 18px; cursor: pointer;" onchange="updateAllGuildCalculations(); handleInput();">
@@ -3201,7 +3213,7 @@
           <div class="milestone-box" id="ms-gmission-${ms.pts}">
             <div class="milestone-pts">${toCommaStr(ms.pts)} P 달성</div>
             <div class="item-badge-list">
-              <span class="item-badge">+${ms.coin}🪙 / +${ms.tavern}🍺</span>
+              <span class="item-badge">+${toCommaStr(ms.guildTavern)} 길드주점 / +${toCommaStr(ms.heroTavern)} 용사주점</span>
             </div>
           </div>
         `).join('');
@@ -3227,31 +3239,30 @@
       handleInput();
     }
     
-  /* ===== 전체 계산 및 대시보드 업데이트 (순서 & 일일/누적 반영) ===== */
-  function updateAllGuildCalculations() {
-    const days = Math.max(1, parseNumber(document.getElementById('guild-days')?.value) || 1);
-    const daysLabel = document.getElementById('guild-days-label-text');
-    if (daysLabel) daysLabel.innerText = `${toCommaStr(days)}일간`;
-  
-    // 1. 일일 길드 활동 계산
-    let dailyActCoin = 0;
-    let dailyActExp = 0;
-    let dailyActDia = 0;
-  
-    guildDailyActivityData.forEach(m => {
-      const chk = document.getElementById(`chk-gact-${m.id}`);
-      const card = document.getElementById(`card-gact-${m.id}`);
-      if (chk && chk.checked) {
-        dailyActCoin += m.coin;
-        dailyActExp += m.exp;
-        dailyActDia += m.dia;
-        if (card) card.classList.add('checked');
-      } else {
-        if (card) card.classList.remove('checked');
-      }
-    });
+    /* ===== 전체 계산 및 대시보드 업데이트 ===== */
+    function updateAllGuildCalculations() {
+      const days = Math.max(1, parseNumber(document.getElementById('guild-days')?.value) || 1);
+      const daysLabel = document.getElementById('guild-days-label-text');
+      if (daysLabel) daysLabel.innerText = `${toCommaStr(days)}일간`;
     
-    // 일일 활동 카드 하단 결과 업데이트
+      // 1. 일일 길드 활동 계산
+      let dailyActCoin = 0;
+      let dailyActExp = 0;
+      let dailyActDia = 0;
+    
+      guildDailyActivityData.forEach(m => {
+        const chk = document.getElementById(`chk-gact-${m.id}`);
+        const card = document.getElementById(`card-gact-${m.id}`);
+        if (chk && chk.checked) {
+          dailyActCoin += m.coin;
+          dailyActExp += m.exp;
+          dailyActDia += m.dia;
+          if (card) card.classList.add('checked');
+        } else {
+          if (card) card.classList.remove('checked');
+        }
+      });
+    
       const sumCoinEl = document.getElementById('sum-gdaily-coin');
       const sumExpEl = document.getElementById('sum-gdaily-exp');
       const sumDiaEl = document.getElementById('sum-gdaily-dia');
@@ -3260,18 +3271,18 @@
       if (sumExpEl) sumExpEl.innerText = `${toCommaStr(dailyActExp)} EXP`;
       if (sumDiaEl) sumDiaEl.innerText = `${toCommaStr(dailyActDia)} 💎`;
     
-      // 2. 길드 미션 & 누적 보상 계산
+      // 2. 길드 미션 & 누적 마일스톤 계산
       let missionPts = 0;
       let missionCoin = 0;
-      let missionTavern = 0;
+      let milestoneGuildTavern = 0;
+      let milestoneHeroTavern = 0;
     
-    guildMissionData.forEach(m => {
+      guildMissionData.forEach(m => {
         const chk = document.getElementById(`chk-gmission-${m.id}`);
         const card = document.getElementById(`card-gmission-${m.id}`);
         if (chk && chk.checked) {
           missionPts += m.pts;
           missionCoin += m.coin;
-          missionTavern += m.tavern;
           if (card) card.classList.add('checked');
         } else {
           if (card) card.classList.remove('checked');
@@ -3281,35 +3292,39 @@
       guildMilestonesData.forEach(ms => {
         const box = document.getElementById(`ms-gmission-${ms.pts}`);
         if (missionPts >= ms.pts) {
-          missionCoin += ms.coin;
-          missionTavern += ms.tavern;
+          milestoneGuildTavern += ms.guildTavern;
+          milestoneHeroTavern += ms.heroTavern;
           if (box) box.classList.add('achieved');
         } else {
           if (box) box.classList.remove('achieved');
         }
       });
     
-    const ptsTextEl = document.getElementById('guild-mission-pts-text');
-      if (ptsTextEl) ptsTextEl.innerText = `${toCommaStr(missionPts)} / 1,000 P`;
+      // 미션 패널 UI 업데이트
+      const ptsTextEl = document.getElementById('guild-mission-pts-text');
+      if (ptsTextEl) ptsTextEl.innerText = `${toCommaStr(missionPts)} / 800 P`;
+      
       const progressFill = document.getElementById('guild-mission-progress-fill');
-      if (progressFill) progressFill.style.width = `${Math.min(100, (missionPts / 1000) * 100)}%`;
+      if (progressFill) progressFill.style.width = `${Math.min(100, (missionPts / 800) * 100)}%`;
     
       const sumPtsEl = document.getElementById('sum-gmission-pts');
       const sumCoinsEl = document.getElementById('sum-gmission-coins');
-      const sumTavernEl = document.getElementById('sum-gmission-tavern');
+      const sumGuildTavernEl = document.getElementById('sum-gmission-guild-tavern');
+      const sumHeroTavernEl = document.getElementById('sum-gmission-hero-tavern');
     
       if (sumPtsEl) sumPtsEl.innerText = `${toCommaStr(missionPts)} P`;
       if (sumCoinsEl) sumCoinsEl.innerText = `${toCommaStr(missionCoin)} 🪙`;
-      if (sumTavernEl) sumTavernEl.innerText = `${toCommaStr(missionTavern)} 🍺`;
+      if (sumGuildTavernEl) sumGuildTavernEl.innerText = `${toCommaStr(milestoneGuildTavern)} 🍺`;
+      if (sumHeroTavernEl) sumHeroTavernEl.innerText = `${toCommaStr(milestoneHeroTavern)} 🍺`;
     
-      // 3. 최상단 대시보드 5종 수급 항목 집계 (요청 순서 및 누적액 적용)
+      // 3. 최상단 대시보드 5종 수급 항목 집계
       const dGuildCoin = dailyActCoin + missionCoin;
       const dGuildExp = dailyActExp;
-      const dPersonalTavern = Math.floor(missionTavern * 0.4);
-      const dGuildTavern = Math.floor(missionTavern * 0.6);
-      const dHeroTavern = missionTavern;
+      const dPersonalTavern = 0; // 개인 주점 코인 수급 항목 추가 시 자동 반영
+      const dGuildTavern = milestoneGuildTavern;
+      const dHeroTavern = milestoneHeroTavern;
     
-    // 1) 길드 코인 (일일 / 누적)
+      // 1) 길드 코인 (일일 / 누적)
       document.getElementById('top-daily-guild-coin').innerText = `${toCommaStr(dGuildCoin)} 🪙`;
       document.getElementById('top-accum-guild-coin').innerText = `${toCommaStr(dGuildCoin * days)} 🪙`;
     
