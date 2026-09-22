@@ -2640,17 +2640,21 @@
           }
         });
 
-        const renderGroup = (label, htmlArray) => {
+      const renderGroup = (label, htmlArray) => {
           if (htmlArray.length === 0) return '';
-          return `<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; width: 100%; margin-bottom: 6px;">
-                    <span style="font-size: 12px; color: #94a3b8; font-weight: bold; margin-right: 4px;">${label}</span>
-                    ${htmlArray.join('')}
+          return `<div style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+                    <span style="display: inline-block; width: 40px; font-size: 12px; color: #94a3b8; font-weight: bold; flex-shrink: 0; padding-top: 4px; text-align: left;">${label}</span>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-start; flex: 1;">
+                      ${htmlArray.join('')}
+                    </div>
                   </div>`;
         };
 
-        topPeriodKeysEl.innerHTML = renderGroup('[열쇠]', keysGroup) + 
-                                    renderGroup('[티켓]', ticketsGroup) + 
-                                    renderGroup('[기타]', etcGroup);
+        topPeriodKeysEl.innerHTML = `<div style="display: inline-block; text-align: left; max-width: 100%;">
+                                       ${renderGroup('[열쇠]', keysGroup)}
+                                       ${renderGroup('[티켓]', ticketsGroup)}
+                                       ${renderGroup('[기타]', etcGroup)}
+                                     </div>`;
       }
 
       const totalWeeklyExtraDia = weeklyTotalDia + freeDiaTotal;
