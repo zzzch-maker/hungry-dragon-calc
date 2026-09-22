@@ -1853,50 +1853,7 @@
 
       chkContainer.innerHTML = chkHtml;
       
-      // 💡 [시안 B 적용] 성격별 그룹 분리 및 컬러 태그 그리드 정렬
-      const combatStats = unlockedStats.filter(s => !s.id.startsWith('f') && parseInt(s.id.replace('s','')) <= 7);
-      const utilityStats = unlockedStats.filter(s => !s.id.startsWith('f') && parseInt(s.id.replace('s','')) > 7);
-      const cookingStats = unlockedStats.filter(s => s.id.startsWith('f'));
-
-      // 💡 [개선된 그리드 정렬 적용] 항목별 크기 및 열을 균일하게 맞춘 레이아웃
-      const statsEl = document.getElementById('ga-unlocked-stats');
-      statsEl.style.display = 'grid';
-      statsEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
-      statsEl.style.gap = '12px';
-
-      let unlockedHtml = '';
-      
-      // 공통 스타일: 그리드 아이템들이 칼같이 정렬되도록 설정
-      const gridBoxStyle = 'background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;';
-      const innerGridStyle = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px;';
-      const badgeStyle = 'display: block; width: 100%; text-align: center; box-sizing: border-box; padding: 5px 8px; font-size: 12px; border-radius: 6px; border: 1px solid;';
-
-      if (combatStats.length > 0) {
-        unlockedHtml += `<div style="${gridBoxStyle}">
-          <div style="font-size: 12px; font-weight: 700; color: #ef4444; margin-bottom: 8px;">⚔️ 전투 및 데미지 계열</div>
-          <div style="${innerGridStyle}">
-            ${combatStats.map(s => `<span class="item-badge" style="background: #fef2f2; color: #ef4444; border-color: #fecaca; ${badgeStyle}">${s.name}</span>`).join('')}
-          </div>
-        </div>`;
-      }
-      if (utilityStats.length > 0) {
-        unlockedHtml += `<div style="${gridBoxStyle}">
-          <div style="font-size: 12px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">💰 파밍 및 유틸리티 계열</div>
-          <div style="${innerGridStyle}">
-            ${utilityStats.map(s => `<span class="item-badge" style="background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; ${badgeStyle}">${s.name}</span>`).join('')}
-          </div>
-        </div>`;
-      }
-      if (cookingStats.length > 0) {
-        unlockedHtml += `<div style="${gridBoxStyle}; grid-column: 1 / -1;">
-          <div style="font-size: 12px; font-weight: 700; color: #8b5cf6; margin-bottom: 8px;">🍳 요리 증폭 특화 계열</div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px;">
-            ${cookingStats.map(s => `<span class="item-badge" style="background: #f5f3ff; color: #8b5cf6; border-color: #ddd6fe; ${badgeStyle}">${s.name}</span>`).join('')}
-          </div>
-        </div>`;
-      }
-      statsEl.innerHTML = unlockedHtml;
-      updateGuildAbilityCalc();
+     
       const unlockedStats = guildAbilityStatsDict.filter(s => s.unlockLv <= curLv);
     document.getElementById('ga-unlocked-count').innerText = unlockedStats.length;
     
