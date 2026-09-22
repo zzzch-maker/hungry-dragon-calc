@@ -1897,7 +1897,109 @@
       }
       statsEl.innerHTML = unlockedHtml;
       updateGuildAbilityCalc();
-      updateGuildAbilityDict();
+      const unlockedStats = guildAbilityStatsDict.filter(s => s.unlockLv <= curLv);
+    document.getElementById('ga-unlocked-count').innerText = unlockedStats.length;
+    
+    // 💡 공통으로 사용할 성격별 그룹 분리 (중복 선언 방지)
+    const combatStats = unlockedStats.filter(s => !s.id.startsWith('f') && parseInt(s.id.replace('s','')) <= 7);
+    const utilityStats = unlockedStats.filter(s => !s.id.startsWith('f') && parseInt(s.id.replace('s','')) > 7);
+    const cookingStats = unlockedStats.filter(s => s.id.startsWith('f'));
+
+    // 1. 하단 [목표(유효) 옵션 다중 선택] 체크박스 영역 렌더링
+    const chkContainer = document.getElementById('ga-stat-checkboxes');
+    chkContainer.style.display = 'flex';
+    chkContainer.style.flexDirection = 'column';
+    chkContainer.style.gap = '10px';
+
+    const boxStyle = 'background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;';
+    const innerGridStyle = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px;';
+
+    let chkHtml = '';
+    if (combatStats.length > 0) {
+      chkHtml += `
+        <div style="${boxStyle}">
+          <div style="font-size: 12px; font-weight: 700; color: #ef4444; margin-bottom: 8px;">⚔️ 전투 및 데미지 계열</div>
+          <div style="${innerGridStyle}">
+            ${combatStats.map(s => `
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 6px 10px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 12px;">
+                <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();" style="cursor: pointer;">
+                <span style="color: #0f172a; font-weight: 600;">${s.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+    if (utilityStats.length > 0) {
+      chkHtml += `
+        <div style="${boxStyle}">
+          <div style="font-size: 12px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">💰 파밍 및 유틸리티 계열</div>
+          <div style="${innerGridStyle}">
+            ${utilityStats.map(s => `
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 6px 10px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 12px;">
+                <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();" style="cursor: pointer;">
+                <span style="color: #0f172a; font-weight: 600;">${s.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+    if (cookingStats.length > 0) {
+      chkHtml += `
+        <div style="${boxStyle}">
+          <div style="font-size: 12px; font-weight: 700; color: #8b5cf6; margin-bottom: 8px;">🍳 요리 증폭 특화 계열</div>
+          <div style="${innerGridStyle}">
+            ${cookingStats.map(s => `
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 6px 10px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; font-size: 12px;">
+                <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();" style="cursor: pointer;">
+                <span style="color: #0f172a; font-weight: 600;">${s.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+    chkContainer.innerHTML = chkHtml;
+
+    // 2. 상단 [현재 레벨 등장 능력치] 도감 영역 렌더링
+    const statEl = document.getElementById('ga-unlocked-stats');
+    statEl.style.display = 'grid';
+    statEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(320px, 1fr))';
+    statEl.style.gap = '12px';
+
+    let unlockedHtml = '';
+    const badgeStyle = 'display: block; width: 100%; text-align: center; box-sizing: border-box; padding: 5px 8px; font-size: 12px; border-radius: 6px; border: 1px solid;';
+    const docGridStyle = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px;';
+
+    if (combatStats.length > 0) {
+      unlockedHtml += `<div style="${boxStyle}">
+        <div style="font-size: 12px; font-weight: 700; color: #ef4444; margin-bottom: 8px;">⚔️ 전투 및 데미지 계열</div>
+        <div style="${docGridStyle}">
+          ${combatStats.map(s => `<span class="item-badge" style="background: #fef2f2; color: #ef4444; border-color: #fecaca; ${badgeStyle}">${s.name}</span>`).join('')}
+        </div>
+      </div>`;
+    }
+    if (utilityStats.length > 0) {
+      unlockedHtml += `<div style="${boxStyle}">
+        <div style="font-size: 12px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">💰 파밍 및 유틸리티 계열</div>
+        <div style="${docGridStyle}">
+          ${utilityStats.map(s => `<span class="item-badge" style="background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; ${badgeStyle}">${s.name}</span>`).join('')}
+        </div>
+      </div>`;
+    }
+    if (cookingStats.length > 0) {
+      unlockedHtml += `<div style="${boxStyle}; grid-column: 1 / -1;">
+        <div style="font-size: 12px; font-weight: 700; color: #8b5cf6; margin-bottom: 8px;">🍳 요리 증폭 특화 계열</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px;">
+          ${cookingStats.map(s => `<span class="item-badge" style="background: #f5f3ff; color: #8b5cf6; border-color: #ddd6fe; ${badgeStyle}">${s.name}</span>`).join('')}
+        </div>
+      </div>`;
+    }
+    statEl.innerHTML = unlockedHtml;
+
+    updateGuildAbilityCalc();
+    updateGuildAbilityDict();
     }
 
     function toggleGaStats(checked) {
