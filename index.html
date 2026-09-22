@@ -4297,6 +4297,28 @@
       validateInvestUnits();
       runInvestmentCalc();
       updateAllMissionCalculations();
+      // ▼▼▼ 이 아래부터 복사해서 붙여넣으세요 ▼▼▼
+
+      const savedForGuild = localStorage.getItem('hungryDragonGoldV8Data');
+      if (savedForGuild) {
+        const data = JSON.parse(savedForGuild);
+        
+        // 1. 상단의 자동 불러오기로 입력된 '현재 레벨'을 바탕으로 체크박스 UI 강제 생성
+        if (typeof updateGuildAbilityInfo === 'function') updateGuildAbilityInfo();
+
+        // 2. 방금 화면에 생성된 체크박스들에 저장되어 있던 체크(true/false) 상태를 다시 덧입히기
+        document.querySelectorAll('.ga-stat-chk').forEach(chk => {
+          if (data[chk.id] !== undefined) {
+            chk.checked = data[chk.id];
+          }
+        });
+
+        // 3. 체크 상태가 모두 복구된 후 최종 기댓값 및 경험치 계산 업데이트
+        if (typeof updateGuildAbilityCalc === 'function') updateGuildAbilityCalc();
+        if (typeof calcGuildAbilityExp === 'function') calcGuildAbilityExp();
+      }
+      
+      // ▲▲▲ 여기까지 붙여넣으세요 ▲▲▲
     }
 
     document.addEventListener('DOMContentLoaded', () => {
