@@ -2617,21 +2617,40 @@
       if (combinedPeriodKeysList.length === 0) {
         topPeriodKeysEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">기간 획득 아이템 없음</span>`;
       } else {
-        topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
+        let keysGroup = [];
+        let ticketsGroup = [];
+        let etcGroup = [];
+
+        combinedPeriodKeysList.forEach(kt => {
           const it = combinedPeriodItems[kt];
-          
-        // 아이템 종류별 전용 아이콘 매칭
           let iconHtml = getKeySvg(it.color);
+          let badgeHtml = '';
+
           if (kt === 'material_pocket') {
             iconHtml = getBagSvg(it.color);
+            badgeHtml = `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">${iconHtml} ${it.name} x${toCommaStr(it.count)}</span>`;
+            etcGroup.push(badgeHtml);
           } else if (kt.includes('ticket')) {
             iconHtml = getTicketSvg(it.color);
+            badgeHtml = `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">${iconHtml} ${it.name} x${toCommaStr(it.count)}</span>`;
+            ticketsGroup.push(badgeHtml);
+          } else {
+            badgeHtml = `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">${iconHtml} ${it.name} x${toCommaStr(it.count)}</span>`;
+            keysGroup.push(badgeHtml);
           }
+        });
 
-          return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
-            ${iconHtml} ${it.name} x${toCommaStr(it.count)}
-          </span>`;
-        }).join('');
+        const renderGroup = (label, htmlArray) => {
+          if (htmlArray.length === 0) return '';
+          return `<div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; width: 100%; margin-bottom: 6px;">
+                    <span style="font-size: 12px; color: #94a3b8; font-weight: bold; margin-right: 4px;">${label}</span>
+                    ${htmlArray.join('')}
+                  </div>`;
+        };
+
+        topPeriodKeysEl.innerHTML = renderGroup('[열쇠]', keysGroup) + 
+                                    renderGroup('[티켓]', ticketsGroup) + 
+                                    renderGroup('[기타]', etcGroup);
       }
 
       const totalWeeklyExtraDia = weeklyTotalDia + freeDiaTotal;
