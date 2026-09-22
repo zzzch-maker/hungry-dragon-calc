@@ -1629,10 +1629,17 @@
     }
 
     function switchMissionPanel(panelId, btnEl) {
-      document.querySelectorAll('.mission-tab-btn').forEach(btn => btn.classList.remove('active'));
+      // 클릭된 버튼이 속한 탭(tab-content)을 찾아서 그 안에서만 상태를 변경하도록 범위 제한
+      const parentTab = btnEl.closest('.tab-content');
+      if (parentTab) {
+        parentTab.querySelectorAll('.mission-tab-btn').forEach(btn => btn.classList.remove('active'));
+        parentTab.querySelectorAll('.mission-panel').forEach(panel => panel.classList.remove('active'));
+      } else {
+        document.querySelectorAll('.mission-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mission-panel').forEach(panel => panel.classList.remove('active'));
+      }
+      
       btnEl.classList.add('active');
-
-      document.querySelectorAll('.mission-panel').forEach(panel => panel.classList.remove('active'));
       document.getElementById(panelId)?.classList.add('active');
     }
 
@@ -3933,10 +3940,11 @@
       document.getElementById('tavern-personal-cost').value = toCommaStr(pCost);
       document.getElementById('tavern-guild-cost').value = toCommaStr(gCost);
     
-      const totalNeeded = pCost + gCost;
+    const totalNeeded = pCost + gCost;
       document.getElementById('tavern-total-needed-coins').innerText = `${toCommaStr(totalNeeded)} 🍺`;
     
-      const dailyTavernCoinText = document.getElementById('top-guild-daily-tavern')?.innerText || '0';
+      // 존재하지 않던 ID 'top-guild-daily-tavern'을 올바른 'top-daily-hero-tavern'으로 교체
+      const dailyTavernCoinText = document.getElementById('top-daily-hero-tavern')?.innerText || '0';
       const dailyTavernCoin = parseNumber(dailyTavernCoinText);
       const days = dailyTavernCoin > 0 ? Math.ceil(totalNeeded / dailyTavernCoin) : 0;
       document.getElementById('tavern-needed-days').innerText = `${toCommaStr(days)} 일`;
