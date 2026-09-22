@@ -2044,14 +2044,14 @@
           </div>
         ` : ''}
               
-  ${m.items && m.items.length > 0 ? `
+    ${m.items && m.items.length > 0 ? `
             <div style="margin-top: 6px; border-top: 1px dashed var(--border); pt-2;">
               <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 4px;">포함 아이템:</div>
               <div class="item-badge-list" style="justify-content: flex-start;">
                 ${m.items.map(it => {
                   let iconHtml = getKeySvg(it.color);
                   if (it.keyType === 'material_pocket') iconHtml = getBagSvg(it.color);
-                  else if (it.keyType === 'ticket') iconHtml = getTicketSvg(it.color);
+                  else if (it.keyType.includes('ticket')) iconHtml = getTicketSvg(it.color);
                   return `<span class="item-badge">${iconHtml} ${it.name} x${toCommaStr(it.count)}</span>`;
                 }).join('')}
               </div>
@@ -2528,11 +2528,11 @@
       if (attendanceItemKeys.length === 0) {
         attendanceItemSummaryEl.innerHTML = `<span style="font-size: 11px; color: #94a3b8;">선택된 출석보상 아이템 없음</span>`;
       } else {
-        attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
+      attendanceItemSummaryEl.innerHTML = attendanceItemKeys.map(kt => {
           const it = attendanceAcquiredItems[kt];
           let iconHtml = getKeySvg(it.color);
           if (kt === 'material_pocket') iconHtml = getBagSvg(it.color);
-          else if (kt === 'ticket') iconHtml = getTicketSvg(it.color);
+          else if (kt.includes('ticket')) iconHtml = getTicketSvg(it.color);
   
           return `<span class="item-badge" style="background: #1e293b; color: white; border-color: #334155;">
             ${iconHtml} ${it.name} x${toCommaStr(it.count)}
@@ -2620,12 +2620,12 @@
         topPeriodKeysEl.innerHTML = combinedPeriodKeysList.map(kt => {
           const it = combinedPeriodItems[kt];
           
-           // 아이템 종류별 전용 아이콘 매칭
-          let iconHtml = getKeySvg(it.color); // 기본값을 모두 열쇠로 통일
+        // 아이템 종류별 전용 아이콘 매칭
+          let iconHtml = getKeySvg(it.color);
           if (kt === 'material_pocket') {
-            iconHtml = getBagSvg(it.color); // 식재료 주머니 전용 아이콘
-          } else if (kt === 'ticket') {
-            iconHtml = getTicketSvg(it.color); // 가속권 전용 시계 아이콘
+            iconHtml = getBagSvg(it.color);
+          } else if (kt.includes('ticket')) {
+            iconHtml = getTicketSvg(it.color);
           }
 
           return `<span class="item-badge" style="background: #334155; color: white; border-color: #475569;">
