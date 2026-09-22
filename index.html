@@ -1464,92 +1464,89 @@
         </div>
       </div>
     
-      <!-- Panel 6) 길드 주점 -->
-      <div id="guild-panel-tavern" class="guild-panel" style="display:none;">
-        <div class="invest-card">
-          <div class="invest-title">🍺 주점 레벨업 & 능력치 계산기</div>
+    <!-- ===== 길드/개인 주점 계산기 영역 ===== -->
+    <div class="panel-section" style="margin-top: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
     
-          <div class="stat-grid" style="margin-bottom: 16px;">
-            <div class="stat-card atk">
-              <div class="card-header"><span class="stat-title">👤 개인 주점 레벨업</span></div>
-              <div class="input-grid">
-                <div class="input-field">
-                  <label>현재 레벨</label>
-                  <div class="input-box" style="background: white;">
-                    <input type="text" id="tavern-personal-cur-lv" value="1" oninput="formatLevelWithComma(this); calcTavernLevelUp(); handleInput();">
-                    <span class="unit">Lv</span>
-                  </div>
-                </div>
-                <div class="input-field">
-                  <label>목표 레벨</label>
-                  <div class="input-box" style="background: white;">
-                    <input type="text" id="tavern-personal-target-lv" value="10" oninput="formatLevelWithComma(this); calcTavernLevelUp(); handleInput();">
-                    <span class="unit">Lv</span>
-                  </div>
-                </div>
-                <div class="input-field full-width">
-                  <label>현재 버프: <span id="tavern-personal-cur-buff" style="color: var(--primary); font-weight:700;">공격력 +1.0%</span></label>
-                </div>
-                <div class="input-field full-width">
-                  <label>목표 버프: <span id="tavern-personal-target-buff" style="color: #059669; font-weight:700;">공격력 +10.0%</span></label>
-                </div>
-                <div class="input-field full-width">
-                  <label>필요 용사의 주점 코인</label>
-                  <div class="input-box readonly">
-                    <input type="text" id="tavern-personal-cost" value="0" readonly style="color: #38bdf8; font-weight:800;">
-                    <span class="unit">🍺</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-    
-            <div class="stat-card def">
-              <div class="card-header"><span class="stat-title">🏛️ 길드 주점 레벨업</span></div>
-              <div class="input-grid">
-                <div class="input-field">
-                  <label>현재 레벨</label>
-                  <div class="input-box" style="background: white;">
-                    <input type="text" id="tavern-guild-cur-lv" value="1" oninput="formatLevelWithComma(this); calcTavernLevelUp(); handleInput();">
-                    <span class="unit">Lv</span>
-                  </div>
-                </div>
-                <div class="input-field">
-                  <label>목표 레벨</label>
-                  <div class="input-box" style="background: white;">
-                    <input type="text" id="tavern-guild-target-lv" value="10" oninput="formatLevelWithComma(this); calcTavernLevelUp(); handleInput();">
-                    <span class="unit">Lv</span>
-                  </div>
-                </div>
-                <div class="input-field full-width">
-                  <label>현재 길드원 전체 버프: <span id="tavern-guild-cur-buff" style="color: var(--primary); font-weight:700;">최종 피해 +0.5%</span></label>
-                </div>
-                <div class="input-field full-width">
-                  <label>목표 길드원 전체 버프: <span id="tavern-guild-target-buff" style="color: #059669; font-weight:700;">최종 피해 +5.0%</span></label>
-                </div>
-                <div class="input-field full-width">
-                  <label>필요 용사의 주점 코인</label>
-                  <div class="input-box readonly">
-                    <input type="text" id="tavern-guild-cost" value="0" readonly style="color: #38bdf8; font-weight:800;">
-                    <span class="unit">🍺</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <!-- 🍺 개인 주점 카드 -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 16px; color: var(--text-main);">🍺 개인 주점</h3>
+            <span class="badge" style="background: #1e293b; color: #cbd5e1; font-size: 11px; padding: 4px 8px; border-radius: 4px;">Max Lv.100</span>
           </div>
-    
-          <div class="category-summary-grid">
-            <div class="cat-summary-card">
-              <div class="cat-summary-title">주점 레벨업 총 필요 코인</div>
-              <div class="cat-summary-cost" id="tavern-total-needed-coins" style="color: #38bdf8;">0 🍺</div>
+          <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; margin-bottom: 16px;">
+            <label style="font-size: 13px; color: var(--text-sub);">현재 레벨</label>
+            <input type="number" id="tavern-personal-cur-lv" class="input-base" value="1" min="1" max="100">
+            <label style="font-size: 13px; color: var(--text-sub);">보유 코인(EXP)</label>
+            <input type="number" id="tavern-personal-cur-exp" class="input-base" value="0" min="0">
+            <label style="font-size: 13px; color: var(--text-sub);">목표 레벨</label>
+            <input type="number" id="tavern-personal-target-lv" class="input-base" value="100" min="1" max="100">
+          </div>
+          <div style="background: var(--bg-dark); border-radius: 6px; padding: 12px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--text-sub);">현재 축복 버프:</span>
+              <span id="t-p-cur-buff" style="color: white;">공/생/방/관 +3%</span>
             </div>
-            <div class="cat-summary-card">
-              <div class="cat-summary-title">일일 수급 기준 목표 달성 예상 일수</div>
-              <div class="cat-summary-cost" id="tavern-needed-days" style="color: #ef4444;">0 일</div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--text-sub);">목표 달성 버프:</span>
+              <span id="t-p-target-buff" style="color: white;">공/생/방/관 +300%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: bold;">
+              <span style="color: #60a5fa;">추가 획득 능력치:</span>
+              <span id="t-p-add-buff" style="color: #60a5fa;">🔺 +297%</span>
+            </div>
+            <div style="border-top: 1px dashed var(--border); margin: 8px 0;"></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--text-sub);">목표까지 필요 코인:</span>
+              <span id="t-p-req-coin" style="color: #fbbf24; font-weight: bold;">0 개</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-sub);">예상 소요 일수:</span>
+              <span id="t-p-days" style="color: white;">0 일</span>
             </div>
           </div>
         </div>
-      </div>
     
+        <!-- 🍻 길드 주점 카드 -->
+        <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 16px; color: var(--text-main);">🍻 길드 주점</h3>
+            <span class="badge" style="background: #1e293b; color: #cbd5e1; font-size: 11px; padding: 4px 8px; border-radius: 4px;">Max Lv.10</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; margin-bottom: 16px;">
+            <label style="font-size: 13px; color: var(--text-sub);">현재 레벨</label>
+            <input type="number" id="tavern-guild-cur-lv" class="input-base" value="1" min="1" max="10">
+            <label style="font-size: 13px; color: var(--text-sub);">보유 코인(EXP)</label>
+            <input type="number" id="tavern-guild-cur-exp" class="input-base" value="0" min="0">
+            <label style="font-size: 13px; color: var(--text-sub);">목표 레벨</label>
+            <input type="number" id="tavern-guild-target-lv" class="input-base" value="10" min="1" max="10">
+          </div>
+          <div style="background: var(--bg-dark); border-radius: 6px; padding: 12px; font-size: 13px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--text-sub);">현재 컨텐츠 버프:</span>
+              <span id="t-g-cur-buff" style="color: white;">공/생/방/관 +0%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--text-sub);">목표 달성 버프:</span>
+              <span id="t-g-target-buff" style="color: white;">공/생/방/관 +0%</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: bold;">
+              <span style="color: #60a5fa;">추가 획득 능력치:</span>
+              <span id="t-g-add-buff" style="color: #60a5fa;">🔺 +0%</span>
+            </div>
+            <div style="border-top: 1px dashed var(--border); margin: 8px 0;"></div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+              <span style="color: var(--text-sub);">목표까지 필요 코인:</span>
+              <span id="t-g-req-coin" style="color: #fbbf24; font-weight: bold;">0 개</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-sub);">예상 소요 일수:</span>
+              <span id="t-g-days" style="color: white;">0 일</span>
+            </div>
+          </div>
+        </div>
+    
+      </div>
     </div>
 
     <!-- 기타 서브탭 준비중 플레이스홀더들 -->
@@ -1569,6 +1566,94 @@
 
   <script>
     // [찾을 위치] <script> 태그 내부의 하단 함수들 근처에 아래 함수들을 추가해 주세요.
+
+        /* ===== 주점 데이터 베이스 ===== */
+    // 1. 개인 주점 (1~100렙): 레벨당 버프 3% 증가
+    const personalTavernData = Array.from({length: 101}, (_, i) => ({
+      buff: i * 3, // 69렙 = 207%
+      cost: i === 0 ? 0 : 4762 // [임시 데이터] 레벨업 코인이 동일하다고 가정
+    }));
+    
+    // 2. 길드 주점 (1~10렙)
+    const guildTavernData = [
+      { lv: 0, cost: 0, buff: 0 },
+      { lv: 1, cost: 800000, buff: 0 },
+      { lv: 2, cost: 1200000, buff: 0 }, // 2~4렙 코인 임시
+      { lv: 3, cost: 1800000, buff: 0 },
+      { lv: 4, cost: 2400000, buff: 0 },
+      { lv: 5, cost: 3000000, buff: 1000 },
+      { lv: 6, cost: 4000000, buff: 1500 }, // 6~10렙 코인 및 버프 임시
+      { lv: 7, cost: 5000000, buff: 2000 },
+      { lv: 8, cost: 6000000, buff: 2500 },
+      { lv: 9, cost: 7000000, buff: 3000 },
+      { lv: 10, cost: 8000000, buff: 3500 }
+    ];
+
+        /* ===== 주점 계산기 구동 로직 ===== */
+    function updateTavernCalculations() {
+      // 1일 예상 길드 코인 획득량 가져오기 (임시: 1일 획득결과창 등에서 파싱. 못찾으면 기본 5000)
+      // 작성자님 코드에 '일일 총 획득 길드 코인'을 보여주는 ID가 있다면 'daily-guild-coin-total' 부분을 그 ID로 바꿔주세요.
+      let dailyCoin = parseNumber(document.getElementById('daily-guild-coin-total')?.innerText) || 5000;
+    
+      // --- 1. 개인 주점 계산 ---
+      const pCurLv = Math.max(1, Math.min(100, parseNumber(document.getElementById('tavern-personal-cur-lv')?.value) || 1));
+      const pTargetLv = Math.max(pCurLv, Math.min(100, parseNumber(document.getElementById('tavern-personal-target-lv')?.value) || 100));
+      const pCurExp = Math.max(0, parseNumber(document.getElementById('tavern-personal-cur-exp')?.value) || 0);
+    
+      const pCurBuff = personalTavernData[pCurLv]?.buff || 0;
+      const pTargetBuff = personalTavernData[pTargetLv]?.buff || 0;
+      
+      let pReqCoin = 0;
+      for (let i = pCurLv; i < pTargetLv; i++) {
+        pReqCoin += personalTavernData[i + 1]?.cost || 0;
+      }
+      pReqCoin = Math.max(0, pReqCoin - pCurExp);
+      const pDays = Math.ceil(pReqCoin / dailyCoin);
+    
+      document.getElementById('t-p-cur-buff').innerText = `공/생/방/관 +${toCommaStr(pCurBuff)}%`;
+      document.getElementById('t-p-target-buff').innerText = `공/생/방/관 +${toCommaStr(pTargetBuff)}%`;
+      document.getElementById('t-p-add-buff').innerText = `🔺 +${toCommaStr(pTargetBuff - pCurBuff)}%`;
+      document.getElementById('t-p-req-coin').innerText = `${toCommaStr(pReqCoin)} 개`;
+      document.getElementById('t-p-days').innerText = pReqCoin > 0 ? `${toCommaStr(pDays)} 일` : `달성 완료`;
+    
+      // --- 2. 길드 주점 계산 ---
+      const gCurLv = Math.max(1, Math.min(10, parseNumber(document.getElementById('tavern-guild-cur-lv')?.value) || 1));
+      const gTargetLv = Math.max(gCurLv, Math.min(10, parseNumber(document.getElementById('tavern-guild-target-lv')?.value) || 10));
+      const gCurExp = Math.max(0, parseNumber(document.getElementById('tavern-guild-cur-exp')?.value) || 0);
+    
+      const gCurBuff = guildTavernData[gCurLv]?.buff || 0;
+      const gTargetBuff = guildTavernData[gTargetLv]?.buff || 0;
+    
+      let gReqCoin = 0;
+      for (let i = gCurLv; i < gTargetLv; i++) {
+        gReqCoin += guildTavernData[i + 1]?.cost || 0;
+      }
+      gReqCoin = Math.max(0, gReqCoin - gCurExp);
+      const gDays = Math.ceil(gReqCoin / dailyCoin);
+    
+      document.getElementById('t-g-cur-buff').innerText = `공/생/방/관 +${toCommaStr(gCurBuff)}%`;
+      document.getElementById('t-g-target-buff').innerText = `공/생/방/관 +${toCommaStr(gTargetBuff)}%`;
+      document.getElementById('t-g-add-buff').innerText = `🔺 +${toCommaStr(gTargetBuff - gCurBuff)}%`;
+      document.getElementById('t-g-req-coin').innerText = `${toCommaStr(gReqCoin)} 개`;
+      document.getElementById('t-g-days').innerText = gReqCoin > 0 ? `${toCommaStr(gDays)} 일` : `달성 완료`;
+    }
+    
+    // 입력값이 변할 때마다 즉시 다시 계산하도록 연결
+    ['tavern-personal-cur-lv', 'tavern-personal-cur-exp', 'tavern-personal-target-lv',
+     'tavern-guild-cur-lv', 'tavern-guild-cur-exp', 'tavern-guild-target-lv'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          updateTavernCalculations();
+          handleInput(); // 기존 로컬스토리지 자동저장 함수 호출
+        });
+      }
+    });
+    
+    // 화면이 처음 로드될 때 1회 실행
+    document.addEventListener('DOMContentLoaded', () => {
+      updateTavernCalculations();
+    });
     
     function onTicketStartDayChange() {
       // 사용자가 셀렉트박스를 직접 바꿨을 때 오늘 날짜를 기준(베이스)으로 저장합니다.
