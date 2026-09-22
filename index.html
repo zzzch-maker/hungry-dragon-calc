@@ -3794,8 +3794,18 @@
       saveData['guild-info-cur-exp'] = document.getElementById('guild-info-cur-exp')?.value;
       saveData['guild-info-member-cnt'] = document.getElementById('guild-info-member-cnt')?.value;
       saveData['guild-info-exp-per-member'] = document.getElementById('guild-info-exp-per-member')?.value;
-      saveData['ga-target-grade'] = document.getElementById('ga-target-grade')?.value;
+      
+      // 길드 어빌리티 입력값 추가 수집
+      saveData['ga-current-lv'] = document.getElementById('ga-current-lv')?.value;
       saveData['ga-lock-count'] = document.getElementById('ga-lock-count')?.value;
+      saveData['ga-target-grade'] = document.getElementById('ga-target-grade')?.value;
+      saveData['ga-exp-target-lv'] = document.getElementById('ga-exp-target-lv')?.value;
+
+      // 동적 생성되는 유효 옵션 체크박스(.ga-stat-chk) 상태 전체 수집
+      document.querySelectorAll('.ga-stat-chk').forEach(chk => {
+          saveData[chk.id] = chk.checked;
+      });
+
       saveData['tavern-personal-cur-lv'] = document.getElementById('tavern-personal-cur-lv')?.value;
       saveData['tavern-personal-target-lv'] = document.getElementById('tavern-personal-target-lv')?.value;
       saveData['tavern-guild-cur-lv'] = document.getElementById('tavern-guild-cur-lv')?.value;
