@@ -1374,58 +1374,123 @@
     
       <!-- Panel 4) 길드 어빌리티 -->
       <div id="guild-panel-ability" class="guild-panel" style="display:none;">
-        <div class="invest-card">
-          <div class="invest-title">🎯 길드 어빌리티 해금 정보 & 주사위 기댓값 계산기</div>
-    
-          <div style="background: #1e293b; color: white; padding: 14px; border-radius: 8px; margin-bottom: 16px;">
-            <div style="font-size: 13px; font-weight: 700; color: #38bdf8; margin-bottom: 8px;">🔓 길드 레벨별 어빌리티 해금 목록</div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 12px; color: #cbd5e1;">
-              <div>• Lv 1: 공격력 %, 생명력 %</div>
-              <div>• Lv 3: 방어력 %, 관통력 %</div>
-              <div>• Lv 5: 치명타 피해 %, 궁극 치명타 피해 %</div>
-              <div>• Lv 8: 최종 피해 증가 %, 보스 피해 %</div>
-              <div>• Lv 10: 골드 획득량 %, 경험치 획득량 %</div>
+        
+        <!-- 섹션 1: 길드 어빌리티 레벨별 해금 및 확률 정보 -->
+        <div class="invest-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: white; border: none;">
+          <div class="invest-title" style="color: #38bdf8;">🔓 길드 어빌리티 레벨별 해금 정보</div>
+          
+          <div class="input-grid" style="margin-bottom: 14px;">
+            <div class="input-field" style="flex: 1;">
+              <label style="color: #94a3b8;">현재 길드 어빌리티 레벨 (1~25)</label>
+              <div class="input-box" style="background: #334155; border-color: #475569;">
+                <input type="text" id="ga-current-lv" value="1" style="color: white; text-align: left;" oninput="formatLevelWithComma(this); updateGuildAbilityInfo(); handleInput();">
+                <span class="unit" style="color: #cbd5e1;">Lv</span>
+              </div>
             </div>
           </div>
-    
-          <div style="background: #f8fafc; border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
-            <strong style="font-size: 14px; color: var(--text-main); display: block; margin-bottom: 10px;">🎲 특정 등급 획득 예상 소모 주사위 계산</strong>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 12px;">
+          
+          <div style="font-size: 12px; color: #cbd5e1; margin-bottom: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px;">📊 해당 레벨 등장 확률</div>
+          <div class="item-badge-list" id="ga-prob-badges" style="justify-content: flex-start; margin-bottom: 12px;"></div>
+
+          <div style="font-size: 12px; color: #cbd5e1; margin-bottom: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px;">✨ 현재 레벨 등장 능력치 (<span id="ga-unlocked-count" style="color: #38bdf8; font-weight: bold;">0</span>개)</div>
+          <div class="item-badge-list" id="ga-unlocked-stats" style="justify-content: flex-start;"></div>
+        </div>
+
+        <!-- 섹션 2: 특정 옵션 다중 타겟팅 계산기 -->
+        <div class="invest-card">
+          <div class="invest-title">🎯 유효 옵션 타겟팅 & 주사위 기댓값 계산기</div>
+          <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 14px;">* 체크한 유효 옵션 중 <strong>하나라도 목표 등급 이상</strong> 뜰 확률과 주사위 소모량을 계산합니다.</div>
+          
+          <div class="input-grid" style="margin-bottom: 14px;">
+            <div class="input-field">
+              <label>어빌리티 잠금 개수 (0~25)</label>
+              <select id="ga-lock-count" class="unit-select" onchange="updateGuildAbilityCalc(); handleInput();"></select>
+            </div>
+            <div class="input-field">
+              <label>저격 목표 최소 등급</label>
+              <select id="ga-target-grade" class="unit-select" onchange="updateGuildAbilityCalc(); handleInput();">
+                <option value="D">D 등급 이상</option>
+                <option value="C">C 등급 이상</option>
+                <option value="B">B 등급 이상</option>
+                <option value="A">A 등급 이상</option>
+                <option value="S">S 등급 이상</option>
+                <option value="SS" selected>SS 등급 이상</option>
+                <option value="SSS">SSS 등급 이상</option>
+                <option value="US">US 등급 이상</option>
+                <option value="USS">USS 등급 이상</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="background: #f1f5f9; border: 1px solid var(--border); padding: 10px; border-radius: 8px; margin-bottom: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: var(--text-main);">✅ 목표(유효) 옵션 다중 선택</span>
               <div>
-                <label style="font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 4px;">목표 등급</label>
-                <select id="guild-ability-target-grade" class="unit-select" onchange="calcGuildAbilityDice(); handleInput();">
-                  <option value="D">D 등급 (50.0%)</option>
-                  <option value="C">C 등급 (30.0%)</option>
-                  <option value="B">B 등급 (12.0%)</option>
-                  <option value="A">A 등급 (5.0%)</option>
-                  <option value="S">S 등급 (2.0%)</option>
-                  <option value="SS" selected>SS 등급 (0.8%)</option>
-                  <option value="SSS">SSS 등급 (0.2%)</option>
-                </select>
-              </div>
-    
-              <div>
-                <label style="font-size: 11px; color: var(--text-sub); display: block; margin-bottom: 4px;">1회 리롤당 주사위 소모량</label>
-                <div class="input-box" style="background: white;">
-                  <input type="text" id="guild-ability-dice-per-roll" value="10" oninput="formatLevelWithComma(this); calcGuildAbilityDice(); handleInput();">
-                  <span class="unit">개</span>
-                </div>
+                <button onclick="toggleGaStats(true)" style="padding: 2px 8px; font-size: 10px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체선택</button>
+                <button onclick="toggleGaStats(false)" style="padding: 2px 8px; font-size: 10px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체해제</button>
               </div>
             </div>
-    
-            <div class="category-summary-grid">
-              <div class="cat-summary-card">
-                <div class="cat-summary-title">1회 성공 확률</div>
-                <div class="cat-summary-cost" id="guild-ability-prob-text">0.8%</div>
+            <div id="ga-stat-checkboxes" style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 12px; color: var(--text-sub);">
+              <!-- JS로 렌더링 -->
+            </div>
+          </div>
+
+          <div class="category-summary-grid">
+            <div class="cat-summary-card">
+              <div class="cat-summary-title">1회 리롤 소모 주사위</div>
+              <div class="cat-summary-cost" id="ga-cost-per-roll">10 개</div>
+            </div>
+            <div class="cat-summary-card">
+              <div class="cat-summary-title">1회 성공 확률 (합산)</div>
+              <div class="cat-summary-cost" id="ga-calc-prob" style="color: #059669;">0.0000%</div>
+            </div>
+            <div class="cat-summary-card">
+              <div class="cat-summary-title">예상 필요 리롤 횟수</div>
+              <div class="cat-summary-cost" id="ga-calc-rolls">0 회</div>
+            </div>
+            <div class="cat-summary-card" style="border-color: #ef4444; background: #fef2f2;">
+              <div class="cat-summary-title">예상 총 소모 주사위</div>
+              <div class="cat-summary-cost" id="ga-calc-total-dice" style="color: #ef4444;">0 개</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 섹션 3: 수치 미니 도감 -->
+        <div class="invest-card">
+          <div class="invest-title">📖 어빌리티 등급별 수치 도감</div>
+          <div class="input-grid" style="margin-bottom: 12px;">
+            <div class="input-field" style="grid-column: span 2;">
+              <label>조회할 능력치 선택</label>
+              <select id="ga-dict-select" class="unit-select" onchange="updateGuildAbilityDict();"></select>
+            </div>
+          </div>
+          <div id="ga-dict-result" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px;"></div>
+        </div>
+
+        <!-- 섹션 4: 레벨업 경험치 계산기 -->
+        <div class="invest-card">
+          <div class="invest-title">📊 어빌리티 레벨업 필요 경험치 계산기</div>
+          <div style="font-size: 11px; color: #f59e0b; margin-bottom: 14px;">* 일부 레벨 구간의 필요 경험치는 데이터 보간을 통해 추정한 예상치입니다.</div>
+          <div class="input-grid">
+            <div class="input-field">
+              <label>현재 레벨 (1~25)</label>
+              <div class="input-box" style="background: white;">
+                <input type="text" id="ga-exp-cur-lv" value="1" oninput="formatLevelWithComma(this); calcGuildAbilityExp(); handleInput();">
+                <span class="unit">Lv</span>
               </div>
-              <div class="cat-summary-card">
-                <div class="cat-summary-title">예상 필요 리롤 횟수</div>
-                <div class="cat-summary-cost" id="guild-ability-expected-rolls">125 회</div>
+            </div>
+            <div class="input-field">
+              <label>목표 레벨 (1~25)</label>
+              <div class="input-box" style="background: white;">
+                <input type="text" id="ga-exp-target-lv" value="10" oninput="formatLevelWithComma(this); calcGuildAbilityExp(); handleInput();">
+                <span class="unit">Lv</span>
               </div>
-              <div class="cat-summary-card">
-                <div class="cat-summary-title">예상 총 소모 주사위</div>
-                <div class="cat-summary-cost" id="guild-ability-expected-dice" style="color: #ef4444;">1,250 개</div>
+            </div>
+            <div class="input-field full-width">
+              <label>목표 레벨 도달까지 필요한 총 경험치 (누적)</label>
+              <div class="input-box readonly">
+                <input type="text" id="ga-exp-total-needed" value="0" readonly style="font-size: 14px; font-weight: 800; color: #10b981;">
+                <span class="unit">EXP</span>
               </div>
             </div>
           </div>
@@ -1569,6 +1634,229 @@
 
   <script>
     // [찾을 위치] <script> 태그 내부의 하단 함수들 근처에 아래 함수들을 추가해 주세요.
+    // ===== 길드 어빌리티 관련 신규 데이터 (해금, 확률, 수치 도감, 경험치) =====
+    const gaStatGroups = {
+      g1: ['15~25%', '30~50%', '45~75%', '60~100%', '75~125%', '90~150%', '105~175%', '120~200%', '180~300%'],
+      g2: ['90~150%', '180~300%', '270~450%', '360~600%', '450~750%', '540~900%', '630~1050%', '720~1200%', '1080~1800%'],
+      g3: ['60~100%', '120~200%', '180~300%', '240~400%', '300~500%', '360~600%', '420~700%', '480~800%', '720~1200%'],
+      g4: ['600~1000%', '1200~2000%', '1800~3000%', '2400~4000%', '3000~5000%', '3600~6000%', '4200~7000%', '4800~8000%', '7200~12000%'],
+      g5: ['30~50%', '60~100%', '90~150%', '120~200%', '150~250%', '180~300%', '210~350%', '240~400%', '360~600%'],
+      g6: ['13.5~15.0%', '15.8~17.5%', '18.0~20.0%', '20.3~22.5%', '22.5~25.0%', '24.8~27.5%', '27.0~30.0%', '29.3~32.5%', '31.5~35.0%'],
+      g7: ['1.4~1.5%', '1.6~1.8%', '1.8~2.0%', '2.0~2.3%', '2.3~2.5%', '2.5~2.8%', '2.7~3.0%', '2.9~3.3%', '3.2~3.5%']
+    };
+
+    const guildAbilityStatsDict = [
+      { id: 's1', name: '하트 공격력 증폭', unlockLv: 1, group: 'g1' },
+      { id: 's2', name: '코어 공격력 증폭', unlockLv: 1, group: 'g1' },
+      { id: 's3', name: '최종 공격력', unlockLv: 1, group: 'g2' },
+      { id: 's4', name: '최종 체력', unlockLv: 1, group: 'g3' },
+      { id: 's5', name: '일반 몬스터 피해량', unlockLv: 1, group: 'g4' },
+      { id: 's6', name: '보스 피해 증가', unlockLv: 1, group: 'g4' },
+      { id: 's7', name: '스킬 데미지 증가', unlockLv: 1, group: 'g5' },
+      { id: 's8', name: '골드 획득량', unlockLv: 1, group: 'g6' },
+      { id: 's9', name: '경험치 획득량', unlockLv: 1, group: 'g6' },
+      { id: 's10', name: '식재료 드랍 확률', unlockLv: 1, group: 'g6' },
+      { id: 's11', name: '아이템 드랍 확률', unlockLv: 1, group: 'g6' },
+      { id: 's12', name: '재사용 대기시간 감소', unlockLv: 1, group: 'g7' },
+      { id: 'f1', name: '견습 요리 증폭 (D)', unlockLv: 1, group: 'g1' },
+      { id: 'f2', name: '왕실 요리 증폭 (C)', unlockLv: 1, group: 'g1' },
+      { id: 'f3', name: '용의 요리 증폭 (B)', unlockLv: 1, group: 'g1' },
+      { id: 'f4', name: '만찬 요리 증폭 (A)', unlockLv: 1, group: 'g1' },
+      { id: 'f5', name: '세계 요리 증폭 (S)', unlockLv: 1, group: 'g1' },
+      { id: 'f6', name: '천상 요리 증폭 (SS)', unlockLv: 1, group: 'g1' },
+      { id: 'f7', name: '축복 요리 증폭 (SSS)', unlockLv: 14, group: 'g1' },
+      { id: 'f8', name: '신성한 요리 증폭 (US)', unlockLv: 14, group: 'g1' },
+      { id: 'f9', name: '창조의 요리 증폭 (USS)', unlockLv: 14, group: 'g1' },
+      { id: 'f10', name: '눈부신 요리 증폭 (UR)', unlockLv: 14, group: 'g1' },
+      { id: 'f11', name: '황홀한 요리 증폭 (URR)', unlockLv: 14, group: 'g1' },
+      { id: 'f12', name: '찬란한 요리 증폭 (LR)', unlockLv: 14, group: 'g1' },
+      { id: 'f13', name: '장엄한 요리 증폭 (LRR)', unlockLv: 18, group: 'g1' },
+      { id: 'f14', name: '경이로운 요리 증폭 (MR)', unlockLv: 18, group: 'g1' },
+      { id: 'f15', name: '영원의 요리 증폭 (MRR)', unlockLv: 18, group: 'g1' },
+      { id: 'f16', name: '숭고한 요리 증폭 (XR)', unlockLv: 21, group: 'g1' },
+      { id: 'f17', name: '유구한 요리 증폭 (XRR)', unlockLv: 21, group: 'g1' },
+      { id: 'f18', name: '초월한 요리 증폭 (ZR)', unlockLv: 21, group: 'g1' },
+      { id: 'f19', name: '불후의 요리 증폭 (ZRR)', unlockLv: 21, group: 'g1' },
+      { id: 'f20', name: '성대한 요리 증폭 (TR)', unlockLv: 21, group: 'g1' },
+      { id: 'f21', name: '신비로운 요리 증폭 (TRR)', unlockLv: 21, group: 'g1' },
+      { id: 'f22', name: '고결한 요리 증폭 (GR)', unlockLv: 25, group: 'g1' },
+      { id: 'f23', name: '장대한 요리 증폭 (GRR)', unlockLv: 25, group: 'g1' },
+      { id: 'f24', name: '태초의 요리 증폭 (AR)', unlockLv: 25, group: 'g1' }
+    ];
+
+    const gaProbsTable = [ // index 0 = Lv1, index 24 = Lv25
+      { D: 97, C: 3 },
+      { D: 95, C: 5 },
+      { D: 91, C: 8, B: 1 },
+      { D: 88.6, C: 10, B: 1.4 },
+      { D: 85, C: 12, B: 2.6, A: 0.4 },
+      { D: 79.9, C: 16, B: 3.4, A: 0.7 },
+      { D: 72.1, C: 20, B: 6.3, A: 1.3, S: 0.3 },
+      { D: 59.15, C: 28, B: 10, A: 2.4, S: 0.45 },
+      { D: 40.59, C: 35, B: 18.6, A: 4.7, S: 0.95, SS: 0.16 },
+      { D: 33.61, C: 32, B: 26, A: 6.3, S: 1.8, SS: 0.29 },
+      { D: 25.01, C: 30, B: 33.2, A: 8.3, S: 3, SS: 0.39, SSS: 0.1 },
+      { D: 22.01, C: 32.15, B: 31.3, A: 10.3, S: 3.6, SS: 0.49, SSS: 0.15 },
+      { D: 19.38, C: 32.6, B: 29, A: 12.8, S: 5.4, SS: 0.59, SSS: 0.2, US: 0.03 },
+      { D: 19.38, C: 32.6, B: 29, A: 12.8, S: 5.4, SS: 0.59, SSS: 0.2, US: 0.03 },
+      { D: 15.63, C: 27.9, B: 29, A: 16.3, S: 10, SS: 0.79, SSS: 0.3, US: 0.08 },
+      { D: 13.5, C: 27, B: 28.3, A: 18.2, S: 11.8, SS: 0.88, SSS: 0.22, US: 0.1 },
+      { D: 11.8, C: 26.2, B: 27.5, A: 19.7, S: 13.3, SS: 1.1, SSS: 0.28, US: 0.12 },
+      { D: 10.4, C: 25.3, B: 26.6, A: 21, S: 14.8, SS: 1.42, SSS: 0.34, US: 0.14 },
+      { D: 9.2, C: 24.2, B: 25.6, A: 22.4, S: 16.3, SS: 1.7, SSS: 0.44, US: 0.16 },
+      { D: 8.2, C: 23, B: 24.5, A: 23.8, S: 18, SS: 1.8, SSS: 0.5, US: 0.2 },
+      { D: 7.27, C: 21.5, B: 24, A: 24.6, S: 19.5, SS: 2.1, SSS: 0.7, US: 0.3, USS: 0.03 },
+      { D: 6.39, C: 20, B: 23.5, A: 25.3, S: 21, SS: 2.45, SSS: 0.9, US: 0.4, USS: 0.06 },
+      { D: 5.5, C: 18.5, B: 23, A: 26, S: 22.5, SS: 2.8, SSS: 1.1, US: 0.5, USS: 0.1 },
+      { D: 4.45, C: 17, B: 22.5, A: 26.8, S: 24, SS: 3.15, SSS: 1.3, US: 0.65, USS: 0.15 },
+      { D: 3.43, C: 15.5, B: 22, A: 27.5, S: 25.5, SS: 3.5, SSS: 1.55, US: 0.8, USS: 0.22 }
+    ];
+    const gaGradesList = ['D', 'C', 'B', 'A', 'S', 'SS', 'SSS', 'US', 'USS'];
+
+    // 임의 보간된 어빌리티 레벨업 필요 경험치 (해당 레벨 도달 시 요구치)
+    const gaExpNeededData = [
+      0, 35200, 70400, 105600, 140800, 176000, 211200, 246400, 281600, 333900,
+      386200, 438500, 490800, 543100, 595400, 647700, 700000, 762500, 825000, 887500,
+      950000, 1000000, 1050000, 1100000, 1150000
+    ];
+
+    // ===== 길드 어빌리티 함수들 =====
+    function initGuildAbilityUI() {
+      const lockSelect = document.getElementById('ga-lock-count');
+      if(lockSelect) {
+        lockSelect.innerHTML = Array.from({length: 26}, (_, i) => `<option value="${i}">${i}개 잠금 (주사위 ${10 + i * 10}개)</option>`).join('');
+      }
+      const dictSelect = document.getElementById('ga-dict-select');
+      if(dictSelect) {
+        dictSelect.innerHTML = guildAbilityStatsDict.map(s => `<option value="${s.id}">${s.name} (Lv${s.unlockLv} 해금)</option>`).join('');
+      }
+    }
+
+    function updateGuildAbilityInfo() {
+      const lvEl = document.getElementById('ga-current-lv');
+      if(!lvEl) return;
+      let curLv = parseNumber(lvEl.value);
+      if (curLv < 1) curLv = 1;
+      if (curLv > 25) curLv = 25;
+      lvEl.value = curLv;
+
+      const probs = gaProbsTable[curLv - 1];
+      const badgesEl = document.getElementById('ga-prob-badges');
+      const gradeColors = { D:'#94a3b8', C:'#22c55e', B:'#3b82f6', A:'#a855f7', S:'#f59e0b', SS:'#ef4444', SSS:'#eab308', US:'#06b6d4', USS:'#ec4899' };
+      
+      badgesEl.innerHTML = gaGradesList.filter(g => probs[g]).map(g => 
+        `<span class="item-badge" style="background: white; border: 1px solid ${gradeColors[g]}; color: ${gradeColors[g]}; font-weight: 800;">
+          ${g} ${probs[g].toFixed(2)}%
+        </span>`
+      ).join('');
+
+      const unlockedStats = guildAbilityStatsDict.filter(s => s.unlockLv <= curLv);
+      document.getElementById('ga-unlocked-count').innerText = unlockedStats.length;
+      
+      // 계산기 체크박스 업데이트
+      const chkContainer = document.getElementById('ga-stat-checkboxes');
+      chkContainer.innerHTML = unlockedStats.map(s => `
+        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 8px; background: white; border: 1px solid var(--border); border-radius: 6px;">
+          <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); handleInput();"> ${s.name}
+        </label>
+      `).join('');
+      
+      // 하단 도감 목록 (참고용)
+      const statsEl = document.getElementById('ga-unlocked-stats');
+      statsEl.innerHTML = unlockedStats.map(s => `<span class="item-badge" style="background: #1e293b; color: #cbd5e1; border-color: #334155;">${s.name}</span>`).join('');
+      
+      updateGuildAbilityCalc();
+      updateGuildAbilityDict();
+    }
+
+    function toggleGaStats(checked) {
+      document.querySelectorAll('.ga-stat-chk').forEach(chk => chk.checked = checked);
+      updateGuildAbilityCalc();
+      handleInput();
+    }
+
+    function updateGuildAbilityCalc() {
+      const curLv = parseNumber(document.getElementById('ga-current-lv')?.value) || 1;
+      const lockCnt = parseNumber(document.getElementById('ga-lock-count')?.value) || 0;
+      const targetGrade = document.getElementById('ga-target-grade')?.value || 'SS';
+      
+      const dicePerRoll = 10 + (lockCnt * 10);
+      document.getElementById('ga-cost-per-roll').innerText = `${dicePerRoll} 개`;
+
+      const probs = gaProbsTable[curLv - 1];
+      const targetIdx = gaGradesList.indexOf(targetGrade);
+      
+      let validGradeProbSum = 0;
+      for(let i = targetIdx; i < gaGradesList.length; i++) {
+        if(probs[gaGradesList[i]]) validGradeProbSum += probs[gaGradesList[i]];
+      }
+
+      const totalUnlocked = guildAbilityStatsDict.filter(s => s.unlockLv <= curLv).length;
+      let checkedCount = 0;
+      document.querySelectorAll('.ga-stat-chk').forEach(chk => { if(chk.checked) checkedCount++; });
+
+      // 최종 확률 = (해당 등급 이상 뜰 확률) * (그 중에서 체크한 옵션 중 하나가 뜰 확률)
+      const finalProb = validGradeProbSum * (checkedCount / totalUnlocked);
+      
+      const probEl = document.getElementById('ga-calc-prob');
+      const rollsEl = document.getElementById('ga-calc-rolls');
+      const totalDiceEl = document.getElementById('ga-calc-total-dice');
+
+      if (finalProb <= 0) {
+        probEl.innerText = `0.0000%`;
+        probEl.style.color = '#94a3b8';
+        rollsEl.innerText = `불가`;
+        totalDiceEl.innerText = `- 개`;
+      } else {
+        probEl.innerText = `${finalProb.toFixed(4)}%`;
+        probEl.style.color = '#059669';
+        const expRolls = Math.round(100 / finalProb);
+        rollsEl.innerText = `${toCommaStr(expRolls)} 회`;
+        totalDiceEl.innerText = `${toCommaStr(expRolls * dicePerRoll)} 개`;
+      }
+    }
+
+    function updateGuildAbilityDict() {
+      const statId = document.getElementById('ga-dict-select')?.value;
+      const statInfo = guildAbilityStatsDict.find(s => s.id === statId);
+      const resultEl = document.getElementById('ga-dict-result');
+      if(!statInfo || !resultEl) return;
+      
+      const gradeColors = { D:'#94a3b8', C:'#22c55e', B:'#3b82f6', A:'#a855f7', S:'#f59e0b', SS:'#ef4444', SSS:'#eab308', US:'#06b6d4', USS:'#ec4899' };
+      const groupVals = gaStatGroups[statInfo.group];
+      
+      resultEl.innerHTML = gaGradesList.map((g, idx) => `
+        <div style="background: white; border: 1px solid var(--border); border-radius: 6px; text-align: center; overflow: hidden;">
+          <div style="background: ${gradeColors[g]}; color: white; font-weight: 800; font-size: 11px; padding: 4px;">${g} 등급</div>
+          <div style="padding: 8px 4px; font-size: 11px; font-weight: 700; color: var(--text-main);">${groupVals[idx]}</div>
+        </div>
+      `).join('');
+    }
+
+    function calcGuildAbilityExp() {
+      const curLvEl = document.getElementById('ga-exp-cur-lv');
+      const targetLvEl = document.getElementById('ga-exp-target-lv');
+      if(!curLvEl || !targetLvEl) return;
+      
+      let curLv = parseNumber(curLvEl.value) || 1;
+      let targetLv = parseNumber(targetLvEl.value) || curLv;
+      if(curLv < 1) curLv = 1; if(curLv > 25) curLv = 25;
+      if(targetLv < curLv) targetLv = curLv; if(targetLv > 25) targetLv = 25;
+      curLvEl.value = curLv;
+      targetLvEl.value = targetLv;
+
+      let totalExp = 0;
+      for(let i = curLv; i < targetLv; i++) {
+        totalExp += gaExpNeededData[i];
+      }
+      document.getElementById('ga-exp-total-needed').value = toCommaStr(totalExp);
+    }
+
+
+
+
+
+    
     
     function onTicketStartDayChange() {
       // 사용자가 셀렉트박스를 직접 바꿨을 때 오늘 날짜를 기준(베이스)으로 저장합니다.
@@ -3764,24 +4052,7 @@
         }).join('');
       }
     }
-    
-    const guildAbilityProbTable = {
-      'D': 50.0, 'C': 30.0, 'B': 12.0, 'A': 5.0, 'S': 2.0, 'SS': 0.8, 'SSS': 0.2
-    };
-    
-    function calcGuildAbilityDice() {
-      const grade = document.getElementById('guild-ability-target-grade')?.value || 'SS';
-      const dicePerRoll = parseNumber(document.getElementById('guild-ability-dice-per-roll')?.value) || 10;
-    
-      const prob = guildAbilityProbTable[grade] || 1.0;
-      const expectedRolls = Math.round(100 / prob);
-      const totalDice = expectedRolls * dicePerRoll;
-    
-      document.getElementById('guild-ability-prob-text').innerText = `${prob.toFixed(1)}%`;
-      document.getElementById('guild-ability-expected-rolls').innerText = `${toCommaStr(expectedRolls)} 회`;
-      document.getElementById('guild-ability-expected-dice').innerText = `${toCommaStr(totalDice)} 개`;
-    }
-
+     
     const dungeonKeyColors = {
       gold: '#eab308',
       equip: '#6b7280',
@@ -4014,9 +4285,11 @@
       renderGuildMissions();
       renderGuildShopItems();
     
+      initGuildAbilityUI(); // 신규 추가 (어빌리티 초기화)
+    
       loadSavedData();
       calcGuildLevelInfo();
-      calcGuildAbilityDice();
+      updateGuildAbilityInfo(); // 신규 추가 (calcGuildAbilityDice 대체)
       calcGuildShopTotal();
       updateAllGuildCalculations();
     });
