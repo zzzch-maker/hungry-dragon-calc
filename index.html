@@ -2141,6 +2141,7 @@
         items: [
           { keyType: 'material_pocket', name: '식재료 주머니', count: 30, color: '#64748b' } // 💡 keyType이 반드시 'material_pocket'이어야 합니다 ('material' 금지)
         ] 
+        note: '3일 1회 누적보상 미포함 (1회 보상 품목 골드던전 열쇠3개, 장비던전 열쇠3개, 스킬던전 열쇠3개, 하트던전 열쇠3개)'
       },
       { 
         id: 'att4', 
@@ -2439,9 +2440,14 @@
               </div>
             </div>
           ` : ''}
-        </div>
-      `).join('');
-    }
+          <!-- 💡 [추가할 위치] 아이템 목록 박스 바로 아래에 이 코드를 넣어주세요 -->
+        ${m.note ? `
+            <div style="font-size: 11px; color: #ef4444; font-weight: 600; line-height: 1.4; margin-top: 6px; border-top: 1px dashed var(--border); padding-top: 6px;">
+              ${m.note}
+            </div>
+          ` : ''}
+
+        </div> <!-- 카드 닫는 태그 -->
 
     function renderSummonStats() {
       const container = document.getElementById('summon-stat-container');
