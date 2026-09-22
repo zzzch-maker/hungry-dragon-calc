@@ -1788,13 +1788,58 @@
     const unlockedStats = guildAbilityStatsDict.filter(s => s.unlockLv <= curLv);
       document.getElementById('ga-unlocked-count').innerText = unlockedStats.length;
       
-      // 계산기 체크박스 업데이트 부분
+      // 💡 [개선] 상단 도감과 동일한 3대 계열별 그룹으로 체크박스 영역 구조화
+      const combatStats = unlockedStats.filter(s => !s.id.startsWith('f') && parseInt(s.id.replace('s','')) <= 7);
+      const utilityStats = unlockedStats.filter(s => !s.id.startsWith('f') && parseInt(s.id.replace('s','')) > 7);
+      const cookingStats = unlockedStats.filter(s => s.id.startsWith('f'));
+
       const chkContainer = document.getElementById('ga-stat-checkboxes');
-      chkContainer.innerHTML = unlockedStats.map(s => `
-        <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 8px; background: white; border: 1px solid var(--border); border-radius: 6px;">
-          <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();"> ${s.name}
-        </label>
-      `).join('');
+      chkContainer.style.display = 'block'; // 그룹 박스들이 세로로 배치되도록 블록 설정
+      
+      const gridBoxStyle = 'background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;';
+      const innerGridStyle = 'display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px;';
+      
+      let chkHtml = '';
+      if (combatStats.length > 0) {
+        chkHtml += `<div style="${gridBoxStyle}; margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 700; color: #ef4444; margin-bottom: 8px;">⚔️ 전투 및 데미지 계열</div>
+          <div style="${innerGridStyle}">
+            ${combatStats.map(s => `
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 5px 8px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; font-size: 12px;">
+                <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();" style="cursor: pointer;">
+                <span style="color: #0f172a; font-weight: 600;">${s.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>`;
+      }
+      if (utilityStats.length > 0) {
+        chkHtml += `<div style="${gridBoxStyle}; margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 700; color: #3b82f6; margin-bottom: 8px;">💰 파밍 및 유틸리티 계열</div>
+          <div style="${innerGridStyle}">
+            ${utilityStats.map(s => `
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 5px 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 12px;">
+                <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();" style="cursor: pointer;">
+                <span style="color: #0f172a; font-weight: 600;">${s.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>`;
+      }
+      if (cookingStats.length > 0) {
+        chkHtml += `<div style="${gridBoxStyle};">
+          <div style="font-size: 12px; font-weight: 700; color: #8b5cf6; margin-bottom: 8px;">🍳 요리 증폭 특화 계열</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px;">
+            ${cookingStats.map(s => `
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 5px 8px; background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 6px; font-size: 12px;">
+                <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();" style="cursor: pointer;">
+                <span style="color: #0f172a; font-weight: 600;">${s.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>`;
+      }
+      chkContainer.innerHTML = chkHtml;
       
       // 💡 [시안 B 적용] 성격별 그룹 분리 및 컬러 태그 그리드 정렬
       const combatStats = unlockedStats.filter(s => !s.id.startsWith('f') && parseInt(s.id.replace('s','')) <= 7);
