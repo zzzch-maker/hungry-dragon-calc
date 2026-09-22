@@ -3795,10 +3795,19 @@
       saveData['guild-info-member-cnt'] = document.getElementById('guild-info-member-cnt')?.value;
       saveData['guild-info-exp-per-member'] = document.getElementById('guild-info-exp-per-member')?.value;
       
-      // 길드 어빌리티 입력값 추가 수집
+      // ▼ 새로 추가된 길드 탭 관련 개별 입력값 저장 ▼
+      saveData['guild-days'] = document.getElementById('guild-days')?.value;
+      saveData['guild-info-cur-lv'] = document.getElementById('guild-info-cur-lv')?.value;
+      saveData['guild-info-target-lv'] = document.getElementById('guild-info-target-lv')?.value;
+      saveData['guild-info-cur-exp'] = document.getElementById('guild-info-cur-exp')?.value;
+      saveData['guild-info-member-cnt'] = document.getElementById('guild-info-member-cnt')?.value;
+      saveData['guild-info-exp-per-member'] = document.getElementById('guild-info-exp-per-member')?.value;
+      
+      // 길드 어빌리티 관련 입력값 및 경험치 계산기 입력값 전체 수집
       saveData['ga-current-lv'] = document.getElementById('ga-current-lv')?.value;
       saveData['ga-lock-count'] = document.getElementById('ga-lock-count')?.value;
       saveData['ga-target-grade'] = document.getElementById('ga-target-grade')?.value;
+      saveData['ga-exp-cur-lv'] = document.getElementById('ga-exp-cur-lv')?.value; // 💡 누락되었던 경험치 현재 레벨 추가
       saveData['ga-exp-target-lv'] = document.getElementById('ga-exp-target-lv')?.value;
 
       // 동적 생성되는 유효 옵션 체크박스(.ga-stat-chk) 상태 전체 수집
