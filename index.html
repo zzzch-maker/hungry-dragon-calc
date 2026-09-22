@@ -1649,6 +1649,15 @@
       </svg>`;
     }
 
+    // ▼ 새로 추가된 식재료 주머니 아이콘 생성 함수 ▼
+    function getBagSvg(colorHex) {
+      return `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="${colorHex}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>`;
+    }
+
     /* ===== 미션 및 보상 데이터 정의 ===== */
     const dailyMissionData = [
       { id: 'd1', name: '로그인 1회', dia: 10000, pts: 500 },
