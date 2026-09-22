@@ -1735,10 +1735,21 @@
     function updateGuildAbilityInfo() {
       const lvEl = document.getElementById('ga-current-lv');
       if(!lvEl) return;
-      let curLv = parseNumber(lvEl.value);
-      if (curLv < 1) curLv = 1;
-      if (curLv > 25) curLv = 25;
-      lvEl.value = curLv;
+      
+      let rawVal = lvEl.value;
+      let curLv = 1; // 빈칸일 때 내부 계산용 기본값
+      
+      if (rawVal !== '') {
+        curLv = parseNumber(rawVal);
+        if (curLv > 25) {
+          curLv = 25;
+          lvEl.value = '25';
+        } else if (curLv === 0) {
+          curLv = 1;
+          lvEl.value = '1';
+        }
+      }
+      // 입력창이 빈칸(백스페이스)일 때는 lvEl.value를 1로 강제 변환하지 않고 사용자의 입력 대기 상태를 유지합니다.
 
       const probs = gaProbsTable[curLv - 1];
       const badgesEl = document.getElementById('ga-prob-badges');
@@ -1838,15 +1849,28 @@
       const targetLvEl = document.getElementById('ga-exp-target-lv');
       if(!curLvEl || !targetLvEl) return;
       
-      let curLv = parseNumber(curLvEl.value) || 1;
-      let targetLv = parseNumber(targetLvEl.value) || curLv;
-      if(curLv < 1) curLv = 1; if(curLv > 25) curLv = 25;
-      if(targetLv < curLv) targetLv = curLv; if(targetLv > 25) targetLv = 25;
-      curLvEl.value = curLv;
-      targetLvEl.value = targetLv;
+      let curRaw = curLvEl.value;
+      let targetRaw = targetLvEl.value;
+      
+      let curLv = 1;
+      if (curRaw !== '') {
+        curLv = parseNumber(curRaw);
+        if (curLv > 25) { curLv = 25; curLvEl.value = '25'; }
+        if (curLv === 0) { curLv = 1; curLvEl.value = '1'; }
+      }
+      
+      let targetLv = curLv;
+      if (targetRaw !== '') {
+        targetLv = parseNumber(targetRaw);
+        if (targetLv > 25) { targetLv = 25; targetLvEl.value = '25'; }
+        if (targetLv === 0) { targetLv = 1; targetLvEl.value = '1'; }
+      }
+      
+      // 타이핑 간섭을 막기 위해 목표 레벨이 현재 레벨보다 낮아도 화면 숫자를 억지로 바꾸지 않고, 내부 계산에서만 보정합니다.
+      let calcTargetLv = Math.max(curLv, targetLv);
 
       let totalExp = 0;
-      for(let i = curLv; i < targetLv; i++) {
+      for(let i = curLv; i < calcTargetLv; i++) {
         totalExp += gaExpNeededData[i];
       }
       document.getElementById('ga-exp-total-needed').value = toCommaStr(totalExp);
