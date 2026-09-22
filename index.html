@@ -1720,6 +1720,30 @@
       950000, 1000000, 1050000, 1100000, 1150000
     ];
 
+    // 길드 어빌리티 전용 명시적 저장 함수
+    function saveGuildAbilityState() {
+        if (window.isDataLoading) return; // 로딩 중 저장 차단
+        
+        let data = {};
+        const saved = localStorage.getItem('hungryDragonGoldV8Data');
+        if (saved) {
+            try { data = JSON.parse(saved); } catch(e) {}
+        }
+        
+        // 주요 입력값 수집
+        data['ga-current-lv'] = document.getElementById('ga-current-lv')?.value || '1';
+        data['ga-lock-count'] = document.getElementById('ga-lock-count')?.value || '0';
+        data['ga-target-grade'] = document.getElementById('ga-target-grade')?.value || 'SS';
+        data['ga-exp-target-lv'] = document.getElementById('ga-exp-target-lv')?.value || '10';
+        
+        // 동적 체크박스(.ga-stat-chk)들의 체크 상태를 명시적으로 저장 객체에 반영
+        document.querySelectorAll('.ga-stat-chk').forEach(chk => {
+            data[chk.id] = chk.checked;
+        });
+        
+        localStorage.setItem('hungryDragonGoldV8Data', JSON.stringify(data));
+    }
+    
     // ===== 길드 어빌리티 함수들 =====
     function initGuildAbilityUI() {
       const lockSelect = document.getElementById('ga-lock-count');
@@ -1764,11 +1788,11 @@
       const unlockedStats = guildAbilityStatsDict.filter(s => s.unlockLv <= curLv);
       document.getElementById('ga-unlocked-count').innerText = unlockedStats.length;
       
-      // 계산기 체크박스 업데이트
+      // 계산기 체크박스 업데이트 부분
       const chkContainer = document.getElementById('ga-stat-checkboxes');
       chkContainer.innerHTML = unlockedStats.map(s => `
         <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 4px 8px; background: white; border: 1px solid var(--border); border-radius: 6px;">
-          <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); handleInput();"> ${s.name}
+          <input type="checkbox" id="ga-chk-${s.id}" class="ga-stat-chk" onchange="updateGuildAbilityCalc(); saveGuildAbilityState(); handleInput();"> ${s.name}
         </label>
       `).join('');
       
@@ -4263,16 +4287,30 @@
                 }
             });
 
-            // 3. 길드 어빌리티 현재 레벨 명시적 반영 및 체크박스 UI 강제 생성
+            // 길드 어빌리티 입력값 복구
             if (data['ga-current-lv']) {
                 const curLvEl = document.getElementById('ga-current-lv');
                 if (curLvEl) curLvEl.value = data['ga-current-lv'];
             }
-            if (typeof updateGuildAbilityInfo === 'function') {
-                updateGuildAbilityInfo(); // 이 함수가 실행되어야 비로소 체크박스 HTML들이 생성됨
+            if (data['ga-lock-count']) {
+                const lockEl = document.getElementById('ga-lock-count');
+                if (lockEl) lockEl.value = data['ga-lock-count'];
+            }
+            if (data['ga-target-grade']) {
+                const gradeEl = document.getElementById('ga-target-grade');
+                if (gradeEl) gradeEl.value = data['ga-target-grade'];
+            }
+            if (data['ga-exp-target-lv']) {
+                const expEl = document.getElementById('ga-exp-target-lv');
+                if (expEl) expEl.value = data['ga-exp-target-lv'];
             }
 
-            // 4. 방금 생성된 길드 어빌리티 체크박스들에 저장된 true/false 상태 복구
+            // 1. 레벨에 맞는 체크박스 UI 강제 생성
+            if (typeof updateGuildAbilityInfo === 'function') {
+                updateGuildAbilityInfo();
+            }
+
+            // 2. 저장된 객체에서 ga-chk-로 시작하는 항목들을 찾아 체크 상태 복구
             Object.keys(data).forEach(k => {
                 if (k.startsWith('ga-chk-')) {
                     const chkEl = document.getElementById(k);
@@ -4281,6 +4319,10 @@
                     }
                 }
             });
+
+            // 3. 최종 계산 갱신
+            if (typeof updateGuildAbilityCalc === 'function') updateGuildAbilityCalc();
+            if (typeof calcGuildAbilityExp === 'function') calcGuildAbilityExp();
 
             // 5. 기타 모드 및 기존 시스템 복구 로직 실행
             if (data['invest-mode']) {
