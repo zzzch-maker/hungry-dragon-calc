@@ -3707,6 +3707,7 @@
     }
 
       function handleInput() {
+      if (window.isDataLoading) return;
       const saveData = {};
       goldStats.forEach(s => {
         ['lv', 'target-lv'].forEach(field => {
@@ -4245,85 +4246,97 @@
       document.getElementById('tavern-needed-days').innerText = `${toCommaStr(days)} 일`;
     }
 
-    function loadSavedData() {
-      const saved = localStorage.getItem('hungryDragonGoldV8Data');
-      if (saved) {
-        const data = JSON.parse(saved);
-        Object.keys(data).forEach(k => {
-          const el = document.getElementById(k);
-          if (el) {
-            if (el.type === 'checkbox') el.checked = data[k];
-            else el.value = data[k];
-          }
-        });
+      function loadSavedData() {
+        // 1. 데이터 로딩 시작 (자동 저장 차단막 활성화)
+        window.isDataLoading = true;
 
-        if (data['invest-mode']) {
-          currentInvestMode = data['invest-mode'];
-          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-          document.getElementById(`btn-mode-${currentInvestMode}`)?.classList.add('active');
-        }
-      }
+        const saved = localStorage.getItem('hungryDragonGoldV8Data');
+        if (saved) {
+            const data = JSON.parse(saved);
+            
+            // 2. 일반 입력 요소(input, select 등) 값 우선 주입
+            Object.keys(data).forEach(k => {
+                const el = document.getElementById(k);
+                if (el) {
+                    if (el.type === 'checkbox') el.checked = data[k];
+                    else el.value = data[k];
+                }
+            });
 
-      onTargetProbTypeChange();
-      if (saved) {
-        const data = JSON.parse(saved);
-        if (data['target-prob-grade']) document.getElementById('target-prob-grade').value = data['target-prob-grade'];
-        if (data['target-prob-tier']) document.getElementById('target-prob-tier').value = data['target-prob-tier'];
-      }
-
-      goldStats.forEach(s => {
-        validateGoldMaxLevel(s.id, 'lv');
-        validateGoldMaxLevel(s.id, 'target-lv');
-        calcGoldStat(s.id);
-      });
-
-      levelStats.forEach(s => {
-        validateLevelMaxLevel(s.id, 'lv');
-        validateLevelMaxLevel(s.id, 'target-lv');
-        calcLevelStat(s.id);
-      });
-
-      summonStats.forEach(s => {
-        validateSummonLevel(s.id, 'cur');
-        calcSummonStat(s.id);
-      });
-
-      repeatMissionData.forEach(m => {
-        onRepeatCountInput(m.id);
-      });
-
-      calcMonsterFromPerMinute();
-      calcTotalLevelNeeded();
-      validateInvestUnits();
-      runInvestmentCalc();
-      updateAllMissionCalculations();
-      // ▼▼▼ 이 아래부터 복사해서 붙여넣으세요 ▼▼▼
-
-    const savedForGuild = localStorage.getItem('hungryDragonGoldV8Data');
-      if (savedForGuild) {
-        const data = JSON.parse(savedForGuild);
-        
-        // 1. 현재 레벨 UI 먼저 생성
-        if (typeof updateGuildAbilityInfo === 'function') {
-          updateGuildAbilityInfo();
-        }
-
-        // 2. 저장된 데이터 중 체크박스 상태값(true/false)을 찾아 일괄 복구
-        Object.keys(data).forEach(k => {
-          if (k.startsWith('ga-chk-')) {
-            const chkEl = document.getElementById(k);
-            if (chkEl) {
-              chkEl.checked = !!data[k];
+            // 3. 길드 어빌리티 현재 레벨 명시적 반영 및 체크박스 UI 강제 생성
+            if (data['ga-current-lv']) {
+                const curLvEl = document.getElementById('ga-current-lv');
+                if (curLvEl) curLvEl.value = data['ga-current-lv'];
             }
-          }
-        });
+            if (typeof updateGuildAbilityInfo === 'function') {
+                updateGuildAbilityInfo(); // 이 함수가 실행되어야 비로소 체크박스 HTML들이 생성됨
+            }
 
-        // 3. 최종 기댓값 및 경험치 계산 업데이트
-        if (typeof updateGuildAbilityCalc === 'function') updateGuildAbilityCalc();
-        if (typeof calcGuildAbilityExp === 'function') calcGuildAbilityExp();
-      }
-      
-      // ▲▲▲ 여기까지 붙여넣으세요 ▲▲▲
+            // 4. 방금 생성된 길드 어빌리티 체크박스들에 저장된 true/false 상태 복구
+            Object.keys(data).forEach(k => {
+                if (k.startsWith('ga-chk-')) {
+                    const chkEl = document.getElementById(k);
+                    if (chkEl) {
+                        chkEl.checked = !!data[k];
+                    }
+                }
+            });
+
+            // 5. 기타 모드 및 기존 시스템 복구 로직 실행
+            if (data['invest-mode']) {
+                currentInvestMode = data['invest-mode'];
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById(`btn-mode-${currentInvestMode}`)?.classList.add('active');
+            }
+
+            if (typeof onTargetProbTypeChange === 'function') onTargetProbTypeChange();
+            if (data['target-prob-grade']) document.getElementById('target-prob-grade').value = data['target-prob-grade'];
+            if (data['target-prob-tier']) document.getElementById('target-prob-tier').value = data['target-prob-tier'];
+
+            if (typeof goldStats !== 'undefined' && Array.isArray(goldStats)) {
+                goldStats.forEach(s => {
+                    validateGoldMaxLevel(s.id, 'lv');
+                    validateGoldMaxLevel(s.id, 'target-lv');
+                    calcGoldStat(s.id);
+                });
+            }
+
+            if (typeof levelStats !== 'undefined' && Array.isArray(levelStats)) {
+                levelStats.forEach(s => {
+                    validateLevelMaxLevel(s.id, 'lv');
+                    validateLevelMaxLevel(s.id, 'target-lv');
+                    calcLevelStat(s.id);
+                });
+            }
+
+            if (typeof summonStats !== 'undefined' && Array.isArray(summonStats)) {
+                summonStats.forEach(s => {
+                    validateSummonLevel(s.id, 'cur');
+                    calcSummonStat(s.id);
+                });
+            }
+
+            if (typeof repeatMissionData !== 'undefined' && Array.isArray(repeatMissionData)) {
+                repeatMissionData.forEach(m => {
+                    onRepeatCountInput(m.id);
+                });
+            }
+
+            if (typeof calcMonsterFromPerMinute === 'function') calcMonsterFromPerMinute();
+            if (typeof calcTotalLevelNeeded === 'function') calcTotalLevelNeeded();
+            if (typeof validateInvestUnits === 'function') validateInvestUnits();
+            if (typeof runInvestmentCalc === 'function') runInvestmentCalc();
+            if (typeof updateAllMissionCalculations === 'function') updateAllMissionCalculations();
+
+            // 6. 길드 어빌리티 최종 계산 갱신
+            if (typeof updateGuildAbilityCalc === 'function') updateGuildAbilityCalc();
+            if (typeof calcGuildAbilityExp === 'function') calcGuildAbilityExp();
+        }
+
+        // 7. 로딩 완료 후 짧은 지연 시간 뒤에 자동 저장 차단막 해제 (안전장치)
+        setTimeout(() => {
+            window.isDataLoading = false;
+        }, 200);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
