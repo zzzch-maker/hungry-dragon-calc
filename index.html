@@ -1670,7 +1670,7 @@
 
 // ===== 의상(코스튬) 관련 데이터 및 로직 =====
 
-    // 1. 등급별 수집 아이템 및 포인트 정의 (특별 코스튬 세부 부위 분리 반영)
+// 1. 등급별 수집 아이템 및 포인트 정의 (특별 코스튬 세부 부위 분리 및 SS등급 11종 확장)
     const costumeGradeData = [
       { id: 'D', name: 'D 등급', pts: 5, tiers: ['D4', 'D3', 'D2', 'D1'], specials: [] },
       { id: 'C', name: 'C 등급', pts: 10, tiers: ['C4', 'C3', 'C2', 'C1'], specials: [] },
@@ -1686,10 +1686,18 @@
       { id: 'S', name: 'S 등급', pts: 25, tiers: ['S4', 'S3', 'S2', 'S1'], specials: [] },
       { id: 'SS', name: 'SS 등급', pts: 30, tiers: ['SS4', 'SS3', 'SS2', 'SS1'], 
         specials: [
+          /* SS등급 특별 코스튬 11종으로 확장 적용 */
           { id: 'sp1', name: 'SS등급 특별 코스튬 1', pts: 80 },
           { id: 'sp2', name: 'SS등급 특별 코스튬 2', pts: 80 },
           { id: 'sp3', name: 'SS등급 특별 코스튬 3', pts: 80 },
-          { id: 'sp4', name: 'SS등급 특별 코스튬 4', pts: 80 }
+          { id: 'sp4', name: 'SS등급 특별 코스튬 4', pts: 80 },
+          { id: 'sp5', name: 'SS등급 특별 코스튬 5', pts: 80 },
+          { id: 'sp6', name: 'SS등급 특별 코스튬 6', pts: 80 },
+          { id: 'sp7', name: 'SS등급 특별 코스튬 7', pts: 80 },
+          { id: 'sp8', name: 'SS등급 특별 코스튬 8', pts: 80 },
+          { id: 'sp9', name: 'SS등급 특별 코스튬 9', pts: 80 },
+          { id: 'sp10', name: 'SS등급 특별 코스튬 10', pts: 80 },
+          { id: 'sp11', name: 'SS등급 특별 코스튬 11', pts: 80 }
         ] 
       },
       { id: 'SSS', name: 'SSS 등급', pts: 35, tiers: ['SSS4', 'SSS3', 'SSS2', 'SSS1'], specials: [] },
