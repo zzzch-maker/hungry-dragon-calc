@@ -1668,17 +1668,33 @@
 
     // ===== 의상(코스튬) 관련 데이터 및 로직 =====
 
-    // 1. 등급별 수집 아이템 및 포인트 정의
+// ===== 의상(코스튬) 관련 데이터 및 로직 =====
+
+    // 1. 등급별 수집 아이템 및 포인트 정의 (특별 코스튬 세부 부위 분리 반영)
     const costumeGradeData = [
-      { id: 'D', name: 'D 등급', pts: 5, tiers: ['D4', 'D3', 'D2', 'D1'], costTypes: 0, costPts: 0 },
-      { id: 'C', name: 'C 등급', pts: 10, tiers: ['C4', 'C3', 'C2', 'C1'], costTypes: 0, costPts: 0 },
-      { id: 'B', name: 'B 등급', pts: 15, tiers: ['B4', 'B3', 'B2', 'B1'], costTypes: 0, costPts: 0 },
-      { id: 'A', name: 'A 등급', pts: 20, tiers: ['A4', 'A3', 'A2', 'A1'], costTypes: 4, costPts: 80 }, // A등급 코스튬 4종
-      { id: 'S', name: 'S 등급', pts: 25, tiers: ['S4', 'S3', 'S2', 'S1'], costTypes: 0, costPts: 0 },
-      { id: 'SS', name: 'SS 등급', pts: 30, tiers: ['SS4', 'SS3', 'SS2', 'SS1'], costTypes: 0, costPts: 0 },
-      { id: 'SSS', name: 'SSS 등급', pts: 35, tiers: ['SSS4', 'SSS3', 'SSS2', 'SSS1'], costTypes: 11, costPts: 60 }, // SSS등급 코스튬 11종
-      { id: 'US', name: 'US 등급', pts: 40, tiers: ['US4', 'US3', 'US2', 'US1'], costTypes: 0, costPts: 0 },
-      { id: 'USS', name: 'USS 등급', pts: 45, tiers: ['USS4', 'USS3', 'USS2', 'USS1'], costTypes: 0, costPts: 0 }
+      { id: 'D', name: 'D 등급', pts: 5, tiers: ['D4', 'D3', 'D2', 'D1'], specials: [] },
+      { id: 'C', name: 'C 등급', pts: 10, tiers: ['C4', 'C3', 'C2', 'C1'], specials: [] },
+      { id: 'B', name: 'B 등급', pts: 15, tiers: ['B4', 'B3', 'B2', 'B1'], specials: [] },
+      { id: 'A', name: 'A 등급', pts: 20, tiers: ['A4', 'A3', 'A2', 'A1'], 
+        specials: [
+          { id: 'sp1', name: 'A등급 특별 코스튬 1', pts: 60 },
+          { id: 'sp2', name: 'A등급 특별 코스튬 2', pts: 60 },
+          { id: 'sp3', name: 'A등급 특별 코스튬 3', pts: 60 },
+          { id: 'sp4', name: 'A등급 특별 코스튬 4', pts: 60 }
+        ] 
+      },
+      { id: 'S', name: 'S 등급', pts: 25, tiers: ['S4', 'S3', 'S2', 'S1'], specials: [] },
+      { id: 'SS', name: 'SS 등급', pts: 30, tiers: ['SS4', 'SS3', 'SS2', 'SS1'], 
+        specials: [
+          { id: 'sp1', name: 'SS등급 특별 코스튬 1', pts: 80 },
+          { id: 'sp2', name: 'SS등급 특별 코스튬 2', pts: 80 },
+          { id: 'sp3', name: 'SS등급 특별 코스튬 3', pts: 80 },
+          { id: 'sp4', name: 'SS등급 특별 코스튬 4', pts: 80 }
+        ] 
+      },
+      { id: 'SSS', name: 'SSS 등급', pts: 35, tiers: ['SSS4', 'SSS3', 'SSS2', 'SSS1'], specials: [] },
+      { id: 'US', name: 'US 등급', pts: 40, tiers: ['US4', 'US3', 'US2', 'US1'], specials: [] },
+      { id: 'USS', name: 'USS 등급', pts: 45, tiers: ['USS4', 'USS3', 'USS2', 'USS1'], specials: [] }
     ];
 
     // 스탯 종류 및 최대치 매핑 (UI 표시용)
@@ -1695,7 +1711,7 @@
       basic: { name: '평타 데미지 증가', color: '#64748b', max: 78330 }
     };
 
-    // 2. 누적 포인트별 상승하는 능력치 상세 데이터 (제공해주신 180~8790P 테이블 기반 완벽 매핑)
+    // 2. 누적 포인트별 상승하는 능력치 상세 데이터 (기존 코드와 동일하게 180 ~ 8790 유지)
     const costumeMilestones = [
       [180,'atk',10], [220,'gold',1], [260,'hp',5], [300,'exp',1], [340,'def',10], [380,'item',1], [420,'pen',10], [460,'food',1], [500,'skill',10], [540,'basic',10],
       [580,'atk',20], [620,'gold',2], [660,'hp',10], [700,'exp',2], [740,'def',40], [780,'item',2], [820,'pen',40], [860,'food',2], [900,'skill',20], [940,'basic',20],
@@ -1726,47 +1742,55 @@
       const container = document.getElementById('costume-grades-container');
       if (!container) return;
 
-      let maxTotalPoints = 0;
+      const MAX_COSTUME_PTS = 8790; // 요구하신 최대 목표 누적 포인트로 강제 고정
       let html = '';
 
       costumeGradeData.forEach(g => {
         // 일반 장비 렌더링 (무기, 방어구, 투구)
-        let itemsHtml = g.tiers.map(tier => {
-          maxTotalPoints += (g.pts * 3); // 무기,방어구,투구 3종
-          return `
+        let itemsHtml = g.tiers.map(tier => `
             <div style="display:flex; flex-direction:column; gap:4px;">
               <label class="item-badge" style="background:#f8fafc; cursor:pointer; justify-content:flex-start; font-weight:600;">
                 <input type="checkbox" id="costume-w-${g.id}-${tier}" data-grade="${g.id}" data-pts="${g.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
-                무기 ${tier} (+${g.pts}P)
+                무기 ${tier} (+${g.pts})
               </label>
               <label class="item-badge" style="background:#f8fafc; cursor:pointer; justify-content:flex-start; font-weight:600;">
                 <input type="checkbox" id="costume-a-${g.id}-${tier}" data-grade="${g.id}" data-pts="${g.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
-                방어구 ${tier} (+${g.pts}P)
+                방어구 ${tier} (+${g.pts})
               </label>
               <label class="item-badge" style="background:#f8fafc; cursor:pointer; justify-content:flex-start; font-weight:600;">
                 <input type="checkbox" id="costume-h-${g.id}-${tier}" data-grade="${g.id}" data-pts="${g.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
-                투구 ${tier} (+${g.pts}P)
+                투구 ${tier} (+${g.pts})
               </label>
             </div>
-          `;
-        }).join('');
+        `).join('');
 
-        // 추가 코스튬 렌더링 (A등급, SSS등급)
-        if (g.costTypes > 0) {
-          maxTotalPoints += (g.costPts * g.costTypes);
-          let costHtml = '';
-          for (let i = 1; i <= g.costTypes; i++) {
-            costHtml += `
-              <label class="item-badge" style="background:#fef2f2; border-color:#fca5a5; color:#ef4444; cursor:pointer; justify-content:flex-start; font-weight:700;">
-                <input type="checkbox" id="costume-ext-${g.id}-${i}" data-grade="${g.id}" data-pts="${g.costPts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
-                ${g.name} 코스튬 ${i} (+${g.costPts}P)
+        // 특별 코스튬 렌더링 (무기, 방어구, 투구 각각 분리 적용)
+        if (g.specials && g.specials.length > 0) {
+          let costHtml = g.specials.map(sp => `
+            <div style="display:flex; flex-direction:column; gap:4px; background:#fff1f2; padding:8px; border-radius:6px; border:1px solid #fecdd3;">
+              <div style="font-size:12px; font-weight:800; color:#e11d48; text-align:center; margin-bottom:4px;">✨ ${sp.name}</div>
+              <label class="item-badge" style="background:#fff; cursor:pointer; justify-content:flex-start; font-weight:600; border-color:#fda4af;">
+                <input type="checkbox" id="costume-w-${g.id}-sp-${sp.id}" data-grade="${g.id}" data-pts="${sp.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
+                무기 (+${sp.pts})
               </label>
-            `;
-          }
-          itemsHtml += `<div style="display:flex; flex-direction:column; gap:4px; grid-column: 1 / -1; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);">
-            <div style="font-size:12px; color:var(--text-sub); font-weight:700; margin-bottom:4px;">✨ 특별 코스튬</div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:6px;">${costHtml}</div>
-          </div>`;
+              <label class="item-badge" style="background:#fff; cursor:pointer; justify-content:flex-start; font-weight:600; border-color:#fda4af;">
+                <input type="checkbox" id="costume-a-${g.id}-sp-${sp.id}" data-grade="${g.id}" data-pts="${sp.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
+                방어구 (+${sp.pts})
+              </label>
+              <label class="item-badge" style="background:#fff; cursor:pointer; justify-content:flex-start; font-weight:600; border-color:#fda4af;">
+                <input type="checkbox" id="costume-h-${g.id}-sp-${sp.id}" data-grade="${g.id}" data-pts="${sp.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
+                투구 (+${sp.pts})
+              </label>
+            </div>
+          `).join('');
+
+          itemsHtml += `
+            <div style="grid-column: 1 / -1; margin-top:12px; padding-top:12px; border-top:2px dashed var(--border);">
+              <div style="font-size:13px; color:var(--text-main); font-weight:800; margin-bottom:8px;">💎 ${g.name} 특별 코스튬 (부위별 획득)</div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:10px;">
+                ${costHtml}
+              </div>
+            </div>`;
         }
 
         html += `
@@ -1786,7 +1810,7 @@
       });
 
       container.innerHTML = html;
-      document.getElementById('costume-pts-max').innerText = toCommaStr(maxTotalPoints);
+      document.getElementById('costume-pts-max').innerText = toCommaStr(MAX_COSTUME_PTS);
       
       // 스탯 초기 박스 생성
       const statsGrid = document.getElementById('costume-stats-grid');
@@ -1811,10 +1835,11 @@
       saveCostumeState();
     }
 
-    // 의상 포인트 및 스탯 합계 계산
+    // 의상 포인트 및 스탯 합계 계산 (MAX 포인트 8790 기준 반영)
     function calcCostumeStats() {
       let totalPts = 0;
       let unacquiredCounts = {};
+      const MAX_COSTUME_PTS = 8790; // MAX 포인트 명시
 
       costumeGradeData.forEach(g => { unacquiredCounts[g.id] = 0; });
 
@@ -1834,11 +1859,10 @@
         if (el) el.innerText = unacquiredCounts[grade];
       });
 
-      // 최상단 포인트 UI 업데이트
-      const maxPts = parseNumber(document.getElementById('costume-pts-max').innerText);
+      // 최상단 포인트 UI 업데이트 (남은 포인트 계산)
       document.getElementById('costume-pts-current').innerText = toCommaStr(totalPts);
-      document.getElementById('costume-pts-remain').innerText = `${toCommaStr(Math.max(0, maxPts - totalPts))} P`;
-      document.getElementById('costume-progress-fill').style.width = `${Math.min(100, (totalPts / maxPts) * 100)}%`;
+      document.getElementById('costume-pts-remain').innerText = `${toCommaStr(Math.max(0, MAX_COSTUME_PTS - totalPts))} P`;
+      document.getElementById('costume-progress-fill').style.width = `${Math.min(100, (totalPts / MAX_COSTUME_PTS) * 100)}%`;
 
       // 능력치 합계 로직 (누적 포인트 이하의 모든 구간 능력치를 합산)
       let statSums = { atk:0, gold:0, hp:0, exp:0, def:0, item:0, pen:0, food:0, skill:0, basic:0 };
