@@ -1623,7 +1623,6 @@
     <div id="tab-relic" class="tab-content"><div class="placeholder-card">🔮 유물 계산기 준비 중입니다.</div></div>
     <div id="tab-equip" class="tab-content"><div class="placeholder-card">🗡️ 장비 계산기 준비 중입니다.</div></div>
     <div id="tab-skill" class="tab-content"><div class="placeholder-card">✨ 스킬 계산기 준비 중입니다.</div></div>
-    <div id="tab-costume" class="tab-content"><div class="placeholder-card">👗 의상 계산기 준비 중입니다.</div></div>
     <div id="tab-codex" class="tab-content"><div class="placeholder-card">📖 도감 계산기 준비 중입니다.</div></div>
     <div id="tab-dragon" class="tab-content"><div class="placeholder-card">🐉 드래곤 성장 계산기 준비 중입니다.</div></div>
     <div id="tab-spirit" class="tab-content"><div class="placeholder-card">🧚 정령 계산기 준비 중입니다.</div></div>
@@ -1632,7 +1631,245 @@
     
   </div>
 
+  <!-- 5. 의상 계산기 탭 -->
+    <div id="tab-costume" class="tab-content">
+      <!-- 최상단 누적 포인트 및 달성률 -->
+      <div class="point-progress-card" style="background: linear-gradient(135deg, #0f172a, #1e293b); border: none;">
+        <div class="progress-header">
+          <strong style="font-size: 16px; color: #38bdf8;">👗 의상 수집 누적 포인트 달성률</strong>
+          <div style="text-align: right;">
+            <span id="costume-pts-current" style="font-size: 22px; font-weight: 800; color: #f8fafc;">0</span>
+            <span style="font-size: 14px; color: #94a3b8;"> / MAX <span id="costume-pts-max">3,680</span> P</span>
+          </div>
+        </div>
+        <div class="progress-bar-bg" style="background: #334155; height: 14px;">
+          <div class="progress-bar-fill" id="costume-progress-fill" style="background: linear-gradient(90deg, #ec4899, #f43f5e);"></div>
+        </div>
+        <div style="font-size: 12px; color: #cbd5e1; margin-top: 8px; text-align: right;">
+          MAX까지 남은 포인트: <span id="costume-pts-remain" style="color: #f43f5e; font-weight: bold;">3,680 P</span>
+        </div>
+      </div>
+
+      <!-- 누적 합계 스탯 대시보드 -->
+      <div class="invest-card">
+        <div class="invest-title">📊 현재 누적 수집 능력치 합계</div>
+        <div class="category-summary-grid" id="costume-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
+          <!-- JS를 통해 10가지 능력치가 자동 렌더링 됩니다 -->
+        </div>
+      </div>
+
+      <!-- 등급별 장비 체크박스 컨테이너 -->
+      <div id="costume-grades-container">
+        <!-- JS를 통해 D등급 ~ USS등급 섹션이 자동 렌더링 됩니다 -->
+      </div>
+    </div>
+
   <script>
+
+    // ===== 의상(코스튬) 관련 데이터 및 로직 =====
+
+    // 1. 등급별 수집 아이템 및 포인트 정의
+    const costumeGradeData = [
+      { id: 'D', name: 'D 등급', pts: 5, tiers: ['D4', 'D3', 'D2', 'D1'], costTypes: 0, costPts: 0 },
+      { id: 'C', name: 'C 등급', pts: 10, tiers: ['C4', 'C3', 'C2', 'C1'], costTypes: 0, costPts: 0 },
+      { id: 'B', name: 'B 등급', pts: 15, tiers: ['B4', 'B3', 'B2', 'B1'], costTypes: 0, costPts: 0 },
+      { id: 'A', name: 'A 등급', pts: 20, tiers: ['A4', 'A3', 'A2', 'A1'], costTypes: 4, costPts: 80 }, // A등급 코스튬 4종
+      { id: 'S', name: 'S 등급', pts: 25, tiers: ['S4', 'S3', 'S2', 'S1'], costTypes: 0, costPts: 0 },
+      { id: 'SS', name: 'SS 등급', pts: 30, tiers: ['SS4', 'SS3', 'SS2', 'SS1'], costTypes: 0, costPts: 0 },
+      { id: 'SSS', name: 'SSS 등급', pts: 35, tiers: ['SSS4', 'SSS3', 'SSS2', 'SSS1'], costTypes: 11, costPts: 60 }, // SSS등급 코스튬 11종
+      { id: 'US', name: 'US 등급', pts: 40, tiers: ['US4', 'US3', 'US2', 'US1'], costTypes: 0, costPts: 0 },
+      { id: 'USS', name: 'USS 등급', pts: 45, tiers: ['USS4', 'USS3', 'USS2', 'USS1'], costTypes: 0, costPts: 0 }
+    ];
+
+    // 스탯 종류 및 최대치 매핑 (UI 표시용)
+    const costumeStatNames = {
+      atk: { name: '의상 수집 공격력', color: '#ec4899', max: 93910 },
+      gold: { name: '골드 획득량', color: '#eab308', max: 11939 },
+      hp: { name: '의상 수집 생명력', color: '#22c55e', max: 63080 },
+      exp: { name: '경험치 획득량', color: '#06b6d4', max: 9681 },
+      def: { name: '의상 수집 방어력', color: '#f97316', max: 47740680 },
+      item: { name: '아이템 드랍 확률', color: '#a855f7', max: 1164 },
+      pen: { name: '의상 수집 관통력', color: '#f59e0b', max: 47711330 },
+      food: { name: '식재료 드랍 확률', color: '#ef4444', max: 1164 },
+      skill: { name: '스킬 데미지 증가', color: '#0ea5e9', max: 72530 },
+      basic: { name: '평타 데미지 증가', color: '#64748b', max: 78330 }
+    };
+
+    // 2. 누적 포인트별 상승하는 능력치 상세 데이터 (제공해주신 180~8790P 테이블 기반 완벽 매핑)
+    const costumeMilestones = [
+      [180,'atk',10], [220,'gold',1], [260,'hp',5], [300,'exp',1], [340,'def',10], [380,'item',1], [420,'pen',10], [460,'food',1], [500,'skill',10], [540,'basic',10],
+      [580,'atk',20], [620,'gold',2], [660,'hp',10], [700,'exp',2], [740,'def',40], [780,'item',2], [820,'pen',40], [860,'food',2], [900,'skill',20], [940,'basic',20],
+      [980,'atk',20], [1020,'gold',2], [1060,'hp',10], [1100,'exp',2], [1140,'def',40], [1180,'item',2], [1220,'pen',40], [1260,'food',2], [1300,'skill',20], [1340,'basic',20],
+      [1380,'atk',30], [1420,'gold',3], [1460,'hp',15], [1500,'exp',3], [1540,'def',90], [1580,'item',3], [1620,'pen',90], [1660,'food',3], [1700,'skill',30], [1740,'basic',30],
+      [1780,'atk',50], [1820,'gold',5], [1860,'hp',25], [1900,'exp',5], [1940,'def',250], [1980,'item',5], [2020,'pen',250], [2060,'food',5], [2100,'skill',50], [2140,'basic',50],
+      [2180,'atk',70], [2220,'gold',7], [2260,'hp',35], [2300,'exp',7], [2340,'def',490], [2380,'item',7], [2420,'pen',490], [2460,'food',7], [2500,'skill',70], [2540,'basic',70],
+      [2580,'atk',110], [2620,'gold',11], [2660,'hp',55], [2700,'exp',11], [2740,'def',1210], [2780,'item',11], [2820,'pen',1210], [2860,'food',11], [2900,'skill',110], [2940,'basic',110],
+      [2980,'atk',160], [3020,'gold',16], [3060,'hp',80], [3100,'exp',16], [3140,'def',2560], [3180,'item',16], [3220,'pen',2560], [3260,'food',16], [3300,'skill',160], [3340,'basic',160],
+      [3380,'atk',230], [3420,'gold',23], [3460,'hp',115], [3500,'exp',23], [3540,'def',5290], [3580,'item',23], [3620,'pen',5290], [3660,'food',23], [3700,'skill',230], [3740,'basic',230],
+      [3780,'atk',340], [3820,'gold',34], [3860,'hp',170], [3900,'exp',34], [3940,'def',11560], [3980,'item',34], [4020,'pen',11560], [4060,'food',34], [4100,'skill',340], [4140,'basic',340],
+      [4180,'atk',510], [4220,'gold',51], [4260,'hp',255], [4300,'exp',51], [4340,'def',26010], [4380,'item',51], [4420,'pen',26010], [4460,'food',51], [4500,'skill',510], [4540,'basic',510],
+      [4580,'atk',770], [4620,'gold',77], [4660,'hp',385], [4700,'exp',77], [4740,'def',59290], [4780,'item',77], [4820,'pen',59290], [4860,'food',77], [4900,'skill',770], [4940,'basic',770],
+      [4980,'atk',1150], [5020,'gold',115], [5060,'hp',575], [5100,'exp',115], [5140,'def',132250], [5180,'item',115], [5220,'pen',132250], [5260,'food',115], [5300,'skill',1150], [5340,'basic',1150],
+      [5380,'atk',1720], [5420,'gold',172], [5460,'hp',860], [5500,'exp',172], [5540,'def',295840], [5580,'item',172], [5620,'pen',295840], [5660,'food',172], [5700,'skill',1720], [5740,'basic',1720],
+      [5780,'atk',2580], [5820,'gold',258], [5860,'hp',1290], [5900,'exp',258], [5940,'def',665640], [5980,'item',258], [6020,'pen',665640], [6060,'food',258], [6100,'skill',2580], [6140,'basic',2580],
+      [6180,'atk',3870], [6220,'gold',387], [6260,'hp',1935], [6300,'exp',387], [6340,'def',1497690], [6380,'item',387], [6420,'pen',1497690], [6460,'food',387], [6500,'skill',3870], [6540,'basic',3870],
+      [6580,'atk',5800], [6620,'gold',580], [6660,'hp',2900], [6700,'exp',580], [6740,'def',3364000], [6780,'pen',3364000], [6820,'skill',5800], [6860,'basic',5800],
+      [6900,'atk',5800], [6940,'gold',580], [6980,'hp',4350], [7040,'exp',870], [7090,'def',7569000], [7140,'pen',7569000], [7190,'skill',8700], [7240,'basic',8700],
+      [7290,'atk',8700], [7340,'gold',870], [7390,'hp',4350], [7440,'exp',870], [7490,'def',17030250], [7540,'pen',17030250], [7590,'skill',13050], [7640,'basic',13050],
+      [7690,'atk',13050], [7740,'gold',1305], [7790,'hp',6525], [7840,'exp',1305], [7890,'def',17030250], [7940,'pen',17030250], [7990,'skill',19570], [8040,'basic',19570],
+      [8090,'atk',19570], [8140,'gold',1957], [8190,'hp',9785], [8240,'exp',1957], [8290,'def',19570], [8340,'pen',19570], [8390,'skill',19570], [8440,'basic',19570],
+      [8490,'atk',29350], [8540,'gold',2935], [8590,'hp',14675], [8640,'gold',2935], [8690,'hp',14675], [8740,'exp',2935], [8790,'def',29350]
+    ];
+
+    // 의상 탭 UI 및 기능 렌더링
+    function renderCostumes() {
+      const container = document.getElementById('costume-grades-container');
+      if (!container) return;
+
+      let maxTotalPoints = 0;
+      let html = '';
+
+      costumeGradeData.forEach(g => {
+        // 일반 장비 렌더링 (무기, 방어구, 투구)
+        let itemsHtml = g.tiers.map(tier => {
+          maxTotalPoints += (g.pts * 3); // 무기,방어구,투구 3종
+          return `
+            <div style="display:flex; flex-direction:column; gap:4px;">
+              <label class="item-badge" style="background:#f8fafc; cursor:pointer; justify-content:flex-start; font-weight:600;">
+                <input type="checkbox" id="costume-w-${g.id}-${tier}" data-grade="${g.id}" data-pts="${g.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
+                무기 ${tier} (+${g.pts}P)
+              </label>
+              <label class="item-badge" style="background:#f8fafc; cursor:pointer; justify-content:flex-start; font-weight:600;">
+                <input type="checkbox" id="costume-a-${g.id}-${tier}" data-grade="${g.id}" data-pts="${g.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
+                방어구 ${tier} (+${g.pts}P)
+              </label>
+              <label class="item-badge" style="background:#f8fafc; cursor:pointer; justify-content:flex-start; font-weight:600;">
+                <input type="checkbox" id="costume-h-${g.id}-${tier}" data-grade="${g.id}" data-pts="${g.pts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
+                투구 ${tier} (+${g.pts}P)
+              </label>
+            </div>
+          `;
+        }).join('');
+
+        // 추가 코스튬 렌더링 (A등급, SSS등급)
+        if (g.costTypes > 0) {
+          maxTotalPoints += (g.costPts * g.costTypes);
+          let costHtml = '';
+          for (let i = 1; i <= g.costTypes; i++) {
+            costHtml += `
+              <label class="item-badge" style="background:#fef2f2; border-color:#fca5a5; color:#ef4444; cursor:pointer; justify-content:flex-start; font-weight:700;">
+                <input type="checkbox" id="costume-ext-${g.id}-${i}" data-grade="${g.id}" data-pts="${g.costPts}" class="costume-chk" onchange="calcCostumeStats(); saveCostumeState();">
+                ${g.name} 코스튬 ${i} (+${g.costPts}P)
+              </label>
+            `;
+          }
+          itemsHtml += `<div style="display:flex; flex-direction:column; gap:4px; grid-column: 1 / -1; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);">
+            <div style="font-size:12px; color:var(--text-sub); font-weight:700; margin-bottom:4px;">✨ 특별 코스튬</div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:6px;">${costHtml}</div>
+          </div>`;
+        }
+
+        html += `
+          <div class="invest-card" style="margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+              <strong style="font-size: 15px; color: var(--primary);">${g.name} 수집 (미획득: <span id="costume-unacquired-${g.id}" style="color:#ef4444;">0</span>개)</strong>
+              <div>
+                <button onclick="toggleCostumeGrade('${g.id}', true)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 선택</button>
+                <button onclick="toggleCostumeGrade('${g.id}', false)" style="padding: 4px 10px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border); background: white; cursor: pointer;">전체 해제</button>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+              ${itemsHtml}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      document.getElementById('costume-pts-max').innerText = toCommaStr(maxTotalPoints);
+      
+      // 스탯 초기 박스 생성
+      const statsGrid = document.getElementById('costume-stats-grid');
+      statsGrid.innerHTML = Object.keys(costumeStatNames).map(key => {
+        const info = costumeStatNames[key];
+        return `
+          <div class="cat-summary-card" style="text-align: left; background: #f8fafc; border-left: 4px solid ${info.color};">
+            <div style="font-size: 11px; color: var(--text-sub); font-weight: 700; margin-bottom: 4px;">${info.name}</div>
+            <div style="font-size: 15px; font-weight: 800; color: ${info.color};" id="costume-stat-val-${key}">0%</div>
+            <div style="font-size: 10px; color: #94a3b8; margin-top: 2px;">MAX: ${toCommaStr(info.max)}%</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 등급별 일괄 선택/해제 기능
+    function toggleCostumeGrade(gradeId, isChecked) {
+      document.querySelectorAll(`.costume-chk[data-grade="${gradeId}"]`).forEach(chk => {
+        chk.checked = isChecked;
+      });
+      calcCostumeStats();
+      saveCostumeState();
+    }
+
+    // 의상 포인트 및 스탯 합계 계산
+    function calcCostumeStats() {
+      let totalPts = 0;
+      let unacquiredCounts = {};
+
+      costumeGradeData.forEach(g => { unacquiredCounts[g.id] = 0; });
+
+      // 체크박스 순회하며 누적 포인트 및 미획득 수량 파악
+      document.querySelectorAll('.costume-chk').forEach(chk => {
+        const grade = chk.getAttribute('data-grade');
+        if (chk.checked) {
+          totalPts += parseInt(chk.getAttribute('data-pts'));
+        } else {
+          unacquiredCounts[grade]++;
+        }
+      });
+
+      // 미획득 텍스트 업데이트
+      Object.keys(unacquiredCounts).forEach(grade => {
+        const el = document.getElementById(`costume-unacquired-${grade}`);
+        if (el) el.innerText = unacquiredCounts[grade];
+      });
+
+      // 최상단 포인트 UI 업데이트
+      const maxPts = parseNumber(document.getElementById('costume-pts-max').innerText);
+      document.getElementById('costume-pts-current').innerText = toCommaStr(totalPts);
+      document.getElementById('costume-pts-remain').innerText = `${toCommaStr(Math.max(0, maxPts - totalPts))} P`;
+      document.getElementById('costume-progress-fill').style.width = `${Math.min(100, (totalPts / maxPts) * 100)}%`;
+
+      // 능력치 합계 로직 (누적 포인트 이하의 모든 구간 능력치를 합산)
+      let statSums = { atk:0, gold:0, hp:0, exp:0, def:0, item:0, pen:0, food:0, skill:0, basic:0 };
+      
+      costumeMilestones.forEach(m => {
+        if (totalPts >= m[0]) {
+          statSums[m[1]] += m[2];
+        }
+      });
+
+      // 계산된 스탯 UI 렌더링
+      Object.keys(statSums).forEach(key => {
+        const el = document.getElementById(`costume-stat-val-${key}`);
+        if (el) el.innerText = `${toCommaStr(statSums[key])}%`;
+      });
+    }
+
+    // 의상 탭 데이터 로컬스토리지 저장 함수
+    function saveCostumeState() {
+      if (window.isDataLoading) return;
+      let data = {};
+      const saved = localStorage.getItem('hungryDragonGoldV8Data');
+      if (saved) { try { data = JSON.parse(saved); } catch(e) {} }
+
+      document.querySelectorAll('.costume-chk').forEach(chk => {
+        data[chk.id] = chk.checked;
+      });
+
+      localStorage.setItem('hungryDragonGoldV8Data', JSON.stringify(data));
+    }
+    
     // [찾을 위치] <script> 태그 내부의 하단 함수들 근처에 아래 함수들을 추가해 주세요.
     // ===== 길드 어빌리티 관련 신규 데이터 (해금, 확률, 수치 도감, 경험치) =====
     const gaStatGroups = {
@@ -4405,6 +4642,17 @@
                 }
             });
 
+          // 🌟 신규 추가: 의상 탭(costume-) 체크박스 상태 복구 및 자동 계산
+            Object.keys(data).forEach(k => {
+                if (k.startsWith('costume-')) {
+                    const chkEl = document.getElementById(k);
+                    if (chkEl) {
+                        chkEl.checked = !!data[k];
+                    }
+                }
+            });
+            if (typeof calcCostumeStats === 'function') calcCostumeStats();
+
             // 3. 최종 계산 갱신
             if (typeof updateGuildAbilityCalc === 'function') updateGuildAbilityCalc();
             if (typeof calcGuildAbilityExp === 'function') calcGuildAbilityExp();
@@ -4475,7 +4723,9 @@
       renderGuildDailyActivities();
       renderGuildMissions();
       renderGuildShopItems();
-    
+
+      renderCostumes(); // 🌟 신규 추가: 의상 UI 초기화 생성
+      
       initGuildAbilityUI(); // 신규 추가 (어빌리티 초기화)
     
       loadSavedData();
